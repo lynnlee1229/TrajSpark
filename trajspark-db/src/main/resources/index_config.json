@@ -1,0 +1,11 @@
+{
+  "index": {
+    "xz2": {
+      "sequenceMaxLen": 15
+    },
+    "binnedTime": {
+      "binLen" : "week",
+      "sequenceMaxLen": 8
+    }
+  }
+}
