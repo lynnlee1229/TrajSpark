@@ -2,9 +2,10 @@ package cn.edu.whu.trajspark.core.operator.process.staypointdetector;
 
 import cn.edu.whu.trajspark.core.common.point.BasePoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.io.Serializable;
 import java.util.List;
-import org.apache.spark.api.java.JavaRDD;
 
 /**
  * @author Lynn Lee

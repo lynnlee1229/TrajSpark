@@ -3,10 +3,6 @@ package cn.edu.whu.trajspark.core.operator.store;
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.HDFSStoreConfig;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 import org.apache.log4j.Logger;
 import org.apache.spark.HashPartitioner;
@@ -16,6 +12,11 @@ import org.apache.spark.api.java.StorageLevels;
 import scala.NotImplementedError;
 import scala.Tuple2;
 import scala.Tuple3;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lynn Lee

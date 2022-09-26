@@ -1,8 +1,9 @@
 package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import java.io.Serializable;
 import org.apache.spark.api.java.JavaRDD;
+
+import java.io.Serializable;
 
 /**
  * @author Lynn Lee

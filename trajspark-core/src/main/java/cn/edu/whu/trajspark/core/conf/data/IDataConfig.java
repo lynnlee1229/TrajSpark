@@ -3,6 +3,7 @@ package cn.edu.whu.trajspark.core.conf.data;
 import cn.edu.whu.trajspark.core.enums.DataTypeEnum;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.io.Serializable;
 
 /**

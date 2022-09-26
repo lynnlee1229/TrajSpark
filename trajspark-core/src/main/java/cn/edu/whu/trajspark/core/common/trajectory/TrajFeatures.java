@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.common.trajectory;
 
 import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 

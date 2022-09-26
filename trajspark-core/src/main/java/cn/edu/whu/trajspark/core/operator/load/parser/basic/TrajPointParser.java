@@ -1,10 +1,11 @@
 package cn.edu.whu.trajspark.core.operator.load.parser.basic;
 
+import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.conf.data.Mapping;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.util.DataTypeUtils;
 import cn.edu.whu.trajspark.core.util.DateUtils;
+
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.HashMap;

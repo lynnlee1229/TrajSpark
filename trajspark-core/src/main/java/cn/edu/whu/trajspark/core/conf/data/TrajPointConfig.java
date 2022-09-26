@@ -3,6 +3,7 @@ package cn.edu.whu.trajspark.core.conf.data;
 import cn.edu.whu.trajspark.core.common.field.Field;
 import cn.edu.whu.trajspark.core.enums.BasicDataTypeEnum;
 import cn.edu.whu.trajspark.core.enums.DataTypeEnum;
+
 import java.util.List;
 
 /**

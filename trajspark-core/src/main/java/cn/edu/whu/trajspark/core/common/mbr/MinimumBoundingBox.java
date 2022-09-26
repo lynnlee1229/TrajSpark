@@ -3,16 +3,12 @@ package cn.edu.whu.trajspark.core.common.mbr;
 import cn.edu.whu.trajspark.core.common.point.BasePoint;
 import cn.edu.whu.trajspark.core.util.CheckUtils;
 import cn.edu.whu.trajspark.core.util.GeoUtils;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Function;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 /**
  * @author Lynn Lee

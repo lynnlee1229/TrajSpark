@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.core.enums.BasicDataTypeEnum;
 import cn.edu.whu.trajspark.core.enums.DataTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 /**

@@ -8,17 +8,14 @@ import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.HDFSLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.operator.load.parser.basic.TrajPointParser;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import javax.ws.rs.NotSupportedException;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 import scala.Tuple2;
+
+import javax.ws.rs.NotSupportedException;
+import java.util.*;
 
 /**
  * @author Lynn Lee

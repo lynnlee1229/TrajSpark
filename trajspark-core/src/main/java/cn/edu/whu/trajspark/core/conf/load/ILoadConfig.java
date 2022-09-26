@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.conf.load;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.io.Serializable;
 
 /**

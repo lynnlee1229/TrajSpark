@@ -3,23 +3,14 @@ package cn.edu.whu.trajspark.core.common.trajectory;
 import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.util.GeoUtils;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 /**
  * @author Lynn Lee

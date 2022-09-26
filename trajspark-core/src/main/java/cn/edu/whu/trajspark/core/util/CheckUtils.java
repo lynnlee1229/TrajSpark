@@ -1,7 +1,8 @@
 package cn.edu.whu.trajspark.core.util;
 
-import java.util.Collection;
 import org.apache.commons.lang.NullArgumentException;
+
+import java.util.Collection;
 
 /**
  * @author Lynn Lee

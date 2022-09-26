@@ -4,10 +4,11 @@ import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.load.HDFSLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
-import java.io.Serializable;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 import scala.NotImplementedError;
+
+import java.io.Serializable;
 
 /**
  * @author Lynn Lee
