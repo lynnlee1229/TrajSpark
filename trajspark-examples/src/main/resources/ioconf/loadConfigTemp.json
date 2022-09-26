@@ -1,0 +1,59 @@
+{
+  "loadConfig": {
+    "@type": "hdfs",
+    "master": "local[*]",
+    "fsDefaultName": "hdfs://hostname/",
+    "location": "hdfs://hostname/file/path",
+    "fileMode": "multi_file",
+    "partNum": 8,
+    "splitter": ","
+  },
+  "dataConfig": {
+    "@type": "trajectory",
+    "trajId": {
+      "sourceName": "taxi_id",
+      "dataType": "String",
+      "index": 0
+    },
+    "objectId": {
+      "sourceName": "taxi_id",
+      "dataType": "String",
+      "index": 0
+    },
+    "trajPointConfig": {
+      "@type": "traj_point",
+      "pointId": {
+        "sourceName": "taxi_id",
+        "dataType": "String",
+        "index": 0
+      },
+      "lng": {
+        "sourceName": "lng",
+        "dataType": "Double",
+        "index": 2
+      },
+      "lat": {
+        "sourceName": "lat",
+        "dataType": "Double",
+        "index": 3
+      },
+      "time": {
+        "sourceName": "time",
+        "dataType": "Date",
+        "index": 1,
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "trajPointMetas": [
+        {
+          "sourceData": {
+            "sourceName": "direction",
+            "dataType": "Integer",
+            "index": 4
+          },
+          "mappingName": "direction",
+          "indexable": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "@type": "geoMesa",
+  "hbaseZookeepers": "101.124.6.193:2181",
+  "clientPort": 2181,
+  "hbaseCatalog": "do_not_delete_for_test",
+  "quorum": "101.124.6.193",
+  "sftName": "trajectory_gps_list_old",
+  "schemaType": "GPS_LIST_BASED_TRAJECTORY"
+}

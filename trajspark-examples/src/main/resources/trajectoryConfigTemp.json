@@ -1,0 +1,56 @@
+{
+    "@type": "trajectory",
+    "trajId": {
+      "sourceName": "taxi_id",
+      "dataType": "String",
+      "index": 1
+    },
+    "objectId": {
+      "sourceName": "taxi_id",
+      "dataType": "String",
+      "index": 1
+    },
+    "gpsPointConfig": {
+      "@type": "gps_point",
+      "pointId": {
+        "sourceName": "taxi_id",
+        "dataType": "String",
+        "index": 1
+      },
+      "lat": {
+        "sourceName": "lat",
+        "dataType": "Double",
+        "index": 2
+      },
+      "lng": {
+        "sourceName": "lng",
+        "dataType": "Double",
+        "index": 3
+      },
+      "time": {
+        "sourceName": "time",
+        "dataType": "Date",
+        "index": 0,
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "gpsPointMetas": [
+        {
+          "sourceData": {
+            "sourceName": "direction",
+            "dataType": "Integer",
+            "index": 4
+          },
+          "mappingName": "direction",
+          "indexable": true
+        },
+        {
+          "sourceData": {
+            "sourceName": "speed",
+            "dataType": "Double",
+            "index": 5
+          },
+          "mappingName": "speed"
+        }
+      ]
+    }
+  }
