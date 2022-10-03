@@ -1,5 +1,9 @@
 package cn.edu.whu.trajspark.core.util;
 
+import cn.edu.whu.trajspark.core.common.point.TrajPoint;
+import java.io.Serializable;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -14,7 +18,7 @@ import org.locationtech.spatial4j.shape.ShapeFactory;
  * @author Lynn Lee
  * @date 2022/9/8
  **/
-public class GeoUtils {
+public class GeoUtils implements Serializable {
   public static final SpatialContext SPATIAL_CONTEXT = SpatialContext.GEO;
   public static final DistanceCalculator DISTANCE_CALCULATOR = SPATIAL_CONTEXT.getDistCalc();
   public static final ShapeFactory SHAPE_FACTORY = SPATIAL_CONTEXT.getShapeFactory();
@@ -39,9 +43,29 @@ public class GeoUtils {
   }
 
   public static double getEuclideanDistance(double lng1, double lat1, double lng2, double lat2) {
-    Point point1 = SHAPE_FACTORY.pointXY(checkLng(lng1), checkLat(lat1));
-    Point point2 = SHAPE_FACTORY.pointXY(checkLng(lng2), checkLat(lat2));
-    return SPATIAL_CONTEXT.calcDistance(point1, point2) * DistanceUtils.DEG_TO_KM;
+    double lat1Rad = Math.toRadians(lat1);
+    double lat2Rad = Math.toRadians(lat2);
+    double deltaLat = lat1Rad - lat2Rad;
+    double deltaLng = Math.toRadians(lng1) - Math.toRadians(lng2);
+    return 2.0 * Math.asin(Math.sqrt(Math.pow(Math.sin(deltaLat / 2.0), 2.0) +
+        Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.pow(Math.sin(deltaLng / 2.0), 2.0))) *
+        DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM;
+  }
+
+  public static double getGeoListLen(List<Geometry> geoList) {
+    double len = 0.0;
+    for (int i = 1; i < geoList.size(); i++) {
+      len += getEuclideanDistance(geoList.get(i - 1).getCentroid(), geoList.get(i).getCentroid());
+    }
+    return len;
+  }
+
+  public static double getTrajListLen(List<TrajPoint> trajList) {
+    double len = 0.0;
+    for (int i = 1; i < trajList.size(); i++) {
+      len += getEuclideanDistance(trajList.get(i - 1).getCentroid(), trajList.get(i).getCentroid());
+    }
+    return len;
   }
 
   /**
@@ -56,15 +80,15 @@ public class GeoUtils {
 
   public static Envelope getEnvelopeByDis(double lng, double lat, double dis) {
     Point point = SHAPE_FACTORY.pointXY(checkLng(lng), checkLat(lat));
-    Rectangle rect = DISTANCE_CALCULATOR.calcBoxByDistFromPt(
-        point, dis * DistanceUtils.KM_TO_DEG, SPATIAL_CONTEXT, null);
+    Rectangle rect = DISTANCE_CALCULATOR.calcBoxByDistFromPt(point, dis * DistanceUtils.KM_TO_DEG,
+        SPATIAL_CONTEXT, null);
     return new Envelope(rect.getMinX(), rect.getMaxX(), rect.getMinY(), rect.getMaxY());
   }
 
   public static Coordinate getPointOnBearing(double lng, double lat, double angle, double dis) {
     Point point = SHAPE_FACTORY.pointXY(checkLng(lng), checkLat(lat));
-    Point result = DISTANCE_CALCULATOR.pointOnBearing(
-        point, dis * DistanceUtils.KM_TO_DEG, angle, SPATIAL_CONTEXT, null);
+    Point result = DISTANCE_CALCULATOR.pointOnBearing(point, dis * DistanceUtils.KM_TO_DEG, angle,
+        SPATIAL_CONTEXT, null);
     return new Coordinate(result.getX(), result.getY());
   }
 
@@ -88,5 +112,15 @@ public class GeoUtils {
 
   public static double getDegreeFromKm(double degree) {
     return degree * DistanceUtils.DEG_TO_KM;
+  }
+
+  public static double getSpeed(TrajPoint p1, TrajPoint p2) {
+    long timeSpanInSec = ChronoUnit.SECONDS.between(p1.getTimestamp(), p2.getTimestamp());
+    if (timeSpanInSec == 0L) {
+      return 0.0;
+    } else {
+      double distanceInM = getEuclideanDistance(p1, p2) * 1000;
+      return distanceInM / (double) timeSpanInSec * 3.6;
+    }
   }
 }

@@ -112,7 +112,7 @@ public class HDFSLoader implements ILoader {
       String objectId = (String) ((Tuple2) groupLines._1)._1;
       String trajectoryId = (String) ((Tuple2) groupLines._1)._2;
       Iterator<String> iterator = ((Iterable) groupLines._2).iterator();
-      List<TrajPoint> trajPoints = new LinkedList();
+      List<TrajPoint> trajPoints = new ArrayList();
 
       while (iterator.hasNext()) {
         try {

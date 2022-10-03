@@ -2,15 +2,18 @@ package cn.edu.whu.trajspark.example.io;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
+import cn.edu.whu.trajspark.core.operator.process.noisefilter.BasicFilter;
+import cn.edu.whu.trajspark.core.operator.process.noisefilter.IFilter;
+import cn.edu.whu.trajspark.core.operator.process.segmenter.BasicSegmenter;
+import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.FileSystemUtils;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
-
-import java.io.IOException;
 
 /**
  * @author Lynn Lee
@@ -39,8 +42,13 @@ public class DataIOExample {
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
+
+      IFilter myFilter = new BasicFilter(300, 0.1);
+      ISegmenter mySegmenter = new BasicSegmenter(1, 0.1, 600);
+      JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
+      JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(filteredRDD);
       IStore iStore = IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
-      iStore.storeTrajectory(trajRDD);
+      iStore.storeTrajectory(segmentedRDD);
       LOGGER.info("Finished!");
     }
   }
