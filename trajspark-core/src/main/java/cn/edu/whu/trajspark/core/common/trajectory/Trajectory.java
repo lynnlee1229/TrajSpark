@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * @author Lynn Lee
  * @date 2022/9/7
  **/
+
 public class Trajectory implements Serializable {
   private String trajectoryID;
   private String objectID;
@@ -64,7 +65,7 @@ public class Trajectory implements Serializable {
 
   public void addPoint(TrajPoint point) {
     if (this.pointList == null || this.pointList.isEmpty()) {
-      this.pointList = new LinkedList();
+      this.pointList = new ArrayList();
     }
 
     this.pointList.add(point);
@@ -79,7 +80,7 @@ public class Trajectory implements Serializable {
 
   public void addPoints(List<TrajPoint> points) {
     if (this.pointList == null || this.pointList.isEmpty()) {
-      this.pointList = new LinkedList();
+      this.pointList = new ArrayList<>();
     }
 
     this.pointList.addAll(points);
@@ -153,6 +154,7 @@ public class Trajectory implements Serializable {
     double maxLat = Double.MIN_VALUE;
     double maxLng = Double.MIN_VALUE;
 
+    TrajPoint prePoint = null;
     TrajPoint p;
     for (Iterator iter = this.pointList.iterator(); iter.hasNext();
          maxLng = Math.max(maxLng, p.getLng())) {
@@ -160,6 +162,12 @@ public class Trajectory implements Serializable {
       minLat = Math.min(minLat, p.getLat());
       minLng = Math.min(minLng, p.getLng());
       maxLat = Math.max(maxLat, p.getLat());
+      if (prePoint == null) {
+        prePoint = p;
+      } else {
+        length += GeoUtils.getEuclideanDistance(prePoint, p);
+        prePoint = p;
+      }
     }
 
     MinimumBoundingBox mbr = new MinimumBoundingBox(minLng, minLat, maxLng, maxLat);
@@ -192,8 +200,8 @@ public class Trajectory implements Serializable {
 
   public boolean isIntersect(Trajectory otherTrajectory) {
     LineString otherLine = otherTrajectory.getLineString();
-    return otherLine != null && otherLine.getNumPoints() != 0 ?
-        this.getLineString().intersects(otherLine) : false;
+    return otherLine != null && otherLine.getNumPoints() != 0
+        ? this.getLineString().intersects(otherLine) : false;
   }
 
   public boolean isPassPoint(Point point, double distance) {
@@ -221,7 +229,7 @@ public class Trajectory implements Serializable {
 
   @Override
   public String toString() {
-    return "{Trajector:[traj_id:" + getTrajectoryID() + " object_id:" + getObjectID() + "]}";
+    return "{Trajectory:[traj_id:" + getTrajectoryID() + " object_id:" + getObjectID() + "]}";
   }
 
   public static class Schema {

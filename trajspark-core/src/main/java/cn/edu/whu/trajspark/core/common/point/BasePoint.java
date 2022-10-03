@@ -15,7 +15,7 @@ public class BasePoint extends Point {
   }
 
   public BasePoint(double lng, double lat) {
-    super(new CoordinateArraySequence(new Coordinate[] {new Coordinate(lat, lng)}),
+    super(new CoordinateArraySequence(new Coordinate[] {new Coordinate(lng, lat)}),
         new GeometryFactory(new PrecisionModel(), 4326));
   }
 

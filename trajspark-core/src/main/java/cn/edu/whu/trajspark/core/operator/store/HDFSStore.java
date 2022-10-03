@@ -64,7 +64,7 @@ public class HDFSStore implements IStore {
         }
       }
 
-      return new Tuple2(oid + "/" + tid, record.toString());
+      return new Tuple2(oid + "/" + oid + "-" + tid, record.toString());
     }).persist(StorageLevels.MEMORY_AND_DISK);
     Map<String, Long> keyCountResult = cachedRDD.countByKey();
     cachedRDD.partitionBy(new HashPartitioner(keyCountResult.size()))
