@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.database.table;
 
-import cn.edu.whu.trajspark.coding.Coding;
+import cn.edu.whu.trajspark.coding.CodingStrategy;
 import org.apache.hadoop.hbase.client.*;
 
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class TrajectoryTable {
   private Table table;
-  private Coding coding;
+  private CodingStrategy codingStrategy;
 
   public TrajectoryTable(Table table) {
     this.table = table;
