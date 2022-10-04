@@ -7,7 +7,7 @@ package cn.edu.whu.trajspark.coding;
  * @author Haocheng Wang
  * Created on 2022/9/28
  */
-public abstract class Coding {
+public abstract class CodingStrategy {
   CodingType codingType;
   /**
    * Get index type of the index;

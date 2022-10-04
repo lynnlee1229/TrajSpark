@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.coding.spatialtemporal;
 
-import cn.edu.whu.trajspark.coding.Coding;
+import cn.edu.whu.trajspark.coding.CodingStrategy;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import org.locationtech.geomesa.curve.BinnedTime;
 import org.locationtech.jts.geom.Polygon;
@@ -10,7 +10,7 @@ import org.locationtech.jts.geom.Polygon;
  * @author Haocheng Wang
  * Created on 2022/9/28
  */
-public class SpatialTemporalCoding extends Coding {
+public class SpatialTemporalCodingStrategy extends CodingStrategy {
   // 对轨迹编码
   long coding(Trajectory trajectory) {
     return 0L;

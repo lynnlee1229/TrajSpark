@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.database.meta;
 
-import cn.edu.whu.trajspark.coding.Coding;
+import cn.edu.whu.trajspark.coding.CodingStrategy;
 
 /**
  * @author Haocheng Wang
@@ -10,7 +10,7 @@ public class TableMeta {
 
   TableType tableType;
 
-  Coding coding;
+  CodingStrategy codingStrategy;
 
   String tableName;
 

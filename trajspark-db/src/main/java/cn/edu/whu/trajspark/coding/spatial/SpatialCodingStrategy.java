@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.coding.spatial;
 
-import cn.edu.whu.trajspark.coding.Coding;
+import cn.edu.whu.trajspark.coding.CodingStrategy;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import org.locationtech.jts.geom.Polygon;
 
@@ -9,7 +9,7 @@ import org.locationtech.jts.geom.Polygon;
  * @author Haocheng Wang
  * Created on 2022/9/28
  */
-public class SpatialCoding extends Coding {
+public class SpatialCodingStrategy extends CodingStrategy {
   // 对轨迹编码
   long coding(Trajectory trajectory) {
     return 0L;

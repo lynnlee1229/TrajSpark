@@ -1,5 +1,7 @@
 package cn.edu.whu.trajspark.datatypes;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**
@@ -8,21 +10,16 @@ import java.time.ZonedDateTime;
  * @author Haocheng Wang
  * Created on 2022/9/28
  */
-public class BinnedTime {
+public class TimeBin {
   /**
    * 将连续时间分割为多个紧密相连的bucket, 单位为 day, week, month, year
    */
-  int bin;
-  /**
-   * 在bin内的偏移量, 单位为milliseconds, seconds, or hours
-   */
-  long offset;
+  long bin;
+  TimePeriod timePeriod;
+  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
 
-  BinnedTimeUtil.TimePeriod timePeriod;
-
-  public BinnedTime(int bin, long offset, BinnedTimeUtil.TimePeriod timePeriod) {
+  public TimeBin(long bin, TimePeriod timePeriod) {
     this.bin = bin;
-    this.offset = offset;
     this.timePeriod = timePeriod;
   }
 
@@ -31,7 +28,7 @@ public class BinnedTime {
    * @return min date time of the bin (inclusive)
    */
   ZonedDateTime getBinStartTime() {
-    return null;
+    return timePeriod.getChronoUnit().addTo(Epoch, bin);
   }
 
   /**
@@ -39,6 +36,6 @@ public class BinnedTime {
    * @return max date time of the bin(exculsive)
    */
   ZonedDateTime getBinEndTime() {
-    return null;
+    return timePeriod.getChronoUnit().addTo(Epoch, bin + 1);
   }
 }

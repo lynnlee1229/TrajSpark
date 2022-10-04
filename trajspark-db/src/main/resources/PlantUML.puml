@@ -1,0 +1,145 @@
+@startuml
+class DataSet {
+    DataSetMeta meta;
+}
+DataSet "1" --> "1" DataSetMeta
+DataSet "1" --> "many" TrajectoryTable
+
+class DataSetMeta {
+    String dataSetName;
+    Map<Table, TableMeta> dataTables;
+    String description;
+}
+
+class TrajectoryTable {
+    Table table;
+    TableMeta meta;
+
+    + List<Object> scanRange(IndexRange rowKeyRange);
+    + boolean writeData(IndexRange rowKeyRange);
+    - Trajectory parseValue(Byte[] hbaseValue);
+}
+
+TrajectoryTable "1" --> "1" TableMeta
+DataSetMeta "1" <--> "many" TableMeta
+
+
+class MainIndexTable extends TrajectoryTable {
+    Schema schema;
+}
+
+class SecondaryIndexTable extends TrajectoryTable {
+
+}
+
+class TableMeta {
+    TableType tableType;
+    Coding coding;
+    String tableName;
+    String dataSetName;
+    DataSetMeta dataSetMeta;
+}
+
+abstract class QueryOptions {
+    // 支持的查询类型,能够获取查询的行键范围, 也能直接获取最终的轨迹
+    TrajectoryTable targetTable
+    FilterStrategy filter // 除了时空信息之外的过滤条件
+    ThreadPoolExecutor queryWorkersPool
+    int threadNum
+    LinkedTransferQueue<Object> resultQueue
+    + {abstract} List<IndexRange> getScanIndexRanges(QueryCondition condition);
+    + {abstract} List<Object> executeQuery(QueryCondition condition);
+    + {abstract} List<Object> executeQuery(List<IndexRange> range);
+}
+
+class STQuery extends QueryOptions {
+    // 基于时空条件查询主索引,得到轨迹
+    - List<Object> stCoprocessorQuery(QueryCondition condition)
+}
+
+class ObjectSTQuery extends QueryOptions {
+    // 基于时空\ID条件查询辅助索引,得到移动对象轨迹
+    - List<Long> getTrajectoryRowKeyList()
+    - List<Object> objCoprocessorQuery(QueryCondition condition)
+    class objCoprocessorQuery extends Observer
+}
+
+abstract class QueryCondition {
+}
+
+class QueryConditionUtil {
+    //  从JSON构建QueryCondition
+    + {static} QueryCondition initQueryConditionFromJson(JSONObject json);
+}
+
+QueryConditionUtil ..> QueryCondition
+
+class SpatialQueryCondition extends QueryCondition {
+    - RangeQueryType queryType;
+    - Envelope queryWindow;
+}
+
+class TemporalQueryCondition extends QueryCondition{
+    - RangeQueryType queryType;
+    - TimeRange queryRange;
+}
+
+class ObjectIDQueryCondition extends QueryCondition{
+    - String targetID;
+}
+
+enum RangeQueryType {
+    // 严格包含, 交叉包含
+    INCLUDE,
+    INTERSECT;
+}
+
+class TrajectoryDatabase {
+    - {static} TrajectoryDatabase instance;
+    - {static} Configuration conf;
+
+    + void openConnection();
+    + void closeConnection();
+    + boolean createTable(TableMeta meta)
+    + boolean dropTable(Table table)
+    + List<String> listDataSetNames();
+    + DataSet getDataSet(String dataSetName);
+    + TrajectoryTable getTrajectoryTable(String tableName);
+}
+
+class CodingStrategy {
+    // 根据不同的编码类型, 获取轨迹对应的编码
+    - CodingType type
+    + CodingType getCodingType()
+    + long getCode(Trajectory t)
+    + Polygon getSpatialGeom(long code)
+    + TimeRange getTimeRange(long code)
+    + String getObjectId(long code)
+}
+
+CodingStrategy --> CodingType
+
+enum CodingType {
+  TXZ2,
+  XZ2T,
+  OBJECT_ID
+}
+
+class XZ2PlusIndex {
+    - final int PRECISION
+    - short getPosCode(LineString line)
+    + long getXZ2Value(Envelope e)
+    + List<IndexRange> getXZ2PlusRanges(SpatialQueryCondition c)
+}
+
+XZ2PlusIndex --> SpatialQueryCondition
+
+class TimeBinIndex {
+    - final int PRECISION
+    - final BinLength bin;
+    - long getTimeBin(long start, long end)
+    + List<IndexRange> getTimeBinRanges(TemporalQueryCondition c)
+}
+
+TimeBinIndex --> TemporalQueryCondition
+@enduml

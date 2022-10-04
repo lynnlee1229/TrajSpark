@@ -20,11 +20,11 @@ import java.util.List;
  * @author Haocheng Wang
  * Created on 2022/9/26
  */
-public class XZ2Index {
+public class XZ2PlusIndex {
 
-  private static final Logger logger = LoggerFactory.getLogger(XZ2Index.class);
+  private static final Logger logger = LoggerFactory.getLogger(XZ2PlusIndex.class);
 
-  private static final XZ2SFC xz2Sfc = XZ2SFC.apply(Constants.XZ2_MAX_PRECESION);
+  private static final XZ2SFC xz2Sfc = XZ2SFC.apply(Constants.MAX_XZ2_PRECESION);
 
   /**
    * Get xz2 index for the line string.
@@ -64,6 +64,4 @@ public class XZ2Index {
     }
     return indexRangeList;
   }
-
-
 }
