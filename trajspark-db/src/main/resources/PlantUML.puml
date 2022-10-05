@@ -34,11 +34,13 @@ class SecondaryIndexTable extends TrajectoryTable {
 
 class TableMeta {
     TableType tableType;
-    Coding coding;
+    CodingStrategy coding;
     String tableName;
     String dataSetName;
     DataSetMeta dataSetMeta;
 }
+
+TableMeta ..> CodingStrategy
 
 abstract class QueryOptions {
     // 支持的查询类型,能够获取查询的行键范围, 也能直接获取最终的轨迹
@@ -51,6 +53,10 @@ abstract class QueryOptions {
     + {abstract} List<Object> executeQuery(QueryCondition condition);
     + {abstract} List<Object> executeQuery(List<IndexRange> range);
 }
+TrajectoryDatabase ..> DataSet
+QueryOptions ..> TrajectoryTable
+QueryOptions ..> QueryCondition
+
 
 class STQuery extends QueryOptions {
     // 基于时空条件查询主索引,得到轨迹

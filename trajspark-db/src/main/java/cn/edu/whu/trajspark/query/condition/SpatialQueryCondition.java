@@ -20,12 +20,9 @@ public class SpatialQueryCondition {
 
   private SpatialQueryType queryType;
 
-  private TrajectoryTable targetTable;
-
-  public SpatialQueryCondition(Envelope queryWindow, SpatialQueryType queryType, TrajectoryTable geoTable) {
+  public SpatialQueryCondition(Envelope queryWindow, SpatialQueryType queryType) {
     this.queryWindow = queryWindow;
     this.queryType = queryType;
-    this.targetTable = geoTable;
   }
 
   public Envelope getQueryWindow() {
@@ -44,10 +41,6 @@ public class SpatialQueryCondition {
     this.queryType = queryType;
   }
 
-  // TODO: impl
-  public List<IndexRange> getIndexIndexRanges() {
-    return null;
-  }
 
   /**
    * @author Haocheng Wang

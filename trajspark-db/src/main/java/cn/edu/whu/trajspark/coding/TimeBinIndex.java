@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.index;
+package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
@@ -10,8 +10,8 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import static cn.edu.whu.trajspark.index.conf.Constants.DEFAULT_TIME_PERIOD;
-import static cn.edu.whu.trajspark.index.conf.Constants.MAX_TIME_BIN_PRECESION;
+import static cn.edu.whu.trajspark.coding.conf.Constants.DEFAULT_TIME_PERIOD;
+import static cn.edu.whu.trajspark.coding.conf.Constants.MAX_TIME_BIN_PRECISION;
 
 /**
  * @author Haocheng Wang
@@ -24,14 +24,14 @@ public class TimeBinIndex {
   private static Logger logger = LoggerFactory.getLogger(TimeBinIndex.class);
 
   public TimeBinIndex() {
-    g = MAX_TIME_BIN_PRECESION;
+    g = MAX_TIME_BIN_PRECISION;
     timePeriod = DEFAULT_TIME_PERIOD;
   }
 
   public TimeBinIndex(int g, TimePeriod timePeriod) {
-    if (g > MAX_TIME_BIN_PRECESION) {
+    if (g > MAX_TIME_BIN_PRECISION) {
       logger.error("Only support time bin precision lower or equal than {}," +
-          " but found precision is {}", MAX_TIME_BIN_PRECESION, g);
+          " but found precision is {}", MAX_TIME_BIN_PRECISION, g);
     }
     this.g = g;
     this.timePeriod = timePeriod;

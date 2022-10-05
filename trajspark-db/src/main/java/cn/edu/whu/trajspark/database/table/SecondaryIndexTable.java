@@ -1,6 +1,5 @@
 package cn.edu.whu.trajspark.database.table;
 
-import cn.edu.whu.trajspark.coding.CodingStrategy;
 import org.apache.hadoop.hbase.client.Table;
 
 /**
