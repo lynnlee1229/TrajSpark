@@ -76,6 +76,7 @@ public class SpatialIndexStrategy implements IndexStrategy {
   @Override
   public long getSpatialCodingVal(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
     buffer.getShort();
     return buffer.getLong();
   }
@@ -102,7 +103,9 @@ public class SpatialIndexStrategy implements IndexStrategy {
     ByteBuffer byteBuffer = ByteBuffer.allocate(Short.BYTES + Long.BYTES + idBytes.length);
     byteBuffer.putShort(shard);
     byteBuffer.putLong(xz2coding);
-    byteBuffer.put(tId.getBytes());
+    for (byte idByte : idBytes) {
+      byteBuffer.put(idByte);
+    }
     return new ByteArray(byteBuffer);
   }
 }
