@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.index.spatial;
 
+import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
@@ -41,6 +42,11 @@ public class SpatialIndexStrategy implements IndexStrategy {
   public Polygon getSpatialRange(ByteArray byteArray) {
     long spatialCodingVal = getSpatialCodingVal(byteArray);
     return xz2PlusCoding.getSpatialPolygon(spatialCodingVal);
+  }
+
+  @Override
+  public TimeLine getTimeLineRange(ByteArray byteArray) {
+    return null;
   }
 
   @Override

@@ -15,7 +15,7 @@ public interface TimeCoding extends Serializable {
 
   long getIndex(ZonedDateTime time);
 
-  long getIndex(ZonedDateTime start, ZonedDateTime end);
+  long getIndex(ZonedDateTime start, ZonedDateTime end) throws Exception;
 
   List<IndexRange> ranges(TemporalQueryCondition condition);
 }

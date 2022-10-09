@@ -5,17 +5,17 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**
- * TODO: impl
  *
- * @author Haocheng Wang
- * Created on 2022/9/28
+ * @author Haocheng Wang Created on 2022/9/28
  */
 public class TimeBin {
+
   /**
    * 将连续时间分割为多个紧密相连的bucket, 单位为 day, week, month, year
    */
-  long bin;
-  TimePeriod timePeriod;
+  private final long bin;
+  private final TimePeriod timePeriod;
+  @SuppressWarnings("checkstyle:StaticVariableName")
   static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
 
   public TimeBin(long bin, TimePeriod timePeriod) {
@@ -23,19 +23,29 @@ public class TimeBin {
     this.timePeriod = timePeriod;
   }
 
+  public long getBin() {
+    return bin;
+  }
+
+  public TimePeriod getTimePeriod() {
+    return timePeriod;
+  }
+
   /**
-   *
    * @return min date time of the bin (inclusive)
    */
-  ZonedDateTime getBinStartTime() {
+  public ZonedDateTime getBinStartTime() {
     return timePeriod.getChronoUnit().addTo(Epoch, bin);
   }
 
   /**
-   *
    * @return max date time of the bin(exculsive)
    */
-  ZonedDateTime getBinEndTime() {
+  public ZonedDateTime getBinEndTime() {
     return timePeriod.getChronoUnit().addTo(Epoch, bin + 1);
+  }
+
+  public long getRefTime(ZonedDateTime refTime) {
+    return refTime.toEpochSecond() - getBinStartTime().toEpochSecond();
   }
 }
