@@ -12,4 +12,12 @@ public class RowKeyRange {
     this.startKey = startKey;
     this.endKey = endKey;
   }
+
+  public ByteArray getStartKey() {
+    return startKey;
+  }
+
+  public ByteArray getEndKey() {
+    return endKey;
+  }
 }

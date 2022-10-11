@@ -24,7 +24,6 @@ public class TrajectoryTable {
   }
 
   public void put(Put put) throws IOException {
-    table.put(put);
   }
 
   public Result get(Get get) throws IOException {

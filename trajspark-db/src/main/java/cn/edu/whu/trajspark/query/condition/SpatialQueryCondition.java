@@ -56,6 +56,6 @@ public class SpatialQueryCondition {
     /**
      * Query all data that is totally contained in query window.
      */
-    INTERSECT;
+    OVERLAP;
   }
 }

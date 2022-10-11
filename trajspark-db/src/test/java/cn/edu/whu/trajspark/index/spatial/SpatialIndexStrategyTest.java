@@ -5,14 +5,19 @@ import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.RowKeyRange;
+import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import junit.framework.TestCase;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 
-import java.nio.ByteBuffer;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Haocheng Wang
@@ -59,32 +64,34 @@ public class SpatialIndexStrategyTest extends TestCase {
   }
 
   public void testGetScanRanges() {
-  }
-
-  public void testTestGetScanRanges() {
-  }
-
-  public void testTestGetScanRanges1() {
-  }
-
-  public void testTestGetScanRanges2() {
+    WKTReader reader = new WKTReader();
+    try {
+      Geometry geom = reader.read("POLYGON ((114.345703125 30.531005859375, 114.345703125 30.5419921875, 114.36767578125 30.5419921875, 114.36767578125 30.531005859375, 114.345703125 30.531005859375))");
+      SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(geom.getEnvelopeInternal(), SpatialQueryCondition.SpatialQueryType.OVERLAP);
+      SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 1);
+      List<RowKeyRange> list = spatialIndexStrategy.getScanRanges(spatialQueryCondition);
+      for (RowKeyRange range : list) {
+        System.out.println("start:" + spatialIndexStrategy.indexToString(range.getStartKey()) + "end: " + spatialIndexStrategy.indexToString(range.getEndKey()));
+      }
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
   }
 
   public void testIndexToString() {
-  }
-
-  public void testGetSpatialCoding() {
-  }
-
-  public void testGetSpatialCodingVal() {
-  }
-
-  public void testGetTimeCoding() {
-  }
-
-  public void testGetTimeCodingVal() {
+    Trajectory t = getExampleTrajectory();
+    SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 0);
+    ByteArray byteArray = spatialIndexStrategy.index(t);
+    System.out.println(spatialIndexStrategy.indexToString(byteArray));
   }
 
   public void testGetShardNum() {
+  }
+
+  public void testGetTrajectoryId() {
+    Trajectory t = getExampleTrajectory();
+    SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 0);
+    ByteArray byteArray = spatialIndexStrategy.index(t);
+    assertEquals(spatialIndexStrategy.getTrajectoryId(byteArray), t.getTrajectoryID());
   }
 }

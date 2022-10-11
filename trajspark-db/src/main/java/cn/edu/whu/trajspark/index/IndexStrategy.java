@@ -5,6 +5,8 @@ import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.RowKeyRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
+import cn.edu.whu.trajspark.datatypes.TimeBin;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.locationtech.jts.geom.Polygon;
@@ -22,9 +24,10 @@ import java.util.List;
 public interface IndexStrategy {
 
   // 对轨迹编码
-  ByteArray index(Trajectory trajectory);
+  ByteArray index(Trajectory trajectory) throws Exception;
 
   Polygon getSpatialRange(ByteArray byteArray);
+  TimeLine getTimeLineRange(ByteArray byteArray);
 
   /**
    * Get RowKey pairs for scan operation, based on spatial and temporal range.
@@ -34,6 +37,8 @@ public interface IndexStrategy {
    * @return RowKey pairs
    */
   List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum);
+
+  List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition);
 
   List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
 
@@ -52,5 +57,8 @@ public interface IndexStrategy {
   long getTimeCodingVal(ByteArray byteArray);
 
   short getShardNum(ByteArray byteArray);
+
+  String getTrajectoryId(ByteArray byteArray);
+
 
 }
