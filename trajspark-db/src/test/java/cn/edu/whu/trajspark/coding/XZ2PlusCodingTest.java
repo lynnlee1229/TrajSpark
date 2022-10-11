@@ -28,7 +28,6 @@ public class XZ2PlusCodingTest {
     for (int i = 0; i < list.size(); i++) {
       v2 += 1L + list.get(i) *  ((long) Math.pow(4, 16 - i) - 1L) / 3L;
     }
-    System.out.println("v1: " + v1);
-    System.out.println("v2: " + v2);
+    assert v1 == v2;
   }
 }

@@ -38,6 +38,8 @@ public interface IndexStrategy {
    */
   List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum);
 
+  List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition);
+
   List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
 
   List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition);
@@ -55,5 +57,8 @@ public interface IndexStrategy {
   long getTimeCodingVal(ByteArray byteArray);
 
   short getShardNum(ByteArray byteArray);
+
+  String getTrajectoryId(ByteArray byteArray);
+
 
 }

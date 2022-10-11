@@ -67,6 +67,11 @@ public class TimeIndexStrategy implements IndexStrategy {
   }
 
   @Override
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition) {
+    return null;
+  }
+
+  @Override
   public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
       TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
     return null;
@@ -128,6 +133,11 @@ public class TimeIndexStrategy implements IndexStrategy {
   @Override
   public short getShardNum(ByteArray byteArray) {
     return 0;
+  }
+
+  @Override
+  public String getTrajectoryId(ByteArray byteArray) {
+    return null;
   }
 
   private ByteArray toIndex(short shard, short bin, long timeCode, String oId, String tId) {
