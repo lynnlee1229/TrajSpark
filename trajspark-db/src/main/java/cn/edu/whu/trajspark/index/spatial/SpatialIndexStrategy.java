@@ -22,8 +22,8 @@ import java.util.List;
 /**
  * row key: shard + xz2 + tid, 无PosCode
  * TODO: 加PosCode
- * @author Haocheng Wang
- * Created on 2022/10/4
+ *
+ * @author Haocheng Wang Created on 2022/10/4
  */
 public class SpatialIndexStrategy implements IndexStrategy {
 
@@ -56,7 +56,8 @@ public class SpatialIndexStrategy implements IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
+      int maxRangeNum) {
     List<RowKeyRange> result = new ArrayList<>();
     // 1. xz2 coding
     List<IndexRange> list = spatialCoding.ranges(spatialQueryCondition);
@@ -81,17 +82,21 @@ public class SpatialIndexStrategy implements IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
+      TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition) {
+  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition,
+      String oID) {
     throw new UnsupportedOperationException();
   }
 
+
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition) {
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
+      TemporalQueryCondition temporalQueryCondition) {
     throw new UnsupportedOperationException();
   }
 

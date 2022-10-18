@@ -1,13 +1,14 @@
 package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
+import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
+import cn.edu.whu.trajspark.datatypes.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import java.util.ArrayList;
 import java.util.List;
-import org.locationtech.sfcurve.IndexRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class TimeLineCoding implements TimeCoding {
   public TimeLineCoding() {
     g = MAX_TIME_BIN_PRECISION;
     timePeriod = DEFAULT_TIME_PERIOD;
+    xztCoding = XZTCoding.apply(g, timePeriod);
   }
 
   public TimeLineCoding(int g, TimePeriod timePeriod) {
@@ -48,22 +50,33 @@ public class TimeLineCoding implements TimeCoding {
   }
 
   @Override
-  public long getIndex(ZonedDateTime time) {
-    return 0;
-  }
-
-  @Override
-  public List<IndexRange> ranges(TemporalQueryCondition condition) {
-    return null;
+  public List<TimeIndexRange> ranges(TemporalQueryCondition condition) {
+    List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
+    if (condition.getQueryWindows() == null) {
+      if (condition.getTemporalQueryType() == TemporalQueryType.OVERLAP) {
+        indexRangeList = xztCoding.ranges(condition.getQueryWindow(), timePeriod);
+      } else if (condition.getTemporalQueryType() == TemporalQueryType.INCLUDE) {
+        indexRangeList = xztCoding.ranges(condition.getQueryWindow(), timePeriod);
+      }
+    } else {
+      if (condition.getTemporalQueryType() == TemporalQueryType.OVERLAP) {
+        indexRangeList = xztCoding.ranges(condition.getQueryWindows(), timePeriod);
+      } else if (condition.getTemporalQueryType() == TemporalQueryType.INCLUDE) {
+        indexRangeList = xztCoding.ranges(condition.getQueryWindows(), timePeriod);
+      }
+    }
+    return indexRangeList;
   }
 
   public XZTCoding getXztCoding() {
     return xztCoding;
   }
 
+  @Override
   public TimePeriod getTimePeriod() {
     return timePeriod;
   }
+
 
   public TimeBin getTrajectoryTimeBin(TrajFeatures features) {
     ZonedDateTime zonedDateTime = features.getStartTime();
@@ -77,27 +90,25 @@ public class TimeLineCoding implements TimeCoding {
   }
 
   public TimeBin dateToBinnedTime(ZonedDateTime zonedDateTime) {
-    long binId = timePeriod.getChronoUnit().between(Epoch, zonedDateTime);
+    short binId = (short) timePeriod.getChronoUnit().between(Epoch, zonedDateTime);
     return new TimeBin(binId, timePeriod);
   }
 
-  public long getIndex(ZonedDateTime start, ZonedDateTime end) throws Exception {
+  public long getIndex(ZonedDateTime start, ZonedDateTime end) {
     return getIndex(new TimeLine(start, end));
   }
 
   /**
-   *
    * @param timeLine With time starting point and end point information
    * @return Time coding
    */
+  @Override
   public long getIndex(TimeLine timeLine) {
-    xztCoding = XZTCoding.apply(g, timePeriod);
     TimeBin bin = dateToBinnedTime(timeLine.getTimeStart());
     return xztCoding.index(timeLine, bin);
   }
 
   /**
-   *
    * @param coding Time coding
    * @return Sequences 0 and 1 of time
    */
@@ -118,7 +129,8 @@ public class TimeLineCoding implements TimeCoding {
 
   /**
    * Obtaining Minimum Time Bounding Box Based on Coding Information
-   * @param coding Time coding
+   *
+   * @param coding  Time coding
    * @param timeBin Time interval information
    * @return With time starting point and end point information
    */
