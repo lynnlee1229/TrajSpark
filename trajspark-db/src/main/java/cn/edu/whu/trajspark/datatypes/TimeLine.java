@@ -11,6 +11,8 @@ public class TimeLine {
 
   private ZonedDateTime timeStart;
   private ZonedDateTime timeEnd;
+  private double reTimeStart;
+  private double reTimeEnd;
 
   public TimeLine(ZonedDateTime timeStart, ZonedDateTime timeEnd) {
     if (timeStart.compareTo(timeEnd) < 0) {
@@ -20,6 +22,19 @@ public class TimeLine {
       this.timeStart = timeEnd;
       this.timeEnd = timeStart;
     }
+  }
+
+  public TimeLine(double reTimeStart, double reTimeEnd) {
+    this.reTimeStart = reTimeStart;
+    this.reTimeEnd = reTimeEnd;
+  }
+
+  public double getReTimeStart() {
+    return reTimeStart;
+  }
+
+  public double getReTimeEnd() {
+    return reTimeEnd;
   }
 
   public ZonedDateTime getTimeStart() {
@@ -58,5 +73,8 @@ public class TimeLine {
   @Override
   public String toString() {
     return "TimeLine{" + "timeStart=" + timeStart + ", timeEnd=" + timeEnd + '}';
+  }
+  public String toReString() {
+    return "TimeLine{" + "timeStart=" + reTimeStart + ", timeEnd=" + reTimeEnd + '}';
   }
 }

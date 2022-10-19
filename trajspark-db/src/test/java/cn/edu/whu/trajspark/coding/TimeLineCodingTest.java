@@ -42,5 +42,6 @@ class TimeLineCodingTest extends TestCase {
     System.out.println("timeBinVal: " + timeBinVal);
     System.out.println("timeCodingVal: " + timeCodingVal);
     System.out.println("coding: " + coding);
+    assert timeCodingVal == coding;
   }
 }

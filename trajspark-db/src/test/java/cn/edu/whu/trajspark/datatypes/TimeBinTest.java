@@ -9,12 +9,12 @@ import junit.framework.TestCase;
 public class TimeBinTest extends TestCase {
 
   public void testGetBinStartTime() {
-    TimeBin bin = new TimeBin(18993, TimePeriod.DAY);
+    TimeBin bin = new TimeBin((short) 18993, TimePeriod.DAY);
     System.out.println(bin.getBinStartTime());
   }
 
   public void testGetBinEndTime() {
-    TimeBin bin = new TimeBin(18993, TimePeriod.DAY);
+    TimeBin bin = new TimeBin((short) 18993, TimePeriod.DAY);
     System.out.println(bin.getBinEndTime());
   }
 }

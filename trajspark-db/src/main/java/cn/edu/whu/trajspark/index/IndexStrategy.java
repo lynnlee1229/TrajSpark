@@ -42,7 +42,7 @@ public interface IndexStrategy {
 
   List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
 
-  List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition);
+  List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
 
   List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition);
 

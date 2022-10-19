@@ -1,21 +1,29 @@
 package cn.edu.whu.trajspark.coding;
 
+import cn.edu.whu.trajspark.datatypes.TimeBin;
+import cn.edu.whu.trajspark.datatypes.TimeIndexRange;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
+import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.locationtech.sfcurve.IndexRange;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
- * @author Haocheng Wang
- * Created on 2022/10/4
+ * @author Haocheng Wang Created on 2022/10/4
  */
 public interface TimeCoding extends Serializable {
 
-  long getIndex(ZonedDateTime time);
+  long getIndex(TimeLine timeline);
 
-  long getIndex(ZonedDateTime start, ZonedDateTime end) throws Exception;
+  TimeBin dateToBinnedTime(ZonedDateTime zonedDateTime);
 
-  List<IndexRange> ranges(TemporalQueryCondition condition);
+  TimeLine getTimeLine(long coding, TimeBin timeBin);
+
+  TimePeriod getTimePeriod();
+
+  long getIndex(ZonedDateTime start, ZonedDateTime end);
+
+  List<TimeIndexRange> ranges(TemporalQueryCondition condition);
 }
