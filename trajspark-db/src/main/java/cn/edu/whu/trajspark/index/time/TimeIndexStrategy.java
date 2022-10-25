@@ -10,16 +10,20 @@ import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.RowKeyRange;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
+import cn.edu.whu.trajspark.datatypes.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
+import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.sfcurve.IndexRange;
 
 /**
  * @author Xu Qi
@@ -27,11 +31,11 @@ import org.locationtech.jts.geom.Polygon;
  */
 public class TimeIndexStrategy implements IndexStrategy {
 
-  private final TimeLineCoding timeLineCoding;
+  private final TimeCoding timeCoding;
   private final short shardNum;
 
-  public TimeIndexStrategy(TimeLineCoding timeLineCoding, short shardNum) {
-    this.timeLineCoding = timeLineCoding;
+  public TimeIndexStrategy(TimeCoding timeCoding, short shardNum) {
+    this.timeCoding = timeCoding;
     this.shardNum = shardNum;
   }
 
@@ -40,8 +44,8 @@ public class TimeIndexStrategy implements IndexStrategy {
     short shard = (short) (Math.random() * shardNum);
     TimeLine timeLine = new TimeLine(trajectory.getTrajectoryFeatures().getStartTime(),
         trajectory.getTrajectoryFeatures().getEndTime());
-    long timeIndex = timeLineCoding.getIndex(timeLine);
-    short binNum = (short) timeLineCoding.dateToBinnedTime(timeLine.getTimeStart()).getBin();
+    long timeIndex = timeCoding.getIndex(timeLine);
+    short binNum = (short) timeCoding.dateToBinnedTime(timeLine.getTimeStart()).getBin();
     return toIndex(shard, binNum, timeIndex, trajectory.getObjectID(),
         trajectory.getTrajectoryID());
   }
@@ -54,9 +58,9 @@ public class TimeIndexStrategy implements IndexStrategy {
   @Override
   public TimeLine getTimeLineRange(ByteArray byteArray) {
     long timeCodingVal = getTimeCodingVal(byteArray);
-    long bin = getTimeBinVal(byteArray);
-    TimeBin timeBin = new TimeBin(bin, timeLineCoding.getTimePeriod());
-    return timeLineCoding.getTimeLine(timeCodingVal, timeBin);
+    short bin = getTimeBinVal(byteArray);
+    TimeBin timeBin = new TimeBin(bin, timeCoding.getTimePeriod());
+    return timeCoding.getTimeLine(timeCodingVal, timeBin);
   }
 
 
@@ -78,8 +82,33 @@ public class TimeIndexStrategy implements IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition) {
-    return null;
+  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition,
+      String oId) {
+    List<RowKeyRange> result = new ArrayList<>();
+    // 1. xzt coding
+    List<TimeIndexRange> list = timeCoding.ranges(temporalQueryCondition);
+    // 2. concat shard index
+    for (TimeIndexRange xztCoding : list) {
+      for (short shard = 0; shard < shardNum; shard++) {
+        ByteBuffer byteBuffer1 = ByteBuffer.allocate(
+            Short.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
+        ByteBuffer byteBuffer2 = ByteBuffer.allocate(
+            Short.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
+        byte[] oidBytes = oId.getBytes(StandardCharsets.ISO_8859_1);
+        byte[] oidBytesPadding = bytePadding(oidBytes, MAX_OID_LENGTH);
+        short bin = xztCoding.getTimeBin().getBin();
+        byteBuffer1.putShort(shard);
+        byteBuffer1.put(oidBytesPadding);
+        byteBuffer1.putShort(bin);
+        byteBuffer1.putLong(xztCoding.getLower());
+        byteBuffer2.putShort(shard);
+        byteBuffer2.put(oidBytesPadding);
+        byteBuffer2.putShort(bin);
+        byteBuffer2.putLong(xztCoding.getUpper());
+        result.add(new RowKeyRange(new ByteArray(byteBuffer1), new ByteArray(byteBuffer2)));
+      }
+    }
+    return result;
   }
 
   @Override
@@ -105,7 +134,7 @@ public class TimeIndexStrategy implements IndexStrategy {
 
   @Override
   public TimeCoding getTimeCoding() {
-    return timeLineCoding;
+    return timeCoding;
   }
 
   @Override
@@ -132,12 +161,25 @@ public class TimeIndexStrategy implements IndexStrategy {
 
   @Override
   public short getShardNum(ByteArray byteArray) {
-    return 0;
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
+    return buffer.getShort();
   }
 
   @Override
   public String getTrajectoryId(ByteArray byteArray) {
-    return null;
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
+    buffer.getShort();
+    byte[] stringBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(stringBytes);
+    return new String(stringBytes, StandardCharsets.ISO_8859_1);
+  }
+
+  public String timeIndexToString(ByteArray byteArray) {
+    return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = "
+        + getTrajectoryId(byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = "
+        + getTimeCodingVal(byteArray) + '}';
   }
 
   private ByteArray toIndex(short shard, short bin, long timeCode, String oId, String tId) {
