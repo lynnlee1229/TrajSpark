@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.coding.conf.Constants;
+import cn.edu.whu.trajspark.constant.CodingConstants;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import org.locationtech.geomesa.curve.XZ2SFC;
 import org.locationtech.jts.geom.*;
@@ -10,10 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import scala.collection.JavaConverters;
 
-import static cn.edu.whu.trajspark.coding.conf.Constants.*;
+import static cn.edu.whu.trajspark.constant.CodingConstants.*;
 
 /**
  *  包装XZ2SFC, 负责 <br/>
@@ -23,23 +24,23 @@ import static cn.edu.whu.trajspark.coding.conf.Constants.*;
  * @author Haocheng Wang
  * Created on 2022/9/26
  */
-public class XZ2PlusCoding implements SpatialCoding {
+public class XZ2Coding extends SpatialCoding {
 
-  private static final Logger logger = LoggerFactory.getLogger(XZ2PlusCoding.class);
+  private static final Logger logger = LoggerFactory.getLogger(XZ2Coding.class);
 
-  private XZ2SFC xz2Sfc;
+  private transient XZ2SFC xz2Sfc;
 
   short xz2Precision;
 
-  public XZ2PlusCoding() {
-    xz2Precision = Constants.MAX_XZ2_PRECISION;
+  public XZ2Coding() {
+    xz2Precision = CodingConstants.MAX_XZ2_PRECISION;
     xz2Sfc = XZ2SFC.apply(xz2Precision);
   }
 
-  public XZ2PlusCoding(short xz2Precision) {
-    if (xz2Precision > Constants.MAX_XZ2_PRECISION) {
-      logger.warn("The XZ2 precision you provided exceeds max {}, we automatically set it to max precision.", Constants.MAX_XZ2_PRECISION);
-      xz2Precision = Constants.MAX_XZ2_PRECISION;
+  public XZ2Coding(short xz2Precision) {
+    if (xz2Precision > CodingConstants.MAX_XZ2_PRECISION) {
+      logger.warn("The XZ2 precision you provided exceeds max {}, we automatically set it to max precision.", CodingConstants.MAX_XZ2_PRECISION);
+      xz2Precision = CodingConstants.MAX_XZ2_PRECISION;
     } else {
       this.xz2Precision = xz2Precision;
     }
@@ -48,6 +49,10 @@ public class XZ2PlusCoding implements SpatialCoding {
 
   public int getXz2Precision() {
     return xz2Precision;
+  }
+
+  public void setXz2Sfc(XZ2SFC xz2Sfc) {
+    this.xz2Sfc = xz2Sfc;
   }
 
   /**
@@ -160,13 +165,23 @@ public class XZ2PlusCoding implements SpatialCoding {
     return list;
   }
 
-  /**
-   * TODO: 根据XZ2编码与线段, 获取line string在对应网格的poscode.
-   * @param xz2Coding xz2编码
-   * @param lineString 轨迹线段
-   * @return 该轨迹段在xz2网格内部的poscode
-   */
-  public int getPosCode(long xz2Coding, LineString lineString) {
-    return 0;
+  @Override
+  public String toString() {
+    return "XZ2Coding{" +
+        "xz2Precision=" + xz2Precision +
+        '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    XZ2Coding xz2Coding = (XZ2Coding) o;
+    return xz2Precision == xz2Coding.xz2Precision;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(xz2Precision);
   }
 }

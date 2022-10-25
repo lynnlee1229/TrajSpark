@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.query;
 
-import cn.edu.whu.trajspark.database.table.TrajectoryTable;
+import cn.edu.whu.trajspark.database.table.DataTable;
 import org.locationtech.sfcurve.IndexRange;
 
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.List;
  * Created on 2022/9/28
  */
 public abstract class Query {
-  TrajectoryTable targetTable;
+  DataTable targetTable;
 
-  public Query(TrajectoryTable targetTable) {
+  public Query(DataTable targetTable) {
     this.targetTable = targetTable;
   }
 

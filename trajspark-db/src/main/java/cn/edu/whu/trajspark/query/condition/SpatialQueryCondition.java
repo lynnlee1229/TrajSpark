@@ -1,10 +1,6 @@
 package cn.edu.whu.trajspark.query.condition;
 
-import cn.edu.whu.trajspark.database.table.TrajectoryTable;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.sfcurve.IndexRange;
-
-import java.util.List;
 
 /**
  * 空间查询条件

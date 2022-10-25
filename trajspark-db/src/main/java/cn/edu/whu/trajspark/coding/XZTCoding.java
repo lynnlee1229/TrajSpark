@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.coding;
 
 import static cn.edu.whu.trajspark.coding.TimeLineCoding.Epoch;
-import static cn.edu.whu.trajspark.coding.conf.Constants.LOG_FIVE;
+import static cn.edu.whu.trajspark.constant.CodingConstants.LOG_FIVE;
 
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeElement;

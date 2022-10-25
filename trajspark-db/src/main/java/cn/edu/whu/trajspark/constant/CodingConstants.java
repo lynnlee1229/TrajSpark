@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.coding.conf;
+package cn.edu.whu.trajspark.constant;
 
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 
@@ -6,7 +6,7 @@ import cn.edu.whu.trajspark.datatypes.TimePeriod;
  * @author Haocheng Wang
  * Created on 2022/9/27
  */
-public class Constants {
+public class CodingConstants {
   /**
    * Max length of xz2 Quadrant sequence
    */
@@ -23,4 +23,6 @@ public class Constants {
   public static final double LOG_FIVE = Math.log(0.5);
   public static final int MAX_OID_LENGTH = 20;
   public static final int MAX_TID_LENGTH = 10;
+
+  public static final short XZ2PLUS_POS_CELL_LEN = 2;
 }

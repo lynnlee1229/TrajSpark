@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * @author Lynn Lee
@@ -63,5 +64,19 @@ public class TrajFeatures implements Serializable {
 
   public double getLen() {
     return len;
+  }
+
+  @Override
+  public String toString() {
+    return "TrajFeatures{" +
+        "startTime=" + startTime +
+        ", endTime=" + endTime +
+        ", startPoint=" + startPoint +
+        ", endPoint=" + endPoint +
+        ", pointNum=" + pointNum +
+        ", mbr=" + mbr +
+        ", speed=" + speed +
+        ", len=" + len +
+        '}';
   }
 }

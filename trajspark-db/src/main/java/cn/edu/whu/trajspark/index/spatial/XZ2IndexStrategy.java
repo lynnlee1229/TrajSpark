@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.index.spatial;
 
+import cn.edu.whu.trajspark.coding.XZ2Coding;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
@@ -7,47 +8,57 @@ import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.RowKeyRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
-import cn.edu.whu.trajspark.coding.XZ2PlusCoding;
+import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.locationtech.geomesa.curve.XZ2SFC;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.sfcurve.IndexRange;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * row key: shard + xz2 + tid, 无PosCode
- * TODO: 加PosCode
+ * row key: shard + index type + xz2 + oid + tid
  *
  * @author Haocheng Wang Created on 2022/10/4
  */
-public class SpatialIndexStrategy implements IndexStrategy {
+public class XZ2IndexStrategy extends IndexStrategy {
 
-  private SpatialCoding spatialCoding;
-  private short shardNum;
-  private int KEY_BYTE_LEN = Short.BYTES + Long.BYTES;
+  private XZ2Coding xz2Coding;
+  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + Long.BYTES;
 
-  public SpatialIndexStrategy(SpatialCoding spatialCoding, short shardNum) {
-    this.spatialCoding = spatialCoding;
-    this.shardNum = shardNum;
+  public XZ2IndexStrategy() {
+    indexType = IndexType.XZ2;
+    this.xz2Coding = new XZ2Coding();
+  }
+
+  public XZ2IndexStrategy(int maxPrecision) {
+    this();
+    this.xz2Coding = new XZ2Coding((short) maxPrecision);
   }
 
   @Override
   public ByteArray index(Trajectory trajectory) {
     short shard = (short) (Math.random() * shardNum);
-    long spatialCodingVal = spatialCoding.index(trajectory.getLineString().getEnvelopeInternal());
-    String tId = trajectory.getObjectID();
-    return toIndex(shard, spatialCodingVal, tId);
+    long spatialCodingVal = xz2Coding.index(trajectory.getLineString().getEnvelopeInternal());
+    String tId = trajectory.getTrajectoryID();
+    String oid = trajectory.getObjectID();
+    return toIndex(shard, spatialCodingVal, tId, oid);
+  }
+
+  @Override
+  public IndexType getIndexType() {
+    return IndexType.XZ2;
   }
 
   @Override
   public Polygon getSpatialRange(ByteArray byteArray) {
     long spatialCodingVal = getSpatialCodingVal(byteArray);
-    return spatialCoding.getSpatialPolygon(spatialCodingVal);
+    return xz2Coding.getSpatialPolygon(spatialCodingVal);
   }
 
   @Override
@@ -60,7 +71,7 @@ public class SpatialIndexStrategy implements IndexStrategy {
       int maxRangeNum) {
     List<RowKeyRange> result = new ArrayList<>();
     // 1. xz2 coding
-    List<IndexRange> list = spatialCoding.ranges(spatialQueryCondition);
+    List<IndexRange> list = xz2Coding.ranges(spatialQueryCondition);
     // 2. concat shard index
     for (IndexRange xz2Coding : list) {
       for (short shard = 0; shard < shardNum; shard++) {
@@ -105,13 +116,13 @@ public class SpatialIndexStrategy implements IndexStrategy {
     return "Row key index: {" +
         "shardNum=" + getShardNum(byteArray) +
         ", xz2=" + getSpatialCodingVal(byteArray) +
-        ", tid=" + getTrajectoryId(byteArray) +
+        ", tid=" + getObjectId(byteArray) +
         '}';
   }
 
   @Override
   public SpatialCoding getSpatialCoding() {
-    return spatialCoding;
+    return xz2Coding;
   }
 
   @Override
@@ -140,24 +151,40 @@ public class SpatialIndexStrategy implements IndexStrategy {
   }
 
   @Override
-  public String getTrajectoryId(ByteArray byteArray) {
+  public String getObjectId(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
     buffer.getLong();
     byte[] stringBytes = new byte[buffer.capacity() - KEY_BYTE_LEN];
     buffer.get(stringBytes);
-    return new String(stringBytes, StandardCharsets.ISO_8859_1);
+    return new String(stringBytes, StandardCharsets.UTF_8);
   }
 
-  private ByteArray toIndex(short shard, long xz2coding, String tId) {
-    byte[] idBytes = tId.getBytes(StandardCharsets.ISO_8859_1);
-    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + idBytes.length);
+  @Override
+  public void buildUnserializableObjects() {
+    xz2Coding.setXz2Sfc(XZ2SFC.apply((short) xz2Coding.getXz2Precision()));
+  }
+
+  // TODO: 确定oid, pid的字节数组长度.
+  private ByteArray toIndex(short shard, long xz2coding, String oid, String tid) {
+    byte[] oidBytes = oid.getBytes();
+    byte[] tidBytes = tid.getBytes();
+    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + oidBytes.length + tidBytes.length);
     byteBuffer.putShort(shard);
+    byteBuffer.put(Bytes.toBytes(indexType.getId()));
     byteBuffer.putLong(xz2coding);
-    for (byte idByte : idBytes) {
-      byteBuffer.put(idByte);
-    }
+    byteBuffer.put(oidBytes);
+    byteBuffer.put(tidBytes);
     return new ByteArray(byteBuffer);
+  }
+
+  @Override
+  public String toString() {
+    return "XZ2IndexStrategy{" +
+        "shardNum=" + shardNum +
+        ", indexType=" + indexType +
+        ", xz2Coding=" + xz2Coding +
+        '}';
   }
 }

@@ -1,7 +1,6 @@
 package cn.edu.whu.trajspark.index.time;
 
-import static cn.edu.whu.trajspark.index.spatial.SpatialIndexStrategyTest.getExampleTrajectory;
-import static org.junit.jupiter.api.Assertions.*;
+import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
 
 import cn.edu.whu.trajspark.coding.TimeLineCoding;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
@@ -28,7 +27,7 @@ class TimeIndexStrategyTest extends TestCase {
   public void testIndex() {
     Trajectory exampleTrajectory = getExampleTrajectory();
     TimeLineCoding timeLineCoding = new TimeLineCoding();
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding, (short) 0);
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding);
     ByteArray index = timeIndexStrategy.index(exampleTrajectory);
     System.out.println("ByteArray: " + index);
   }
@@ -37,7 +36,7 @@ class TimeIndexStrategyTest extends TestCase {
   public void testGetTimeRange() {
     Trajectory exampleTrajectory = getExampleTrajectory();
     TimeLineCoding timeLineCoding = new TimeLineCoding();
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding, (short) 0);
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding);
     ByteArray index = timeIndexStrategy.index(exampleTrajectory);
     TimeLine timeLineRange = timeIndexStrategy.getTimeLineRange(index);
     System.out.println(
@@ -58,7 +57,7 @@ class TimeIndexStrategyTest extends TestCase {
     String Oid = "001";
     TemporalQueryCondition temporalQueryCondition = new TemporalQueryCondition(timeLine,
         TemporalQueryType.OVERLAP);
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new TimeLineCoding(), (short) 1);
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new TimeLineCoding());
     List<RowKeyRange> scanRanges = timeIndexStrategy.getScanRanges(temporalQueryCondition, Oid);
     System.out.println("Single ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
@@ -85,7 +84,7 @@ class TimeIndexStrategyTest extends TestCase {
     String Oid = "001";
     TemporalQueryCondition temporalQueryCondition = new TemporalQueryCondition(timeLines,
         TemporalQueryType.OVERLAP);
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new TimeLineCoding(), (short) 1);
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new TimeLineCoding());
     List<RowKeyRange> scanRanges = timeIndexStrategy.getScanRanges(temporalQueryCondition, Oid);
     System.out.println("Multi ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
@@ -112,7 +111,7 @@ class TimeIndexStrategyTest extends TestCase {
     String Oid = "001";
     TemporalQueryCondition temporalQueryCondition = new TemporalQueryCondition(timeLines,
         TemporalQueryType.OVERLAP);
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new TimeLineCoding(), (short) 1);
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new TimeLineCoding());
     List<RowKeyRange> scanRanges = timeIndexStrategy.getScanRanges(temporalQueryCondition, Oid);
     System.out.println("Multi InnerBin ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
