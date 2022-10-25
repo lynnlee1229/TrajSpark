@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.index.spatial;
 
-import cn.edu.whu.trajspark.coding.XZ2PlusCoding;
+import cn.edu.whu.trajspark.coding.XZ2Coding;
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
@@ -23,7 +23,7 @@ import java.util.List;
  * @author Haocheng Wang
  * Created on 2022/10/4
  */
-public class SpatialIndexStrategyTest extends TestCase {
+public class XZ2IndexStrategyTest extends TestCase {
 
   public static Trajectory getExampleTrajectory() {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
@@ -49,16 +49,16 @@ public class SpatialIndexStrategyTest extends TestCase {
 
   public void testIndex() {
     Trajectory t = getExampleTrajectory();
-    SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 0);
-    System.out.println(spatialIndexStrategy.index(t));
+    XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
+    System.out.println(XZ2IndexStrategy.index(t));
   }
 
   public void testGetSpatialRange() {
     Trajectory t = getExampleTrajectory();
-    SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 0);
-    ByteArray byteArray = spatialIndexStrategy.index(t);
+    XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
+    ByteArray byteArray = XZ2IndexStrategy.index(t);
     WKTWriter wktWriter = new WKTWriter();
-    System.out.println("xz2 grid: " + wktWriter.write(spatialIndexStrategy.getSpatialRange(byteArray)));
+    System.out.println("xz2 grid: " + wktWriter.write(XZ2IndexStrategy.getSpatialRange(byteArray)));
     System.out.println("trajectory envelope: " + wktWriter.write(t.getLineString().getEnvelope()));
 
   }
@@ -68,10 +68,10 @@ public class SpatialIndexStrategyTest extends TestCase {
     try {
       Geometry geom = reader.read("POLYGON ((114.345703125 30.531005859375, 114.345703125 30.5419921875, 114.36767578125 30.5419921875, 114.36767578125 30.531005859375, 114.345703125 30.531005859375))");
       SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(geom.getEnvelopeInternal(), SpatialQueryCondition.SpatialQueryType.OVERLAP);
-      SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 1);
-      List<RowKeyRange> list = spatialIndexStrategy.getScanRanges(spatialQueryCondition);
+      XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
+      List<RowKeyRange> list = XZ2IndexStrategy.getScanRanges(spatialQueryCondition);
       for (RowKeyRange range : list) {
-        System.out.println("start:" + spatialIndexStrategy.indexToString(range.getStartKey()) + "end: " + spatialIndexStrategy.indexToString(range.getEndKey()));
+        System.out.println("start:" + XZ2IndexStrategy.indexToString(range.getStartKey()) + "end: " + XZ2IndexStrategy.indexToString(range.getEndKey()));
       }
     } catch (ParseException e) {
       e.printStackTrace();
@@ -80,9 +80,9 @@ public class SpatialIndexStrategyTest extends TestCase {
 
   public void testIndexToString() {
     Trajectory t = getExampleTrajectory();
-    SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 0);
-    ByteArray byteArray = spatialIndexStrategy.index(t);
-    System.out.println(spatialIndexStrategy.indexToString(byteArray));
+    XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
+    ByteArray byteArray = XZ2IndexStrategy.index(t);
+    System.out.println(XZ2IndexStrategy.indexToString(byteArray));
   }
 
   public void testGetShardNum() {
@@ -90,8 +90,8 @@ public class SpatialIndexStrategyTest extends TestCase {
 
   public void testGetTrajectoryId() {
     Trajectory t = getExampleTrajectory();
-    SpatialIndexStrategy spatialIndexStrategy = new SpatialIndexStrategy(new XZ2PlusCoding(), (short) 0);
-    ByteArray byteArray = spatialIndexStrategy.index(t);
-    assertEquals(spatialIndexStrategy.getTrajectoryId(byteArray), t.getTrajectoryID());
+    XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
+    ByteArray byteArray = XZ2IndexStrategy.index(t);
+    assertEquals(XZ2IndexStrategy.getObjectId(byteArray), t.getTrajectoryID());
   }
 }

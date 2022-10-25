@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.index.time;
 
-import static cn.edu.whu.trajspark.coding.conf.Constants.MAX_OID_LENGTH;
-import static cn.edu.whu.trajspark.coding.conf.Constants.MAX_TID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
 
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeLineCoding;
@@ -14,6 +14,7 @@ import cn.edu.whu.trajspark.datatypes.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.index.IndexStrategy;
+import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import java.io.ByteArrayOutputStream;
@@ -29,14 +30,12 @@ import org.locationtech.sfcurve.IndexRange;
  * @author Xu Qi
  * @since 2022/10/7
  */
-public class TimeIndexStrategy implements IndexStrategy {
+public class TimeIndexStrategy extends IndexStrategy {
 
-  private final TimeCoding timeCoding;
-  private final short shardNum;
+  private final TimeLineCoding timeCoding;
 
-  public TimeIndexStrategy(TimeCoding timeCoding, short shardNum) {
+  public TimeIndexStrategy(TimeLineCoding timeCoding) {
     this.timeCoding = timeCoding;
-    this.shardNum = shardNum;
   }
 
   @Override
@@ -48,6 +47,11 @@ public class TimeIndexStrategy implements IndexStrategy {
     short binNum = (short) timeCoding.dateToBinnedTime(timeLine.getTimeStart()).getBin();
     return toIndex(shard, binNum, timeIndex, trajectory.getObjectID(),
         trajectory.getTrajectoryID());
+  }
+
+  @Override
+  public IndexType getIndexType() {
+    return IndexType.TXZ2;
   }
 
   @Override
@@ -167,7 +171,7 @@ public class TimeIndexStrategy implements IndexStrategy {
   }
 
   @Override
-  public String getTrajectoryId(ByteArray byteArray) {
+  public String getObjectId(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
@@ -176,9 +180,14 @@ public class TimeIndexStrategy implements IndexStrategy {
     return new String(stringBytes, StandardCharsets.ISO_8859_1);
   }
 
+  @Override
+  public void buildUnserializableObjects() {
+
+  }
+
   public String timeIndexToString(ByteArray byteArray) {
     return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = "
-        + getTrajectoryId(byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = "
+        + getObjectId(byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = "
         + getTimeCodingVal(byteArray) + '}';
   }
 

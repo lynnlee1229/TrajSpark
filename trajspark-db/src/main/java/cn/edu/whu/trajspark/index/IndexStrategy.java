@@ -11,7 +11,11 @@ import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.locationtech.jts.geom.Polygon;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
+
+import static cn.edu.whu.trajspark.constant.IndexConstants.DEFAULT_SHARD_NUM;
 
 /**
  * 接收对象,输出row-key.
@@ -21,13 +25,22 @@ import java.util.List;
  * @author Haocheng Wang
  * Created on 2022/9/28
  */
-public interface IndexStrategy {
+public abstract class IndexStrategy implements Serializable {
+
+  protected short shardNum = DEFAULT_SHARD_NUM;
+
+  protected IndexType indexType;
 
   // 对轨迹编码
-  ByteArray index(Trajectory trajectory) throws Exception;
+  public abstract ByteArray index(Trajectory trajectory);
 
-  Polygon getSpatialRange(ByteArray byteArray);
-  TimeLine getTimeLineRange(ByteArray byteArray);
+  public IndexType getIndexType() {
+    return indexType;
+  }
+
+  public abstract Polygon getSpatialRange(ByteArray byteArray);
+
+  public abstract TimeLine getTimeLineRange(ByteArray byteArray);
 
   /**
    * Get RowKey pairs for scan operation, based on spatial and temporal range.
@@ -36,29 +49,42 @@ public interface IndexStrategy {
    * @param maxRangeNum 最大范围数量
    * @return RowKey pairs
    */
-  List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum);
+  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum);
 
-  List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition);
+  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition);
 
-  List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
+  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
 
-  List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
+  public abstract List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
 
-  List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition);
+  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition);
 
-  String indexToString(ByteArray byteArray);
+  public abstract String indexToString(ByteArray byteArray);
 
-  SpatialCoding getSpatialCoding();
+  public abstract SpatialCoding getSpatialCoding();
 
-  long getSpatialCodingVal(ByteArray byteArray);
+  public abstract long getSpatialCodingVal(ByteArray byteArray);
 
-  TimeCoding getTimeCoding();
+  public abstract TimeCoding getTimeCoding();
 
-  long getTimeCodingVal(ByteArray byteArray);
+  public abstract long getTimeCodingVal(ByteArray byteArray);
 
-  short getShardNum(ByteArray byteArray);
+  public abstract short getShardNum(ByteArray byteArray);
 
-  String getTrajectoryId(ByteArray byteArray);
+  public abstract Object getObjectId(ByteArray byteArray);
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    IndexStrategy that = (IndexStrategy) o;
+    return shardNum == that.shardNum && indexType == that.indexType;
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(shardNum, indexType);
+  }
+
+  public abstract void buildUnserializableObjects();
 }

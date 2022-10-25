@@ -13,9 +13,9 @@ import java.util.List;
  * @author Haocheng Wang
  * Created on 2022/10/4
  */
-public interface SpatialCoding extends Serializable {
-  long index(LineString lineString);
-  long index(Envelope boundingBox);
-  List<IndexRange> ranges(SpatialQueryCondition spatialQueryRange);
-  Polygon getSpatialPolygon(long spatialCodingVal);
+public abstract class SpatialCoding implements Serializable {
+  public abstract long index(LineString lineString);
+  public abstract long index(Envelope boundingBox);
+  public abstract List<IndexRange> ranges(SpatialQueryCondition spatialQueryRange);
+  public abstract Polygon getSpatialPolygon(long spatialCodingVal);
 }

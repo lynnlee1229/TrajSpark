@@ -1,12 +1,10 @@
 package cn.edu.whu.trajspark.coding;
 
-import static cn.edu.whu.trajspark.coding.conf.Constants.MAX_TIME_BIN_PRECISION;
-import static cn.edu.whu.trajspark.index.spatial.SpatialIndexStrategyTest.getExampleTrajectory;
-import static org.junit.jupiter.api.Assertions.*;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TIME_BIN_PRECISION;
+import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import java.util.List;
@@ -24,7 +22,7 @@ class TimeLineCodingTest extends TestCase {
   public void getIndex() {
     Trajectory exampleTrajectory = getExampleTrajectory();
     TimeLineCoding timeLineCoding = new TimeLineCoding();
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding, (short) 0);
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding);
     ByteArray index = timeIndexStrategy.index(exampleTrajectory);
     TimeLine timeLineRange = timeIndexStrategy.getTimeLineRange(index);
     System.out.println("ByteArray: " + index);

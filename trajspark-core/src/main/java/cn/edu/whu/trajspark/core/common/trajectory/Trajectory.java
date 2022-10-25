@@ -30,6 +30,9 @@ public class Trajectory implements Serializable {
   private Map<String, Object> extendedValues;
   private LineString lineString;
 
+  public Trajectory() {
+  }
+
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
                     TrajFeatures trajectoryFeatures) {
     this.trajectoryID = trajectoryID;
@@ -72,6 +75,18 @@ public class Trajectory implements Serializable {
     this.updateFeatures = true;
     this.updateLineString = true;
     this.updatePointListId = true;
+  }
+
+  public void setObjectID(String objectID) {
+    this.objectID = objectID;
+  }
+
+  public void setPointList(List<TrajPoint> pointList) {
+    this.pointList = pointList;
+  }
+
+  public void setTrajectoryFeatures(TrajFeatures trajectoryFeatures) {
+    this.trajectoryFeatures = trajectoryFeatures;
   }
 
   public void setTrajectoryID(String trajectoryID) {
@@ -229,28 +244,27 @@ public class Trajectory implements Serializable {
 
   @Override
   public String toString() {
-    return "{Trajectory:[traj_id:" + getTrajectoryID() + " object_id:" + getObjectID() + "]}";
+    return "Trajectory{" +
+        "trajectoryID='" + trajectoryID + '\'' +
+        ", objectID='" + objectID + '\'' +
+        ", trajectoryFeatures=" + trajectoryFeatures +
+        '}';
   }
 
   public static class Schema {
     public static final String TRAJECTORY_ID = "trajectory_id";
     public static final String OBJECT_ID = "object_id";
-    public static final String TRAJ_POINT = "traj_point";
-    public static final String TRAJ_LIST = "traj_list";
+    public static final String TRAJ_POINTS = "traj_points";
     public static final String MBR = "mbr";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String LAT = "lat";
-    public static final String LNG = "lng";
-    public static final String TRAJ_POINT_ID = "traj_point_id";
     public static final String START_TIME = "start_time";
     public static final String END_TIME = "end_time";
     public static final String START_POSITION = "start_position";
     public static final String END_POSITION = "end_position";
     public static final String POINT_NUMBER = "point_number";
-    public static final String TIME_RANGE_KEY = "time_range";
     public static final String SPEED = "speed";
     public static final String LENGTH = "length";
     public static final String SIGNATURE = "signature";
+    public static final String PTR = "PTR";
 
     public Schema() {
     }
