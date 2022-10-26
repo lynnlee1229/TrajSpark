@@ -18,9 +18,15 @@ public class BasicFilter implements IFilter {
   private double maxSpeed;
   private double minTrajLength;
 
+  /**
+   * 基础去噪
+   *
+   * @param maxSpeed      速度阈值，单位：km/h
+   * @param minTrajLength 最小轨迹长度，单位：m
+   */
   public BasicFilter(double maxSpeed, double minTrajLength) {
     this.maxSpeed = maxSpeed;
-    this.minTrajLength = minTrajLength;
+    this.minTrajLength = minTrajLength / 1000;
   }
 
 //  public BasicFilter(BasicFilterParams params) {

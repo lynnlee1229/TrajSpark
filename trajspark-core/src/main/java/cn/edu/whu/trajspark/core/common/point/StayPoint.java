@@ -1,0 +1,97 @@
+package cn.edu.whu.trajspark.core.common.point;
+
+import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.core.util.CheckUtils;
+import cn.edu.whu.trajspark.core.util.GeoUtils;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * @author Lynn Lee
+ * @date 2022/10/26
+ **/
+public class StayPoint implements Serializable {
+  private String sid;
+  private String oid;
+  private ZonedDateTime startTime;
+  private ZonedDateTime endTime;
+  private MinimumBoundingBox mbr;
+
+  private List<TrajPoint> plist;
+  private BasePoint centerPoint;
+
+  public StayPoint(List plist, String sid, String oid) {
+    if (CheckUtils.isCollectionEmpty(plist)) {
+      throw new RuntimeException("ptList is expected not empty.");
+    } else {
+      this.plist = plist;
+      this.sid = sid;
+      this.oid = oid;
+      this.startTime = ((TrajPoint) plist.get(0)).getTimestamp();
+      this.endTime = ((TrajPoint) plist.get(plist.size() - 1)).getTimestamp();
+      this.mbr = GeoUtils.calMinimumBoundingBox(plist);
+      double lngSum = 0.0;
+      double latSum = 0.0;
+
+      TrajPoint tmpP;
+      for (Iterator iter = plist.iterator(); iter.hasNext(); latSum += tmpP.getLat()) {
+        tmpP = (TrajPoint) iter.next();
+        lngSum += tmpP.getLng();
+      }
+      this.centerPoint =
+          new BasePoint(lngSum / (double) plist.size(), latSum / (double) plist.size());
+    }
+  }
+
+  public long getStayTimeInSecond() {
+    return ChronoUnit.SECONDS.between(this.startTime, this.endTime);
+  }
+
+  public BasePoint getCenterPoint() {
+    return centerPoint;
+  }
+
+  public String getSid() {
+    return sid;
+  }
+
+  public String getOid() {
+    return oid;
+  }
+
+  public ZonedDateTime getStartTime() {
+    return startTime;
+  }
+
+  public ZonedDateTime getEndTime() {
+    return endTime;
+  }
+
+  public MinimumBoundingBox getMbr() {
+    return mbr;
+  }
+
+  public void setMbr(MinimumBoundingBox mbr) {
+    this.mbr = mbr;
+  }
+
+  public List<TrajPoint> getPlist() {
+    return plist;
+  }
+
+  @Override
+  public String toString() {
+    return "StayPoint{" +
+        "sid='" + sid + '\'' +
+        ", oid='" + oid + '\'' +
+        ", startTime=" + startTime +
+        ", endTime=" + endTime +
+        ", mbr=" + mbr +
+        ", plist=" + plist +
+        ", centerPoint=" + centerPoint +
+        '}';
+  }
+}

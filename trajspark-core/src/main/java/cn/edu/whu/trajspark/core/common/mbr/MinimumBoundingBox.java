@@ -81,9 +81,9 @@ public class MinimumBoundingBox extends Envelope {
 
   private void calcGeoLength() {
     BasePoint var1 = new BasePoint(this.getMinLng(), this.getMaxLat());
-    this.latGeoLength = GeoUtils.getEuclideanDistance(this.getLowerLeft(), var1);
+    this.latGeoLength = GeoUtils.getEuclideanDistanceKM(this.getLowerLeft(), var1);
     var1 = new BasePoint(this.getMaxLng(), this.getMinLat());
-    this.lngGeoLength = GeoUtils.getEuclideanDistance(this.getLowerLeft(), var1);
+    this.lngGeoLength = GeoUtils.getEuclideanDistanceKM(this.getLowerLeft(), var1);
   }
 
   public boolean isContains(MinimumBoundingBox other) {
@@ -167,7 +167,7 @@ public class MinimumBoundingBox extends Envelope {
       }
 
       BasePoint var7 = new BasePoint(tmpLng, tmpLat);
-      return GeoUtils.getEuclideanDistance(var7, p);
+      return GeoUtils.getEuclideanDistanceKM(var7, p);
     }
   }
 

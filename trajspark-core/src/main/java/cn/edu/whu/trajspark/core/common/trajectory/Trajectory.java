@@ -165,7 +165,7 @@ public class Trajectory implements Serializable {
       if (prePoint == null) {
         prePoint = p;
       } else {
-        length += GeoUtils.getEuclideanDistance(prePoint, p);
+        length += GeoUtils.getEuclideanDistanceKM(prePoint, p);
         prePoint = p;
       }
     }

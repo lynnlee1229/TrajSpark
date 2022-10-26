@@ -17,10 +17,16 @@ public class BasicSegmenter implements ISegmenter {
   private double minTrajLength;
   private double maxTimeInterval;
 
-
+  /**
+   * 分段参数
+   *
+   * @param maxDis          分段距离阈值，单位：m
+   * @param minTrajLength   分段后最小轨迹长度，小于该长度则去除，单位：m
+   * @param maxTimeInterval 分段时间阈值，单位：s
+   */
   public BasicSegmenter(double maxDis, double minTrajLength, double maxTimeInterval) {
     this.maxDis = maxDis;
-    this.minTrajLength = minTrajLength;
+    this.minTrajLength = minTrajLength / 1000;
     this.maxTimeInterval = maxTimeInterval;
   }
 
@@ -33,7 +39,7 @@ public class BasicSegmenter implements ISegmenter {
     for (int i = 0; i < tmpPointList.size() - 1; ++i) {
       TrajPoint p0 = tmpPointList.get(i), p1 = tmpPointList.get(i + 1);
       if (ChronoUnit.SECONDS.between(p0.getTimestamp(), p1.getTimestamp()) >= maxTimeInterval ||
-          GeoUtils.getEuclideanDistance(p0, p1) >= maxDis) {
+          GeoUtils.getEuclideanDistanceM(p0, p1) >= maxDis) {
         // record segIndex
         segIndex.add(i);
       }
