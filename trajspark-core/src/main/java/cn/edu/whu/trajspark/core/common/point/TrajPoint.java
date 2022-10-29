@@ -48,7 +48,7 @@ public class TrajPoint extends BasePoint implements Serializable {
   }
 
   public String getTimestampString() {
-    return  timestamp.toLocalDateTime().toString();
+    return timestamp.toLocalDateTime().toString();
   }
 
   public Map<String, Object> getExtendedValues() {
@@ -63,8 +63,10 @@ public class TrajPoint extends BasePoint implements Serializable {
     return this.extendedValues.get(key);
   }
 
+
   public String toString() {
     return "TrajPoint{pid='" + this.pid + '\'' + ", longitude=" + this.getLng() + ", latitude="
-        + this.getLat() + ", extendedValues=" + this.extendedValues + '}';
+        + this.getLat() + ", timeStamp=" + this.getTimestamp() + ", extendedValues=" +
+        this.extendedValues + '}';
   }
 }

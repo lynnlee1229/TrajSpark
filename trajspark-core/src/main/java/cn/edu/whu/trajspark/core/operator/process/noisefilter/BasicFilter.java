@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.BasicFilterConfig;
 import cn.edu.whu.trajspark.core.util.GeoUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,14 +27,17 @@ public class BasicFilter implements IFilter {
    */
   public BasicFilter(double maxSpeed, double minTrajLength) {
     this.maxSpeed = maxSpeed;
-    this.minTrajLength = minTrajLength / 1000;
+    this.minTrajLength = minTrajLength;
   }
 
-//  public BasicFilter(BasicFilterParams params) {
-//    this.maxSpeed = params.getMaxSpeedMeterPerSecond();
-//    this.minTrajLength = params.getMinTrajLengthInKM();
-//  }
-
+  /**
+   * 使用配置文件构造
+   * @param config
+   */
+  public BasicFilter(BasicFilterConfig config) {
+    this.maxSpeed = config.getMaxSpeed();
+    this.minTrajLength = config.getMinTrajLength();
+  }
 
   @Override
   public Trajectory filterFunction(Trajectory rawTrajectory) {
@@ -41,13 +45,12 @@ public class BasicFilter implements IFilter {
     Set<TrajPoint> tmpSet = new TreeSet<>(Comparator.comparing(TrajPoint::getTimestamp));
     tmpSet.addAll(rawTrajectory.getPointList());
     List<TrajPoint> tmpPointList = new ArrayList<>(tmpSet);
-    // 空间去重通过后续停留点识别去除
-    // TODO 乒乓效应，结合基站字段处理
     // 离群点剔除
     for (int i = 1; i < tmpPointList.size(); ++i) {
       TrajPoint p0 = tmpPointList.get(i - 1), p1 = tmpPointList.get(i);
       if (GeoUtils.getSpeed(p0, p1) >= maxSpeed) {
         tmpPointList.remove(i);
+        i -= 1;
       }
     }
     Trajectory cleanedTrajtroy =
@@ -59,6 +62,6 @@ public class BasicFilter implements IFilter {
 
   @Override
   public JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(item -> filterFunction(item));
+    return rawTrajectoryRDD.map(this::filterFunction);
   }
 }

@@ -2,12 +2,14 @@ package cn.edu.whu.trajspark.example.conf;
 
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
+import cn.edu.whu.trajspark.core.conf.process.detector.IDectorConfig;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.ISegmenterConfig;
 import cn.edu.whu.trajspark.core.conf.store.IStoreConfig;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.net.URL;
 
@@ -35,6 +37,22 @@ public class ExampleConfig {
    */
   @JsonProperty
   private IStoreConfig storeConfig;
+  /**
+   * 去噪参数
+   */
+  @JsonProperty
+  private IFilterConfig filterConfig;
+  /**
+   * 分段参数
+   */
+  @JsonProperty
+  private ISegmenterConfig segmenterConfig;
+
+  /**
+   * 停留识别参数
+   */
+  @JsonProperty
+  private IDectorConfig dectorConfig;
 
   public ILoadConfig getLoadConfig() {
     return loadConfig;
@@ -46,6 +64,18 @@ public class ExampleConfig {
 
   public IStoreConfig getStoreConfig() {
     return storeConfig;
+  }
+
+  public IFilterConfig getFilterConfig() {
+    return filterConfig;
+  }
+
+  public ISegmenterConfig getSegmenterConfig() {
+    return segmenterConfig;
+  }
+
+  public IDectorConfig getDectorConfig() {
+    return dectorConfig;
   }
 
   /**

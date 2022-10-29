@@ -2,9 +2,12 @@ package cn.edu.whu.trajspark.core.operator.process.staypointdetector;
 
 import cn.edu.whu.trajspark.core.common.point.StayPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.core.conf.process.detector.BasicDetectorConfig;
+import cn.edu.whu.trajspark.core.conf.process.detector.IDectorConfig;
 import java.io.Serializable;
 import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
+import scala.NotImplementedError;
 
 /**
  * @author Lynn Lee
@@ -27,4 +30,15 @@ public interface IDetector extends Serializable {
    */
   JavaRDD<StayPoint> detect(JavaRDD<Trajectory> rawTrajectoryRDD);
 
+  static IDetector getDector(IDectorConfig config) {
+    switch (config.getDetectorType()) {
+      case BASIC_DETECTOR:
+        if (config instanceof BasicDetectorConfig) {
+          return new BasicDector((BasicDetectorConfig) config);
+        }
+        throw new NoSuchMethodError();
+      default:
+        throw new NotImplementedError();
+    }
+  }
 }

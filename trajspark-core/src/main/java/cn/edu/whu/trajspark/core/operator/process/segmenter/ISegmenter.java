@@ -1,10 +1,13 @@
 package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import org.apache.spark.api.java.JavaRDD;
-
+import cn.edu.whu.trajspark.core.conf.process.segmenter.BasicSegmenterConfig;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.ISegmenterConfig;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
 import java.io.Serializable;
 import java.util.List;
+import org.apache.spark.api.java.JavaRDD;
+import scala.NotImplementedError;
 
 /**
  * @author Lynn Lee
@@ -26,5 +29,22 @@ public interface ISegmenter extends Serializable {
    * @return RDD<子轨迹>
    */
   JavaRDD<Trajectory> segment(JavaRDD<Trajectory> rawTrajectoryRDD);
+
+  static ISegmenter getSegmenter(ISegmenterConfig config) {
+  switch (config.getSegmenterType()){
+    case BASIC_SEGMENTER:
+        if (config instanceof BasicSegmenterConfig) {
+          return new BasicSegmenter((BasicSegmenterConfig) config);
+        }
+        throw new NoSuchMethodError();
+    case STAYPOINTBASED_SEGMENTER:
+        if (config instanceof StayPointBasedSegmenterConfig) {
+          return new StayPointBasedSegmenter((StayPointBasedSegmenterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      default:
+        throw new NotImplementedError();
+  }
+  }
 
 }

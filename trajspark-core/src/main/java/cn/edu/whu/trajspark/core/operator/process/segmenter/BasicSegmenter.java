@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.BasicSegmenterConfig;
 import cn.edu.whu.trajspark.core.util.GeoUtils;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -14,20 +15,30 @@ import org.apache.spark.api.java.JavaRDD;
  **/
 public class BasicSegmenter implements ISegmenter {
   private double maxDis;
-  private double minTrajLength;
   private double maxTimeInterval;
+  private double minTrajLength;
 
   /**
    * 分段参数
    *
    * @param maxDis          分段距离阈值，单位：m
-   * @param minTrajLength   分段后最小轨迹长度，小于该长度则去除，单位：m
    * @param maxTimeInterval 分段时间阈值，单位：s
+   * @param minTrajLength   分段后最小轨迹长度，小于该长度则去除，单位：km
    */
-  public BasicSegmenter(double maxDis, double minTrajLength, double maxTimeInterval) {
+  public BasicSegmenter(double maxDis, double maxTimeInterval, double minTrajLength) {
     this.maxDis = maxDis;
-    this.minTrajLength = minTrajLength / 1000;
     this.maxTimeInterval = maxTimeInterval;
+    this.minTrajLength = minTrajLength;
+  }
+
+  /**
+   * 通过配置文件初始化
+   * @param config
+   */
+  public BasicSegmenter(BasicSegmenterConfig config) {
+    this.maxDis = config.getMaxDis();
+    this.maxTimeInterval = config.getMaxTimeInterval();
+    this.minTrajLength = config.getMinTrajLength();
   }
 
   @Override

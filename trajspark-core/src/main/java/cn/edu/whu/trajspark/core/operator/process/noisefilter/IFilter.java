@@ -1,9 +1,13 @@
 package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import org.apache.spark.api.java.JavaRDD;
-
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.BasicFilterConfig;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.CompositiveFilterConfig;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.PingpongFilterConfig;
 import java.io.Serializable;
+import org.apache.spark.api.java.JavaRDD;
+import scala.NotImplementedError;
 
 /**
  * @author Lynn Lee
@@ -26,4 +30,25 @@ public interface IFilter extends Serializable {
    */
   JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD);
 
+  static IFilter getFilter(IFilterConfig config) {
+    switch (config.getFilterType()) {
+      case BASIC_FILTER:
+        if (config instanceof BasicFilterConfig) {
+          return new BasicFilter((BasicFilterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      case PINGPONG_FILTER:
+        if (config instanceof PingpongFilterConfig) {
+          return new PingpongFilter((PingpongFilterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      case COMPOSITIVEFILTER_FILTER:
+        if (config instanceof CompositiveFilterConfig) {
+          return new CompositiveFilter((CompositiveFilterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      default:
+        throw new NotImplementedError();
+    }
+  }
 }
