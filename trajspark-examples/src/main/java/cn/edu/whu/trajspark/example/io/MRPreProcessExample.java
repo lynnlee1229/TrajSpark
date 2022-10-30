@@ -37,15 +37,13 @@ public class MRPreProcessExample {
       ISegmenter mySegmenter;
       IDetector myDector;
 
-//      myFilter = new BasicFilter(300, 100);
       myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
-//      mySegmenter = new StayPointBasedSegmenter(500, 300, 100);
+      myDector = IDetector.getDector(exampleConfig.getDectorConfig());
       mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
-//      myDector = new BasicDector(800, 900);
-myDector = IDetector.getDector(exampleConfig.getDectorConfig());
-
+//      if (mySegmenter instanceof StayPointBasedSegmenter) {
+//        ((StayPointBasedSegmenter) mySegmenter).setDetector(myDector);
+//      }
       JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
-//        trajRDD.collect().forEach(System.out::println);
       JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(filteredRDD);
       segmentedRDD.collect().forEach(System.out::println);
 //      myDector.detect(segmentedRDD).collect().forEach(System.out::println);

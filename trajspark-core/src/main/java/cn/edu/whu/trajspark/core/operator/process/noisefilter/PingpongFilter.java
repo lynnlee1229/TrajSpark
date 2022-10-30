@@ -36,6 +36,7 @@ public class PingpongFilter implements IFilter {
 
   /**
    * 通过配置文件构造
+   *
    * @param config
    */
   public PingpongFilter(PingpongFilterConfig config) {

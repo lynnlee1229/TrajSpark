@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.core.conf.process.detector;
 
+import cn.edu.whu.trajspark.core.common.constant.PreProcessDefaultConstant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,11 +11,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class BasicDetectorConfig implements IDectorConfig {
   private double maxStayDistInMeter;
   private double maxStayTimeInSecond;
+
+  private String stayPointTagName = PreProcessDefaultConstant.DEFAULT_STAYPOINT_TAG;
+
   @JsonCreator
   public BasicDetectorConfig(@JsonProperty("maxStayDistInMeter") double maxStayDistInMeter,
-                             @JsonProperty("maxStayTimeInSecond") double maxStayTimeInSecond) {
+                             @JsonProperty("maxStayTimeInSecond") double maxStayTimeInSecond,
+                             @JsonProperty("stayPointTagName") String stayPointTagName) {
     this.maxStayDistInMeter = maxStayDistInMeter;
     this.maxStayTimeInSecond = maxStayTimeInSecond;
+    this.stayPointTagName = stayPointTagName;
   }
 
   public double getMaxStayDistInMeter() {
@@ -31,6 +37,14 @@ public class BasicDetectorConfig implements IDectorConfig {
 
   public void setMaxStayTimeInSecond(double maxStayTimeInSecond) {
     this.maxStayTimeInSecond = maxStayTimeInSecond;
+  }
+
+  public String getStayPointTagName() {
+    return stayPointTagName;
+  }
+
+  public void setStayPointTagName(String stayPointTagName) {
+    this.stayPointTagName = stayPointTagName;
   }
 
   @Override

@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Lynn Lee
  * @date 2022/10/28
  **/
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = BasicDetectorConfig.class, name = "BASIC_DETECTOR")
 })

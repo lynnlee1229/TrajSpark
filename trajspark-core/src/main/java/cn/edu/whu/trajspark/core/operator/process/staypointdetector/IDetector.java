@@ -23,6 +23,13 @@ public interface IDetector extends Serializable {
   List<StayPoint> detectFunction(Trajectory rawTrajectory);
 
   /**
+   * 停留检测函数，为基于停留的分段服务
+   * @param rawTrajectory 原始轨迹
+   * @return 添加stop、move语义标签的轨迹
+   */
+  Trajectory detectFunctionForSegmenter(Trajectory rawTrajectory);
+
+  /**
    * 停留检测函数，适用.detect(RDD)形式调用
    *
    * @param rawTrajectoryRDD RDD<原始轨迹>
@@ -30,6 +37,11 @@ public interface IDetector extends Serializable {
    */
   JavaRDD<StayPoint> detect(JavaRDD<Trajectory> rawTrajectoryRDD);
 
+  /**
+   * 返回停留标签名
+   * @return 停留标签名
+   */
+  String getStayPointTagName();
   static IDetector getDector(IDectorConfig config) {
     switch (config.getDetectorType()) {
       case BASIC_DETECTOR:

@@ -3,7 +3,7 @@ package cn.edu.whu.trajspark.core.operator.process.segmenter;
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
-import cn.edu.whu.trajspark.core.operator.process.staypointdetector.DetectUtils;
+import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
 import cn.edu.whu.trajspark.core.util.GeoUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,22 +16,20 @@ import org.apache.spark.api.java.JavaRDD;
  **/
 public class StayPointBasedSegmenter implements ISegmenter {
 
-  private double maxStayDistInMeter;
+  // TODO 持有检测算子
+  private IDetector detector;
 
-  private double maxStayTimeInSecond;
   private double minTrajLength;
 
   /**
    * 基于停留点的轨迹分段
+   * 若已有停留标签，则直接分段，否则首先进行停留检测
    *
-   * @param maxStayDistInMeter  停留距离阈值，单位：m
-   * @param maxStayTimeInSecond 停留时间阈值，单位：s
-   * @param minTrajLength       最小轨迹段长度，小于此值的轨迹段不会被生成，单位：km
+   * @param detector      停留检测器
+   * @param minTrajLength 最小轨迹长度，单位：km
    */
-  public StayPointBasedSegmenter(double maxStayDistInMeter, double maxStayTimeInSecond,
-                                 double minTrajLength) {
-    this.maxStayDistInMeter = maxStayDistInMeter;
-    this.maxStayTimeInSecond = maxStayTimeInSecond;
+  public StayPointBasedSegmenter(IDetector detector, double minTrajLength) {
+    this.detector = detector;
     this.minTrajLength = minTrajLength;
   }
 
@@ -41,70 +39,75 @@ public class StayPointBasedSegmenter implements ISegmenter {
    * @param config
    */
   public StayPointBasedSegmenter(StayPointBasedSegmenterConfig config) {
-    this.maxStayDistInMeter = config.getMaxStayDistInMeter();
-    this.maxStayTimeInSecond = config.getMaxStayTimeInSecond();
     this.minTrajLength = config.getMinTrajLength();
+    this.detector = IDetector.getDector(config.getDectorConfig());
+  }
+
+  public void setDetector(IDetector detector) {
+    this.detector = detector;
   }
 
   @Override
   public List<Trajectory> segmentFunction(Trajectory rawTrajectory) {
-    List<TrajPoint> pList = rawTrajectory.getPointList();
-    if (pList != null && !pList.isEmpty()) {
-      if (!(pList instanceof ArrayList)) {
-        pList = new ArrayList(pList);
+    Trajectory tagedTrajectory = detector.detectFunctionForSegmenter(rawTrajectory);
+    List<TrajPoint> ptList = tagedTrajectory.getPointList();
+    if (ptList != null && !ptList.isEmpty()) {
+      if (!(ptList instanceof ArrayList)) {
+        ptList = new ArrayList(ptList);
       }
-
       List<Trajectory> movingTrajList = new ArrayList();
-      int curIdx = 0;
-      int curFurthestNextIdx = Integer.MIN_VALUE; // 记录当前最大nextIdx，用于防止停留轨迹存在交集
-      boolean newStayPointFlag = true;
-      int spStartIdx = Integer.MIN_VALUE;
-      int trajIdx;
-      int count = 0;
       Trajectory movingTraj;
       List<TrajPoint> tmpPts;
-      for (trajIdx = 0; curIdx < pList.size() - 1; ++curIdx) {
-        int nextIdx = DetectUtils.findFirstExceedMaxDistIdx(pList, curIdx, this.maxStayDistInMeter);
-        if (curFurthestNextIdx < nextIdx &&
-            DetectUtils.isExceedMaxTimeThreshold(pList, curIdx, nextIdx,
-                this.maxStayTimeInSecond)) {
-          if (newStayPointFlag) {
-            spStartIdx = curIdx;
-            newStayPointFlag = false;
+      boolean newSpFlag = true;
+      int spStartIdx = Integer.MIN_VALUE;
+      int spEndIdx = Integer.MIN_VALUE;
+      int trajIdx = 0;
+      int order = 0;
+      String stayPointTagName = detector.getStayPointTagName();
+      for (int i = 0; i < ptList.size() - 1; ++i) {
+        int j = i;
+        while (ptList.get(j).getExtendedValue(stayPointTagName) != null
+            && (boolean) ptList.get(j).getExtendedValue(stayPointTagName)) {
+          // 记录停留点起点
+          if (newSpFlag) {
+            spStartIdx = j;
+            newSpFlag = false;
           }
-
-          curFurthestNextIdx = nextIdx;
+          j++;
         }
-        // curIdx已经至当前停留点集的最后一个点，当前停留之前的部分至停留集合起始点被分为一个轨迹段
-        if (!newStayPointFlag && curIdx == curFurthestNextIdx - 1) {
-          tmpPts = new ArrayList<>(pList.subList(trajIdx, spStartIdx));
+        if (j != i) {
+          spEndIdx = j - 1;
+        }
+        // 根据Tag生成停留点
+        if (!newSpFlag && i == spEndIdx) {
+          tmpPts = new ArrayList<>(ptList.subList(trajIdx, spStartIdx));
           if (GeoUtils.getTrajListLen(tmpPts) >= minTrajLength) {
-            movingTraj = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + count,
+            movingTraj = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + order++,
                 rawTrajectory.getObjectID(), tmpPts, rawTrajectory.getExtendedValues());
             movingTrajList.add(movingTraj);
-            count++;
           }
           // 跳过停留点，并继续发现停留点
-          trajIdx = curIdx + 1;
-          newStayPointFlag = true;
+          trajIdx = i + 1;
+          newSpFlag = true;
         }
       }
       // 上一个停留点至结尾并作一段
       // 若未发现停留点，则轨迹归为一段
-      if (newStayPointFlag) {
-        tmpPts = new ArrayList<>(pList.subList(trajIdx, pList.size()));
+      if (newSpFlag) {
+        tmpPts = new ArrayList<>(ptList.subList(trajIdx, ptList.size()));
         if (GeoUtils.getTrajListLen(tmpPts) >= minTrajLength) {
-          movingTraj = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + count,
+          movingTraj = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + order,
               rawTrajectory.getObjectID(), tmpPts, rawTrajectory.getExtendedValues());
           movingTrajList.add(movingTraj);
         }
       }
-
       return movingTrajList;
     } else {
       return Collections.emptyList();
     }
+
   }
+
 
   @Override
   public JavaRDD<Trajectory> segment(JavaRDD<Trajectory> rawTrajectoryRDD) {

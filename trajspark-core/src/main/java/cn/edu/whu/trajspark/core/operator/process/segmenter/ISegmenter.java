@@ -31,20 +31,20 @@ public interface ISegmenter extends Serializable {
   JavaRDD<Trajectory> segment(JavaRDD<Trajectory> rawTrajectoryRDD);
 
   static ISegmenter getSegmenter(ISegmenterConfig config) {
-  switch (config.getSegmenterType()){
-    case BASIC_SEGMENTER:
+    switch (config.getSegmenterType()) {
+      case BASIC_SEGMENTER:
         if (config instanceof BasicSegmenterConfig) {
           return new BasicSegmenter((BasicSegmenterConfig) config);
         }
         throw new NoSuchMethodError();
-    case STAYPOINTBASED_SEGMENTER:
+      case STAYPOINTBASED_SEGMENTER:
         if (config instanceof StayPointBasedSegmenterConfig) {
           return new StayPointBasedSegmenter((StayPointBasedSegmenterConfig) config);
         }
         throw new NoSuchMethodError();
       default:
         throw new NotImplementedError();
-  }
+    }
   }
 
 }

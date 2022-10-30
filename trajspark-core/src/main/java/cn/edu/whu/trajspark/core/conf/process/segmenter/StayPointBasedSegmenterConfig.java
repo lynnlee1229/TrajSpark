@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.core.conf.process.segmenter;
 
+import cn.edu.whu.trajspark.core.conf.process.detector.IDectorConfig;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,35 +9,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @date 2022/10/28
  **/
 public class StayPointBasedSegmenterConfig implements ISegmenterConfig {
-  private double maxStayDistInMeter;
 
-  private double maxStayTimeInSecond;
   private double minTrajLength;
+
+  private IDectorConfig dectorConfig;
 
   @JsonCreator
   public StayPointBasedSegmenterConfig(
-      @JsonProperty("maxStayDistInMeter") double maxStayDistInMeter,
-      @JsonProperty("maxStayTimeInSecond") double maxStayTimeInSecond,
-      @JsonProperty("minTrajLength") double minTrajLength) {
-    this.maxStayDistInMeter = maxStayDistInMeter;
-    this.maxStayTimeInSecond = maxStayTimeInSecond;
+      @JsonProperty("minTrajLength") double minTrajLength,
+      @JsonProperty("dectorConfig") IDectorConfig dectorConfig) {
     this.minTrajLength = minTrajLength;
+    this.dectorConfig = dectorConfig;
   }
 
-  public double getMaxStayDistInMeter() {
-    return maxStayDistInMeter;
+  public IDectorConfig getDectorConfig() {
+    return dectorConfig;
   }
 
-  public void setMaxStayDistInMeter(double maxStayDistInMeter) {
-    this.maxStayDistInMeter = maxStayDistInMeter;
-  }
-
-  public double getMaxStayTimeInSecond() {
-    return maxStayTimeInSecond;
-  }
-
-  public void setMaxStayTimeInSecond(double maxStayTimeInSecond) {
-    this.maxStayTimeInSecond = maxStayTimeInSecond;
+  public void setDectorConfig(IDectorConfig dectorConfig) {
+    this.dectorConfig = dectorConfig;
   }
 
   public double getMinTrajLength() {

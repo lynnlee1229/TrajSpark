@@ -70,16 +70,19 @@
       "minTrajLength": 0.1
     }
   },
-  "segmenterConfig": {
-    "@type": "STAYPOINTBASED_SEGMENTER",
-    "maxStayDistInMeter": 900,
-    "maxStayTimeInSecond": 900,
-    "minTrajLength": 0.1
-  },
   "dectorConfig": {
     "@type": "BASIC_DETECTOR",
     "maxStayDistInMeter": 900,
     "maxStayTimeInSecond": 900
+  },
+  "segmenterConfig": {
+    "@type": "STAYPOINTBASED_SEGMENTER",
+    "minTrajLength": 0.1,
+    "dectorConfig": {
+      "@type": "BASIC_DETECTOR",
+      "maxStayDistInMeter": 900,
+      "maxStayTimeInSecond": 900
+    }
   },
   "storeConfig": {
     "@type": "hdfs",
