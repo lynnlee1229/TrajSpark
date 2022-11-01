@@ -1,10 +1,12 @@
-package cn.edu.whu.trajspark.database;
+package cn.edu.whu.trajspark.example.database;
 
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import org.locationtech.jts.io.WKTWriter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -14,18 +16,20 @@ import java.util.List;
 
 /**
  * @author Haocheng Wang
- * Created on 2022/10/20
+ * Created on 2022/11/1
  */
-public class ExampleTrajectoryUtil {
+public class ExampleDataUtils {
 
-  public static List<Trajectory> parseFileToTrips(File trajFile) {
+
+  public static List<Trajectory> parseFileToTrips() {
     String objectID = null;
     boolean isFirst = true;
     boolean emptyBefore = false;
     List<Trajectory> res = new LinkedList<>();
     List<TrajPoint> trajPointList = new LinkedList<>();
     try {
-      BufferedReader br = new BufferedReader(new FileReader(trajFile));
+      File f = new File(ExampleDataUtils.class.getResource("/data/database/CBQBDS").toURI());
+      BufferedReader br = new BufferedReader(new FileReader(f));
       String line;
       while ((line = br.readLine()) != null) {
         // 1,CANARQ,22.68915,114.115944,10,190,1450972811,0
@@ -71,7 +75,12 @@ public class ExampleTrajectoryUtil {
       res.add(new Trajectory(String.valueOf(System.currentTimeMillis()), objectID, new LinkedList<>(trajPointList)));
     } catch (IOException e) {
       e.printStackTrace();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
     }
     return res;
   }
+
+
+
 }

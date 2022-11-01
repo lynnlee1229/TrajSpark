@@ -1,6 +1,7 @@
 package cn.edu.whu.trajspark.database.table;
 
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
@@ -37,6 +38,9 @@ public class MetaTable {
     dataSetMetaTable.put(dataSetMeta.toPut());
   }
 
+  public void deleteDataSet(String datasetName) throws IOException {
+    dataSetMetaTable.delete(new Delete(datasetName.getBytes()));
+  }
 
   // TODO
   public List<DataSetMeta> listDataSet() throws IOException {

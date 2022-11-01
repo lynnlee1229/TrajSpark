@@ -12,15 +12,11 @@ import cn.edu.whu.trajspark.index.IndexStrategy;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_CF;
 import static cn.edu.whu.trajspark.core.common.trajectory.Trajectory.Schema.*;
@@ -33,20 +29,20 @@ import static cn.edu.whu.trajspark.core.common.trajectory.Trajectory.Schema.*;
  */
 public class TrajectorySerdeUtils {
 
-  private static final byte[] COLUMN_FAMILY = Bytes.toBytes(DATA_TABLE_CF);
-  private static final byte[] TRAJECTORY_ID_QUALIFIER = Bytes.toBytes(TRAJECTORY_ID);
-  private static final byte[] OBJECT_ID_QUALIFIER = Bytes.toBytes(OBJECT_ID);
-  private static final byte[] MBR_QUALIFIER = Bytes.toBytes(MBR);
-  private static final byte[] START_POSITION_QUALIFIER = Bytes.toBytes(START_POSITION);
-  private static final byte[] END_POSITION_QUALIFIER = Bytes.toBytes(END_POSITION);
-  private static final byte[] START_TIME_QUALIFIER = Bytes.toBytes(START_TIME);
-  private static final byte[] END_TIME_QUALIFIER = Bytes.toBytes(END_TIME);
-  private static final byte[] POINT_NUMBER_QUALIFIER = Bytes.toBytes(POINT_NUMBER);
-  private static final byte[] SPEED_QUALIFIER = Bytes.toBytes(SPEED);
-  private static final byte[] LENGTH_QUALIFIER = Bytes.toBytes(LENGTH);
-  private static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
-  private static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
-  private static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
+  public static final byte[] COLUMN_FAMILY = Bytes.toBytes(DATA_TABLE_CF);
+  public static final byte[] TRAJECTORY_ID_QUALIFIER = Bytes.toBytes(TRAJECTORY_ID);
+  public static final byte[] OBJECT_ID_QUALIFIER = Bytes.toBytes(OBJECT_ID);
+  public static final byte[] MBR_QUALIFIER = Bytes.toBytes(MBR);
+  public static final byte[] START_POSITION_QUALIFIER = Bytes.toBytes(START_POSITION);
+  public static final byte[] END_POSITION_QUALIFIER = Bytes.toBytes(END_POSITION);
+  public static final byte[] START_TIME_QUALIFIER = Bytes.toBytes(START_TIME);
+  public static final byte[] END_TIME_QUALIFIER = Bytes.toBytes(END_TIME);
+  public static final byte[] POINT_NUMBER_QUALIFIER = Bytes.toBytes(POINT_NUMBER);
+  public static final byte[] SPEED_QUALIFIER = Bytes.toBytes(SPEED);
+  public static final byte[] LENGTH_QUALIFIER = Bytes.toBytes(LENGTH);
+  public static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
+  public static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
+  public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
 
 
   /**
@@ -129,38 +125,17 @@ public class TrajectorySerdeUtils {
     ZonedDateTime endTime = (ZonedDateTime) SerializerUtils.deserializeObject(
         result.getValue(COLUMN_FAMILY, END_TIME_QUALIFIER),
         ZonedDateTime.class);
-    Integer pointNumber = (Integer) SerializerUtils.deserializeObject(
-        result.getValue(COLUMN_FAMILY, POINT_NUMBER_QUALIFIER),
-        Integer.class);
-    Double speed = (Double) SerializerUtils.deserializeObject(
-        result.getValue(COLUMN_FAMILY, SPEED_QUALIFIER),
-        Double.class);
-    Double len = (Double) SerializerUtils.deserializeObject(
-        result.getValue(COLUMN_FAMILY, LENGTH_QUALIFIER),
-        Double.class);
+    int pointNumber = result.getValue(COLUMN_FAMILY, POINT_NUMBER_QUALIFIER) == null ? -1 :
+        (Integer) SerializerUtils.deserializeObject(result.getValue(COLUMN_FAMILY, POINT_NUMBER_QUALIFIER), Integer.class);
+    double speed = result.getValue(COLUMN_FAMILY, SPEED_QUALIFIER) == null ? -1 :
+        (Double) SerializerUtils.deserializeObject(result.getValue(COLUMN_FAMILY, SPEED_QUALIFIER), Double.class);
+    double len = result.getValue(COLUMN_FAMILY, LENGTH_QUALIFIER) == null ? -1 :
+        (Double) SerializerUtils.deserializeObject(result.getValue(COLUMN_FAMILY, LENGTH_QUALIFIER), Double.class);
     TrajFeatures trajectoryFeatures = new TrajFeatures(startTime, endTime, startPoint,
         endPoint, pointNumber, mbr, speed, len);
     trajectory.setTrajectoryFeatures(trajectoryFeatures);
   }
 
-  /**
-   * Set TrajPoint list of trajectory using the row got from hbase and the data table.
-   *
-   * @param secondaryIndexResult A row in HBase which stores the trajectory's info.
-   * @param trajectory Trajectory object needed to set TrajPoint list.
-   * @param dataTable A HBase table storing all indexes(main or secondary) of the data set.
-   */
-  private static void setTrajPointList(Result secondaryIndexResult, Trajectory trajectory, DataTable dataTable) throws IOException {
-    boolean isMainIndexRow = secondaryIndexResult.getColumnLatestCell(COLUMN_FAMILY, TRAJ_POINTS_QUALIFIER) != null;
-    if (isMainIndexRow) {
-      setTrajPointList(secondaryIndexResult, trajectory);
-    } else {
-      // get the main index row key from PTR column, and use the new row to set TrajPoint list.
-      byte[] mainIndexRowKey = secondaryIndexResult.getValue(COLUMN_FAMILY, PTR_QUALIFIER);
-      Result result1 = dataTable.getTable().get(new Get(mainIndexRowKey));
-      setTrajPointList(result1, trajectory);
-    }
-  }
 
   private static void setTrajPointList(Result mainIndexResult, Trajectory trajectory) throws IOException {
     List<TrajPoint> list = SerializerUtils.deserializeList(
@@ -169,11 +144,30 @@ public class TrajectorySerdeUtils {
     trajectory.setPointList(list);
   }
 
-  public static Trajectory getTrajectory(Result result, DataTable table) throws IOException {
+  public static Trajectory getTrajectory(Result result) throws IOException {
     Trajectory trajectory = new Trajectory();
     setBasicTrajectoryInfos(result, trajectory);
-    setTrajPointList(result, trajectory, table);
+    setTrajPointList(result, trajectory);
     return trajectory;
   }
 
+  public static Trajectory getTrajectory(byte[] trajPointsByteArray, byte[] objectID) throws IOException {
+    List<TrajPoint> trajPointList = SerializerUtils.deserializeList(trajPointsByteArray, TrajPoint.class);
+    String objectStr = (String) SerializerUtils.deserializeObject(objectID, String.class);
+    return new Trajectory(null, objectStr, trajPointList);
+  }
+
+  public static TrajFeatures getTrajectoryFeatures(Result result) throws IOException {
+    Trajectory trajectory = new Trajectory();
+    setBasicTrajectoryInfos(result, trajectory);
+    return trajectory.getTrajectoryFeatures();
+  }
+
+  public static byte[] getByteArrayByQualifier(Result result, byte[] qualifier) {
+    return result.getValue(COLUMN_FAMILY, qualifier);
+  }
+
+  public static boolean isMainIndexed(Result result) {
+    return result.getValue(COLUMN_FAMILY, PTR_QUALIFIER) == null;
+  }
 }

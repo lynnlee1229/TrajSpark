@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * row key: shard + index type + xz2 + oid + tid
+ * row key: shard(short) + index type(int) + xz2(long) + oid(string) + tid(string)
  *
  * @author Haocheng Wang Created on 2022/10/4
  */
@@ -45,9 +45,9 @@ public class XZ2IndexStrategy extends IndexStrategy {
   public ByteArray index(Trajectory trajectory) {
     short shard = (short) (Math.random() * shardNum);
     long spatialCodingVal = xz2Coding.index(trajectory.getLineString().getEnvelopeInternal());
-    String tId = trajectory.getTrajectoryID();
     String oid = trajectory.getObjectID();
-    return toIndex(shard, spatialCodingVal, tId, oid);
+    String tid = trajectory.getTrajectoryID();
+    return toIndex(shard, spatialCodingVal, oid + tid);
   }
 
   @Override
@@ -75,13 +75,9 @@ public class XZ2IndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (IndexRange xz2Coding : list) {
       for (short shard = 0; shard < shardNum; shard++) {
-        ByteBuffer bb1 = ByteBuffer.allocate(KEY_BYTE_LEN);
-        ByteBuffer bb2 = ByteBuffer.allocate(KEY_BYTE_LEN);
-        bb1.putShort(shard);
-        bb1.putLong(xz2Coding.lower());
-        bb2.putShort(shard);
-        bb2.putLong(xz2Coding.upper());
-        result.add(new RowKeyRange(new ByteArray(bb1), new ByteArray(bb2)));
+        // make sure range end is exclusive
+        result.add(new RowKeyRange(toIndex(shard, xz2Coding.lower())
+            , toIndex(shard, xz2Coding.upper() + 1L)));
       }
     }
     return result;
@@ -166,16 +162,21 @@ public class XZ2IndexStrategy extends IndexStrategy {
     xz2Coding.setXz2Sfc(XZ2SFC.apply((short) xz2Coding.getXz2Precision()));
   }
 
-  // TODO: 确定oid, pid的字节数组长度.
-  private ByteArray toIndex(short shard, long xz2coding, String oid, String tid) {
-    byte[] oidBytes = oid.getBytes();
-    byte[] tidBytes = tid.getBytes();
-    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + oidBytes.length + tidBytes.length);
+  private ByteArray toIndex(short shard, long xz2coding, String oidAndTid) {
+    byte[] oidAndTidBytes = oidAndTid.getBytes();
+    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + oidAndTidBytes.length);
     byteBuffer.putShort(shard);
-    byteBuffer.put(Bytes.toBytes(indexType.getId()));
+    byteBuffer.putInt(indexType.getId());
     byteBuffer.putLong(xz2coding);
-    byteBuffer.put(oidBytes);
-    byteBuffer.put(tidBytes);
+    byteBuffer.put(oidAndTidBytes);
+    return new ByteArray(byteBuffer);
+  }
+
+  private ByteArray toIndex(short shard, long xz2coding) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
+    byteBuffer.putShort(shard);
+    byteBuffer.putInt(indexType.getId());
+    byteBuffer.putLong(xz2coding);
     return new ByteArray(byteBuffer);
   }
 

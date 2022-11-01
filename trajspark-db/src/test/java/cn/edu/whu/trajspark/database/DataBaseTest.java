@@ -17,7 +17,7 @@ import java.util.List;
 public class DataBaseTest {
 
   static DataSetMeta DATASET_META;
-  static String DATASET_NAME = "xz2_dataset_test";
+  static String DATASET_NAME = "database_test";
 
   static {
     System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
@@ -46,7 +46,6 @@ public class DataBaseTest {
   public void createDataSetTest() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();
-    instance.deleteTable("trajspark_db_meta");
     instance.initDataBase();
     instance.createDataSet(DATASET_META);
     instance.closeConnection();
@@ -66,5 +65,12 @@ public class DataBaseTest {
     DataSetMeta meta = instance.getDataSetMeta(DATASET_NAME);
     System.out.println(meta);
     instance.closeConnection();
+  }
+
+  @Test
+  public void testDeleteDataSet() throws IOException {
+    Database instance = Database.getInstance();
+    instance.openConnection();
+    instance.deleteDataSet(DATASET_NAME);
   }
 }

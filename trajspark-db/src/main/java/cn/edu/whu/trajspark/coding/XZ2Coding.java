@@ -65,7 +65,6 @@ public class XZ2Coding extends SpatialCoding {
     return index(lineString.getEnvelopeInternal());
   }
 
-
   public long index(Envelope boundingBox) {
     double minLng = boundingBox.getMinX();
     double maxLng = boundingBox.getMaxX();
@@ -87,9 +86,9 @@ public class XZ2Coding extends SpatialCoding {
     double yMin = envelope.getMinY();
     double xMax = envelope.getMaxX();
     double yMax = envelope.getMaxY();
-    if (spatialQueryRange.getQueryType() == SpatialQueryCondition.SpatialQueryType.OVERLAP) {
+    if (spatialQueryRange.getQueryType() == SpatialQueryCondition.SpatialQueryType.INTERSECT) {
       indexRangeList = JavaConverters.<IndexRange>seqAsJavaList(xz2Sfc.ranges(xMin, yMin, xMax, yMax));
-    } else if (spatialQueryRange.getQueryType() == SpatialQueryCondition.SpatialQueryType.INCLUDE) {
+    } else if (spatialQueryRange.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN) {
       // TODO: 严格包含查询
       logger.error("Spatial query type: {} is not supported", spatialQueryRange.getQueryType());
       throw new IllegalArgumentException();

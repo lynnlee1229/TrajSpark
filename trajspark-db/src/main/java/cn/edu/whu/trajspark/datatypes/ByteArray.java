@@ -1,5 +1,7 @@
 package cn.edu.whu.trajspark.datatypes;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -27,19 +29,9 @@ public class ByteArray implements Serializable, Comparable<ByteArray> {
     return bytes;
   }
 
-  public String getHexString() {
-    final StringJoiner str = new StringJoiner(" ");
-    for (final byte b : bytes) {
-      str.add(String.format(
-          "%02X",
-          b));
-    }
-    return str.toString();
-  }
-
   @Override
   public String toString() {
-    return getHexString();
+    return Bytes.toHex(bytes);
   }
 
   @Override

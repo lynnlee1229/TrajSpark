@@ -5,7 +5,9 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
+import cn.edu.whu.trajspark.datatypes.RowKeyRange;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +34,10 @@ public class DataTable {
 
   public Table getTable() {
     return table;
+  }
+
+  public DataSetMeta getDataSetMeta() {
+    return dataSetMeta;
   }
 
   /**
@@ -76,7 +82,10 @@ public class DataTable {
     return table.getScanner(scan);
   }
 
-  public List<Result> scan(Scan scan) throws IOException {
+  public List<Result> scan(RowKeyRange rowKeyRange) throws IOException {
+    Scan scan = new Scan();
+    scan.withStartRow(rowKeyRange.getStartKey().getBytes());
+    scan.withStopRow(rowKeyRange.getEndKey().getBytes());
     List<Result> results = new ArrayList<>();
     for (Result r : table.getScanner(scan)) {
       results.add(r);

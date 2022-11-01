@@ -20,4 +20,12 @@ public class RowKeyRange {
   public ByteArray getEndKey() {
     return endKey;
   }
+
+  @Override
+  public String toString() {
+    return "RowKeyRange{" +
+        "startKey=" + startKey +
+        ", endKey=" + endKey +
+        '}';
+  }
 }

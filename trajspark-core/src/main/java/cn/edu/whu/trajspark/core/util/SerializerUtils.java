@@ -173,6 +173,9 @@ public class SerializerUtils implements Serializable {
   }
 
   public static Serializable deserializeObject(byte[] tarObjectByteList, Class tarClass) {
+    if (tarObjectByteList == null) {
+      return null;
+    }
     return deserializeObject(tarObjectByteList, tarClass, new JavaSerializer());
   }
 

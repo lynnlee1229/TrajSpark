@@ -62,6 +62,18 @@ public class Database {
     logger.info("Dataset {} created.", dataSetName);
   }
 
+  public void deleteDataSet(String dataSetName) throws IOException {
+    if (!dataSetExists(dataSetName)) {
+      logger.warn("The dataset(name: {}) doesn't exists.", dataSetName);
+      return;
+    }
+    // delete data from dataset meta table
+    metaTable.deleteDataSet(dataSetName);
+    // delete data table of the data set.
+    deleteTable(dataSetName + DATA_TABLE_SUFFIX);
+    logger.info("Dataset {} deleted.", dataSetName);
+  }
+
   public DataSetMeta getDataSetMeta(String dataSetName) throws IOException {
     return metaTable.getDataSetMeta(dataSetName);
   }

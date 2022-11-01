@@ -31,9 +31,12 @@
         <checkstyle.config>conf/checkstyle.xml</checkstyle.config>
         <geomesa.version>3.4.1</geomesa.version>
         <slf4j.log4j.version>1.7.21</slf4j.log4j.version>
-        <hbase.version>1.4.9</hbase.version>
+        <hbase.version>1.4.13</hbase.version>
         <hadoop.version>2.8.5</hadoop.version>
         <fastjson.version>1.2.54</fastjson.version>
+        <protobuf.version>2.5.0</protobuf.version>
+        <maven.compiler.version>2.0.2</maven.compiler.version>
+        <maven.assembly.version>3.3.0</maven.assembly.version>
     </properties>
 
     <dependencyManagement>
@@ -169,34 +172,49 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle.version}</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.version}</version>
                 <configuration>
-                    <configLocation>${checkstyle.config}</configLocation>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <!--<mainClass></mainClass>-->
+                        </manifest>
+                    </archive>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>checkstyle</id>
-                        <phase>validate</phase>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>check</goal>
+                            <goal>single</goal>
                         </goals>
-                        <configuration>
-                            <failOnViolation>true</failOnViolation>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.version}</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>utf8</encoding>
+                </configuration>
             </plugin>
         </plugins>
     </build>

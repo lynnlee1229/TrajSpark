@@ -1,6 +1,12 @@
 package cn.edu.whu.trajspark.query.condition;
 
+import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.WKTWriter;
+
+import java.util.List;
 
 /**
  * 空间查询条件
@@ -23,6 +29,15 @@ public class SpatialQueryCondition {
 
   public Envelope getQueryWindow() {
     return queryWindow;
+  }
+
+  public String getQueryWindowWKT() {
+    WKTWriter writer = new WKTWriter();
+    MinimumBoundingBox mbr = new MinimumBoundingBox(queryWindow.getMinX(),
+        queryWindow.getMinY(),
+        queryWindow.getMaxX(),
+        queryWindow.getMaxY());
+    return writer.write(mbr.toPolygon(4326));
   }
 
   public void setQueryWindow(Envelope queryWindow) {
@@ -48,10 +63,10 @@ public class SpatialQueryCondition {
     /**
      * Query all data that may INTERSECT with query window.
      */
-    INCLUDE,
+    CONTAIN,
     /**
      * Query all data that is totally contained in query window.
      */
-    OVERLAP;
+    INTERSECT;
   }
 }
