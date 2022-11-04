@@ -63,6 +63,17 @@ public class Trajectory implements Serializable {
     this.pointList = pointList;
   }
 
+  public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
+                    boolean genPid) {
+    this.trajectoryID = trajectoryID;
+    this.objectID = objectID;
+    this.pointList = pointList;
+    if (genPid) {
+      this.updatePointListId();
+      ;
+    }
+  }
+
   public void addPoint(TrajPoint point) {
     if (this.pointList == null || this.pointList.isEmpty()) {
       this.pointList = new ArrayList();

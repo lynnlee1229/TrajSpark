@@ -8,34 +8,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Lynn Lee
  * @date 2022/9/18
  **/
-public class HDFSLoadConfig implements ILoadConfig {
+public class StandaloneLoadConfig implements ILoadConfig {
   private String master;
-  private String fsDefaultName;
   private String location;
   private FileMode fileMode;
   private int partNum;
-
   private String splitter;
 
   @JsonCreator
-  public HDFSLoadConfig(@JsonProperty("master") String master,
-                        @JsonProperty("fsDefaultName") String fsDefaultName,
-                        @JsonProperty("location") String location,
-                        @JsonProperty("fileMode") FileMode fileMode,
-                        @JsonProperty("partNum") @JsonInclude(JsonInclude.Include.NON_NULL)
-                        int partNum,
-                        @JsonProperty("splitter") String splitter) {
+  public StandaloneLoadConfig(@JsonProperty("master") String master,
+                              @JsonProperty("location") String location,
+                              @JsonProperty("fileMode") FileMode fileMode,
+                              @JsonProperty("partNum") @JsonInclude(JsonInclude.Include.NON_NULL)
+                      int partNum,
+                              @JsonProperty("splitter") String splitter) {
     this.master = master;
-    this.fsDefaultName = fsDefaultName;
     this.location = location;
     this.fileMode = fileMode;
     this.partNum = partNum;
     this.splitter = splitter;
   }
-
-  public HDFSLoadConfig() {
-  }
-
 
   public String getMaster() {
     return this.master;
@@ -43,10 +35,6 @@ public class HDFSLoadConfig implements ILoadConfig {
 
   public int getPartNum() {
     return this.partNum == 0 ? 1 : this.partNum;
-  }
-
-  public String getFsDefaultName() {
-    return this.fsDefaultName;
   }
 
   public String getLocation() {
@@ -62,11 +50,17 @@ public class HDFSLoadConfig implements ILoadConfig {
   }
 
   public ILoadConfig.InputType getInputType() {
-    return InputType.HDFS;
+    return InputType.STANDALONE;
+  }
+
+  @Override
+  public String getFsDefaultName() {
+    return null;
   }
 
   public String getSplitter() {
     return this.splitter;
   }
+
 
 }

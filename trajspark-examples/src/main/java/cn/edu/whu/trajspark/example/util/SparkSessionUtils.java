@@ -23,23 +23,23 @@ public class SparkSessionUtils {
                                            boolean isLocal) {
     SparkConf sparkConf = new SparkConf();
     sparkConf.set("fs.permissions.umask-mode", "022");
-    sparkConf.set("fs.defaultFS", loadConfig.getFsDefaultName());
+    if (loadConfig.getFsDefaultName() != null) {
+      sparkConf.set("fs.defaultFS", loadConfig.getFsDefaultName());
+    }
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
-//    sparkConf.set("spark.kryo.registrator", GeoMesaSparkKryoRegistrator.class.getName());
     sparkConf.set("spark.kryoserializer.buffer.max", "256m");
     sparkConf.set("spark.kryoserializer.buffer", "64m");
-//    sparkConf.registerKryoClasses(new Class[]{com.github.davidmoten.rtree.RTree.class, org.jgrapht.Graph.class, SimpleFeatureTypeImpl.class, SimpleFeatureBuilder.class});
     if (isLocal) {
       sparkConf.setMaster("local[*]");
     }
     switch (loadConfig.getInputType()) {
+      case STANDALONE:
       case HDFS:
       case GEOMESA:
         return SparkSession
             .builder()
             .appName(className + "_" + System.currentTimeMillis())
             .config(sparkConf)
-            //.enableHiveSupport()
             .getOrCreate();
       default:
         logger.error("Only HDFS and HIVE are supported as the input resource!");

@@ -22,24 +22,30 @@ public class TrajPointParser {
       IOException {
     try {
       String[] record = rawString.split(splitter);
-      String id = record[config.getPointId().getIndex()];
+      int pidIdx = config.getPointId().getIndex();
+      String id;
+      if (pidIdx < 0) {
+        id = null;
+      } else {
+        id = record[config.getPointId().getIndex()];
+      }
       ZonedDateTime
           time = DateUtils.parse(config.getTime().getBasicDataTypeEnum(),
           record[config.getTime().getIndex()], config.getTime());
       double lat = Double.parseDouble(record[config.getLat().getIndex()]);
       double lng = Double.parseDouble(record[config.getLng().getIndex()]);
       Map<String, Object> metas = new HashMap(config.getTrajPointMetas().size());
-      Iterator var11 = config.getTrajPointMetas().iterator();
+      Iterator iter = config.getTrajPointMetas().iterator();
 
-      while (var11.hasNext()) {
-        Mapping m = (Mapping) var11.next();
+      while (iter.hasNext()) {
+        Mapping m = (Mapping) iter.next();
         metas.put(m.getMappingName(),
             DataTypeUtils.parse(record[m.getIndex()], m.getDataType(), m.getSourceData()));
       }
 
       return new TrajPoint(id, time, lng, lat, metas);
-    } catch (Exception var13) {
-      throw new IOException(var13.getMessage());
+    } catch (Exception e) {
+      throw new IOException(e.getMessage());
     }
   }
 
