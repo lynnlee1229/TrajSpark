@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.example.io;
+package cn.edu.whu.trajspark.example.preprocess;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
@@ -40,13 +40,11 @@ public class MRPreProcessExample {
       myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
       myDector = IDetector.getDector(exampleConfig.getDectorConfig());
       mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
-//      if (mySegmenter instanceof StayPointBasedSegmenter) {
-//        ((StayPointBasedSegmenter) mySegmenter).setDetector(myDector);
-//      }
+
       JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
       JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(filteredRDD);
       segmentedRDD.collect().forEach(System.out::println);
-//      myDector.detect(segmentedRDD).collect().forEach(System.out::println);
+      myDector.detect(segmentedRDD).collect().forEach(System.out::println);
 //      IStore iStore =
 //          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
 //      iStore.storeTrajectory(segmentedRDD);

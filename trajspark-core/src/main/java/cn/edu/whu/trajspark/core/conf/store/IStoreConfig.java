@@ -13,10 +13,16 @@ import java.io.Serializable;
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY
 )
-@JsonSubTypes({@JsonSubTypes.Type(
-    value = HDFSStoreConfig.class,
-    name = "hdfs"
-)})
+@JsonSubTypes({
+    @JsonSubTypes.Type(
+        value = HDFSStoreConfig.class,
+        name = "hdfs"
+    ),
+    @JsonSubTypes.Type(
+        value = StandaloneStoreConfig.class,
+        name = "standalone"
+    )
+})
 //, @JsonSubTypes.Type(
 //    value = FileOutputConfig.class,
 //    name = "file"
@@ -26,28 +32,4 @@ import java.io.Serializable;
 //)
 public interface IStoreConfig extends Serializable {
   StoreType getStoreType();
-
-  enum StoreType implements Serializable {
-    FILE("file"),
-    HDFS("hdfs"),
-    HBASE("hbase"),
-    GEOMESA("geoMesa");
-
-    private String type;
-
-    StoreType(String type) {
-      this.type = type;
-    }
-
-    public String toString() {
-      return "OutputType{type='" + this.type + '\'' + '}';
-    }
-
-    static class Constants {
-      static final String HDFS = "hdfs";
-      static final String FILE = "file";
-      static final String HBASE = "hbase";
-      static final String GEOMESA = "geoMesa";
-    }
-  }
 }

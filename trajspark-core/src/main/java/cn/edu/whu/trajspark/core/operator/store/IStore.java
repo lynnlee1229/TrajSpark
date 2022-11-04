@@ -4,6 +4,7 @@ import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.store.HDFSStoreConfig;
 import cn.edu.whu.trajspark.core.conf.store.IStoreConfig;
+import cn.edu.whu.trajspark.core.conf.store.StandaloneStoreConfig;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
 
@@ -21,6 +22,10 @@ public interface IStore extends Serializable {
       case HDFS:
         if (storeConfig instanceof HDFSStoreConfig) {
           return new HDFSStore((HDFSStoreConfig) storeConfig);
+        }
+      case STANDALONE:
+        if (storeConfig instanceof StandaloneStoreConfig) {
+          return new StandaloneStore((StandaloneStoreConfig) storeConfig);
         }
 
         throw new NoSuchMethodError();

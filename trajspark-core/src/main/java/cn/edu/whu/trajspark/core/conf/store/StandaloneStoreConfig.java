@@ -8,30 +8,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Lynn Lee
  * @date 2022/9/22
  **/
-public class HDFSStoreConfig implements IStoreConfig {
-  private String ip;
-  private int port;
+public class StandaloneStoreConfig implements IStoreConfig {
+
   private String location;
   private StoreSchemaEnum schema;
 
   @JsonCreator
-  public HDFSStoreConfig(@JsonProperty("ip") String ip, @JsonProperty("port") int port, @JsonProperty("location") String location, @JsonProperty("schema") StoreSchemaEnum schema) {
-    this.ip = ip;
-    this.port = port;
+  public StandaloneStoreConfig(
+      @JsonProperty("location") String location,
+      @JsonProperty("schema") StoreSchemaEnum schema) {
     this.location = location;
     this.schema = schema;
   }
 
   public StoreType getStoreType() {
-    return StoreType.HDFS;
-  }
-
-  public String getIp() {
-    return this.ip;
-  }
-
-  public int getPort() {
-    return this.port;
+    return StoreType.STANDALONE;
   }
 
   public String getLocation() {

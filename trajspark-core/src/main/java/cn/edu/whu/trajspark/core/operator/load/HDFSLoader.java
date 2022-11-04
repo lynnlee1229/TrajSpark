@@ -40,9 +40,9 @@ public class HDFSLoader implements ILoader {
       }
     } else {
       LOGGER.error(
-          "This inputConfig is not a HDFSInputConfig or this dataConfig is not a TrajectoryConfig！Please check your config file");
+          "This loadConfig is not a HDFSLoadConfig or this dataConfig is not a TrajectoryConfig！Please check your config file");
       throw new RuntimeException(
-          "inputConfig is not a HDFSInputConfig or dataConfig is not a TrajectoryConfig in configuration json file");
+          "loadConfig is not a HDFSLoadConfig or dataConfig is not a TrajectoryConfig in configuration json file");
     }
   }
 

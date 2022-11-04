@@ -12,24 +12,24 @@ import java.io.Serializable;
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME
 )
-@JsonSubTypes({@JsonSubTypes.Type(
-    value = HDFSLoadConfig.class,
-    name = "hdfs"
-)})
-//, @JsonSubTypes.Type(
-//    value = GeoMesaLoadConfig.class,
-//    name = "geomesa"
-//), @JsonSubTypes.Type(
-//    value = HiveLoadConfig.class,
-//    name = "hive"
-//)}
+@JsonSubTypes({
+    @JsonSubTypes.Type(
+        value = HDFSLoadConfig.class,
+        name = "hdfs"
+    ),
+    @JsonSubTypes.Type(
+        value = StandaloneLoadConfig.class,
+        name = "standalone"
+    )
+})
+
 public interface ILoadConfig extends Serializable {
   InputType getInputType();
 
   String getFsDefaultName();
 
   enum InputType implements Serializable {
-    FILE("file"),
+    STANDALONE("standalone"),
     HDFS("hdfs"),
     HBASE("hbase"),
     GEOMESA("geomesa");

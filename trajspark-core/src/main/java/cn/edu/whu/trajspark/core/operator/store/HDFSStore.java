@@ -4,6 +4,7 @@ import cn.edu.whu.trajspark.core.common.point.StayPoint;
 import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.HDFSStoreConfig;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,7 @@ public class HDFSStore implements IStore {
 
   public void storePointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) {
     LOGGER.info("Storing BasePointTrajectory into location : " + this.storeConfig.getLocation());
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     JavaPairRDD<String, String> cachedRDD = trajectoryJavaRDD.flatMap((traj) -> {
       List<Tuple3<String, String, TrajPoint>>
           trajIdAndTrajPoint = new ArrayList(traj.getPointList().size());
@@ -53,7 +55,7 @@ public class HDFSStore implements IStore {
       record.append(tmpP.getPid()).append(",");
       record.append(tmpP.getLat()).append(",");
       record.append(tmpP.getLng()).append(",");
-      record.append(tmpP.getTimestamp().toLocalDateTime().toString().replace("T", " "));
+      record.append(tmpP.getTimestamp().format(formatter).toString());
       if (null != tmpP.getExtendedValues()) {
         Iterator pointIter =
             tmpP.getExtendedValues().entrySet().iterator();
