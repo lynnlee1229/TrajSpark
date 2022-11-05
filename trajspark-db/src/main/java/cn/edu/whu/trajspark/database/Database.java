@@ -19,7 +19,7 @@ import static cn.edu.whu.trajspark.constant.DBConstants.*;
  * @author Haocheng Wang
  * Created on 2022/10/11
  */
-public class Database {
+public final class Database {
   private static final Logger logger = LoggerFactory.getLogger(Database.class);
 
   private Connection connection;
@@ -141,6 +141,10 @@ public class Database {
 
   public Admin getAdmin() {
     return admin;
+  }
+
+  public Connection getConnection() {
+    return connection;
   }
 
   public void deleteTable(String tableName) throws IOException {

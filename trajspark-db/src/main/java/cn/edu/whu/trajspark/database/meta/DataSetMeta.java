@@ -1,6 +1,8 @@
 package cn.edu.whu.trajspark.database.meta;
 
+import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.index.IndexType;
+import java.util.Deque;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.client.Put;
@@ -16,10 +18,10 @@ import java.util.List;
 import static cn.edu.whu.trajspark.constant.DBConstants.META_TABLE_COLUMN_FAMILY;
 
 /**
- * @author Haocheng Wang
- * Created on 2022/9/28
+ * @author Haocheng Wang Created on 2022/9/28
  */
 public class DataSetMeta {
+
   String dataSetName;
   List<IndexMeta> indexMetaList;
 
@@ -73,6 +75,19 @@ public class DataSetMeta {
       }
     }
     return new DataSetMeta(dataSetName, indexMetaList);
+  }
+
+  public void sortByMainIndexMeta(List<IndexMeta> indexMetaList) {
+    Deque<IndexMeta> indexMetaDeque = new LinkedList<>(indexMetaList);
+    while (!indexMetaDeque.isEmpty()) {
+      IndexMeta indexMeta = indexMetaDeque.pollFirst();
+      if (indexMeta.isMainIndex()) {
+        indexMetaDeque.offerFirst(indexMeta);
+        return;
+      } else {
+        indexMetaDeque.offerLast(indexMeta);
+      }
+    }
   }
 
   @Override

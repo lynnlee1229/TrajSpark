@@ -270,7 +270,6 @@ public class XZTCoding {
     return result;
   }
 
-  @SuppressWarnings("checkstyle:TodoComment")
   public TimeIndexRange sequenceInterval(double timeStart, short level, TimeBin timeBin,
       Boolean flag) {
     long min = sequenceCode(timeStart, level);
@@ -278,7 +277,8 @@ public class XZTCoding {
     if (flag) {
       max = min;
     } else {
-      max = min + (long) (Math.pow(2, g - level + 1) - 1L) - 1;
+      //Hbase RowKey Scan
+      max = min + (long) (Math.pow(2, g - level + 1) - 1L);
     }
     return new TimeIndexRange(min, max, timeBin);
   }
