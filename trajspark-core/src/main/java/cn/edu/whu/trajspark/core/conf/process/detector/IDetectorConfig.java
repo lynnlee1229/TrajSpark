@@ -12,6 +12,6 @@ import java.io.Serializable;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = BasicDetectorConfig.class, name = "BASIC_DETECTOR")
 })
-public interface IDectorConfig extends Serializable {
+public interface IDetectorConfig extends Serializable {
   DetectorEnum getDetectorType();
 }

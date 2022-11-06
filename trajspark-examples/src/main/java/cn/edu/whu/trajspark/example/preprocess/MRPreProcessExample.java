@@ -38,7 +38,7 @@ public class MRPreProcessExample {
       IDetector myDector;
 
       myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
-      myDector = IDetector.getDector(exampleConfig.getDectorConfig());
+      myDector = IDetector.getDector(exampleConfig.getDetectorConfig());
       mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
 
       JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);

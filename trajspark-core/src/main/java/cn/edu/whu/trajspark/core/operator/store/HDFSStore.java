@@ -86,11 +86,19 @@ public class HDFSStore implements IStore {
     }
   }
 
+  @Override
+  public void storeStayPointList(JavaRDD<List<StayPoint>> spList) {
+  }
+
+  @Override
+  public void storeStayPointASTraj(JavaRDD<StayPoint> sp) {
+  }
+
   public void storeStayPoint(JavaRDD<StayPoint> stayPointJavaRDD) {
     stayPointJavaRDD.mapToPair((stayPoint) -> {
           String record =
-              stayPoint.getSid() + "," + stayPoint.getOid() + "," + stayPoint.getStartTime() + "," +
-                  stayPoint.getEndTime() + ",'" + stayPoint.getCenterPoint() + "'";
+              stayPoint.getSid() + "," + stayPoint.getOid() + "," + stayPoint.getStartTime() + ","
+                  + stayPoint.getEndTime() + ",'" + stayPoint.getCenterPoint() + "'";
           return new Tuple2(stayPoint.getSid(), record);
         }).persist(StorageLevels.MEMORY_AND_DISK)
         .saveAsHadoopFile(this.storeConfig.getLocation(), String.class, String.class,

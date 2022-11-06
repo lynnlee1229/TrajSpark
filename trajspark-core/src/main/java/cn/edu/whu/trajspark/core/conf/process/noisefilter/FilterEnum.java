@@ -7,7 +7,7 @@ package cn.edu.whu.trajspark.core.conf.process.noisefilter;
 public enum FilterEnum {
   BASIC_FILTER,
   PINGPONG_FILTER,
-
+  DRIFT_FILTER,
   COMPOSITIVEFILTER_FILTER;
 
 }

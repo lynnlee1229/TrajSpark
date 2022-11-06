@@ -3,14 +3,13 @@ package cn.edu.whu.trajspark.example.preprocess;
 import cn.edu.whu.trajspark.core.common.point.StayPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
-import cn.edu.whu.trajspark.core.operator.process.noisefilter.IFilter;
-import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
 import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import java.io.IOException;
+import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 
@@ -19,11 +18,11 @@ import org.apache.spark.sql.SparkSession;
  * @date 2022/11/3
  **/
 
-public class StandaloneExample {
+public class StandaloneDetectExample {
 
   public static void main(String[] args) throws IOException {
     String confPath =
-        "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/ioconf/exampleStandaloneConfig.json";
+        "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/ioconf/exampleDetectConfig.json";
     String fileStr = IOUtils.readFileToString(confPath);
     ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
 
@@ -34,22 +33,18 @@ public class StandaloneExample {
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
-      trajRDD.collect().forEach(System.out::println);
 
       // 从配置文件初始化预处理算子
-      IFilter myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
       IDetector myDector = IDetector.getDector(exampleConfig.getDetectorConfig());
-      ISegmenter mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
 
       // 执行预处理
-      JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
-      JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(filteredRDD);
-      JavaRDD<StayPoint> stayPointRDD = myDector.detect(filteredRDD);
-
+      JavaRDD<List<StayPoint>> stayPointList = trajRDD.map(myDector::detectFunction);
+      JavaRDD<StayPoint> detectRDD = myDector.detect(trajRDD);
       // 存储
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
-      iStore.storeTrajectory(segmentedRDD);
+      iStore.storeStayPointList(stayPointList);
+//      iStore.storeStayPointASTraj(detectRDD);
     }
   }
 }

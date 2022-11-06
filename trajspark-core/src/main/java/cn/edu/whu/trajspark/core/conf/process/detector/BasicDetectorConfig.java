@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Lynn Lee
  * @date 2022/10/28
  **/
-public class BasicDetectorConfig implements IDectorConfig {
+public class BasicDetectorConfig implements IDetectorConfig {
   private double maxStayDistInMeter;
   private double maxStayTimeInSecond;
 

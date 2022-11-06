@@ -3,7 +3,7 @@ package cn.edu.whu.trajspark.core.operator.process.staypointdetector;
 import cn.edu.whu.trajspark.core.common.point.StayPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.detector.BasicDetectorConfig;
-import cn.edu.whu.trajspark.core.conf.process.detector.IDectorConfig;
+import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
 import java.io.Serializable;
 import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
@@ -42,7 +42,7 @@ public interface IDetector extends Serializable {
    * @return 停留标签名
    */
   String getStayPointTagName();
-  static IDetector getDector(IDectorConfig config) {
+  static IDetector getDector(IDetectorConfig config) {
     switch (config.getDetectorType()) {
       case BASIC_DETECTOR:
         if (config instanceof BasicDetectorConfig) {

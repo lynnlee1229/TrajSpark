@@ -23,7 +23,7 @@ public class BasicFilter implements IFilter {
    * 基础去噪
    *
    * @param maxSpeed      速度阈值，单位：km/h
-   * @param minTrajLength 最小轨迹长度，单位：m
+   * @param minTrajLength 最小轨迹长度，单位：km
    */
   public BasicFilter(double maxSpeed, double minTrajLength) {
     this.maxSpeed = maxSpeed;
@@ -56,8 +56,8 @@ public class BasicFilter implements IFilter {
     Trajectory cleanedTrajtroy =
         new Trajectory(rawTrajectory.getTrajectoryID(), rawTrajectory.getObjectID(),
             tmpPointList, rawTrajectory.getExtendedValues());
-    return cleanedTrajtroy.getTrajectoryFeatures().getLen() > minTrajLength ? cleanedTrajtroy :
-        null;
+    return cleanedTrajtroy.getTrajectoryFeatures().getLen() > minTrajLength ? cleanedTrajtroy
+        : null;
   }
 
   @Override

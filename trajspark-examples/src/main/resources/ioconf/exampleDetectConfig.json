@@ -2,7 +2,7 @@
   "loadConfig": {
     "@type": "standalone",
     "master": "local[*]",
-    "location": "/Users/lynnlee/DW/project/10\\ 华为三期\\&轨迹大数据处理引擎/技术点1/实验Python/预处理测试IN",
+    "location": "/Users/lynnlee/DW/project/10 华为三期&轨迹大数据处理引擎/技术点1/实验Python/预处理测试-去噪",
     "fileMode": "multi_file",
     "partNum": 8,
     "splitter": ","
@@ -55,39 +55,14 @@
       ]
     }
   },
-  "filterConfig": {
-    "@type": "COMPOSITIVEFILTER_FILTER",
-    "driftFilterConfig": {
-      "@type": "DRIFT_FILTER",
-      "maxSpeed": 150.0,
-      "minAlpha": 15,
-      "maxRatio": 3.0,
-      "minTrajLength": 0.05
-    },
-    "pingpongFilterConfig": {
-      "@type": "PINGPONG_FILTER",
-      "baseStationIndex": "bsid",
-      "maxPingpongTime": 150.0,
-      "minTrajLength": 0.05
-    }
-  },
   "detectorConfig": {
     "@type": "BASIC_DETECTOR",
     "maxStayDistInMeter": 900,
     "maxStayTimeInSecond": 900
   },
-  "segmenterConfig": {
-    "@type": "STAYPOINTBASED_SEGMENTER",
-    "minTrajLength": 0.05,
-    "dectorConfig": {
-      "@type": "BASIC_DETECTOR",
-      "maxStayDistInMeter": 900,
-      "maxStayTimeInSecond": 900
-    }
-  },
   "storeConfig": {
     "@type": "standalone",
-    "location": "/Users/lynnlee/DW/project/10 华为三期&轨迹大数据处理引擎/技术点1/实验Python/预处理测试-分段",
+    "location": "/Users/lynnlee/DW/project/10 华为三期&轨迹大数据处理引擎/技术点1/实验Python/预处理测试-停留",
     "schema": "POINT_BASED_TRAJECTORY"
   }
 }

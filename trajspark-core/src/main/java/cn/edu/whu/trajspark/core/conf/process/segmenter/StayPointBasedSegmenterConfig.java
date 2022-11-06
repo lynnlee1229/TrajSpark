@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.core.conf.process.segmenter;
 
-import cn.edu.whu.trajspark.core.conf.process.detector.IDectorConfig;
+import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,22 +12,23 @@ public class StayPointBasedSegmenterConfig implements ISegmenterConfig {
 
   private double minTrajLength;
 
-  private IDectorConfig dectorConfig;
+  private IDetectorConfig detectorConfig;
 
   @JsonCreator
   public StayPointBasedSegmenterConfig(
       @JsonProperty("minTrajLength") double minTrajLength,
-      @JsonProperty("dectorConfig") IDectorConfig dectorConfig) {
+      @JsonProperty("detectorConfig") IDetectorConfig detectorConfig) {
     this.minTrajLength = minTrajLength;
-    this.dectorConfig = dectorConfig;
+    this.detectorConfig = detectorConfig;
   }
 
-  public IDectorConfig getDectorConfig() {
-    return dectorConfig;
+  public IDetectorConfig getDetectorConfig() {
+    return detectorConfig;
   }
 
-  public void setDectorConfig(IDectorConfig dectorConfig) {
-    this.dectorConfig = dectorConfig;
+  public void setDetectorConfig(
+      IDetectorConfig detectorConfig) {
+    this.detectorConfig = detectorConfig;
   }
 
   public double getMinTrajLength() {

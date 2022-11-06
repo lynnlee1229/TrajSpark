@@ -3,6 +3,7 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.BasicFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.CompositiveFilterConfig;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.DriftFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.PingpongFilterConfig;
 import java.io.Serializable;
@@ -40,6 +41,11 @@ public interface IFilter extends Serializable {
       case PINGPONG_FILTER:
         if (config instanceof PingpongFilterConfig) {
           return new PingpongFilter((PingpongFilterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      case DRIFT_FILTER:
+        if (config instanceof DriftFilterConfig) {
+          return new DriftFilter((DriftFilterConfig) config);
         }
         throw new NoSuchMethodError();
       case COMPOSITIVEFILTER_FILTER:

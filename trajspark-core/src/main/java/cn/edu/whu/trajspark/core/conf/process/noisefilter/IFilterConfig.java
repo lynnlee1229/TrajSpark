@@ -12,6 +12,7 @@ import java.io.Serializable;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = BasicFilterConfig.class, name = "BASIC_FILTER"),
     @JsonSubTypes.Type(value = PingpongFilterConfig.class, name = "PINGPONG_FILTER"),
+    @JsonSubTypes.Type(value = DriftFilterConfig.class, name = "DRIFT_FILTER"),
     @JsonSubTypes.Type(value = CompositiveFilterConfig.class, name = "COMPOSITIVEFILTER_FILTER")
 })
 public interface IFilterConfig extends Serializable {

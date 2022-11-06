@@ -40,7 +40,7 @@ public class StayPointBasedSegmenter implements ISegmenter {
    */
   public StayPointBasedSegmenter(StayPointBasedSegmenterConfig config) {
     this.minTrajLength = config.getMinTrajLength();
-    this.detector = IDetector.getDector(config.getDectorConfig());
+    this.detector = IDetector.getDector(config.getDetectorConfig());
   }
 
   public void setDetector(IDetector detector) {

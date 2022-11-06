@@ -56,9 +56,9 @@ public class GeoUtils implements Serializable {
     double lat2Rad = Math.toRadians(lat2);
     double deltaLat = lat1Rad - lat2Rad;
     double deltaLng = Math.toRadians(lng1) - Math.toRadians(lng2);
-    return 2.0 * Math.asin(Math.sqrt(Math.pow(Math.sin(deltaLat / 2.0), 2.0) +
-        Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.pow(Math.sin(deltaLng / 2.0), 2.0))) *
-        DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM;
+    return 2.0 * Math.asin(Math.sqrt(Math.pow(Math.sin(deltaLat / 2.0), 2.0)
+        + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.pow(Math.sin(deltaLng / 2.0), 2.0)))
+        * DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM;
   }
 
   public static double getEuclideanDistanceM(double lng1, double lat1, double lng2, double lat2) {
@@ -66,9 +66,9 @@ public class GeoUtils implements Serializable {
     double lat2Rad = Math.toRadians(lat2);
     double deltaLat = lat1Rad - lat2Rad;
     double deltaLng = Math.toRadians(lng1) - Math.toRadians(lng2);
-    return 2.0 * Math.asin(Math.sqrt(Math.pow(Math.sin(deltaLat / 2.0), 2.0) +
-        Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.pow(Math.sin(deltaLng / 2.0), 2.0))) *
-        DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM * 1000;
+    return 2.0 * Math.asin(Math.sqrt(Math.pow(Math.sin(deltaLat / 2.0), 2.0)
+        + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.pow(Math.sin(deltaLng / 2.0), 2.0)))
+        * DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM * 1000;
   }
 
   public static double getGeoListLen(List<Geometry> geoList) {
@@ -144,6 +144,16 @@ public class GeoUtils implements Serializable {
     }
   }
 
+  public static double getSpeed(TrajPoint p1, TrajPoint p2, TrajPoint p3) {
+    long timeSpanInSec = ChronoUnit.SECONDS.between(p1.getTimestamp(), p3.getTimestamp());
+    if (timeSpanInSec == 0L) {
+      return 0.0;
+    } else {
+      double distanceInM = getEuclideanDistanceM(p1, p2) + getEuclideanDistanceM(p2, p3);
+      return distanceInM / (double) timeSpanInSec * 3.6;
+    }
+  }
+
   public static MinimumBoundingBox calMinimumBoundingBox(List geoList) {
     if (geoList != null && !geoList.isEmpty()) {
       double latMin = Double.MAX_VALUE;
@@ -165,5 +175,19 @@ public class GeoUtils implements Serializable {
     } else {
       return null;
     }
+  }
+
+  public static double getAngle(TrajPoint p0, TrajPoint p1, TrajPoint p2) {
+    double d1 = getEuclideanDistanceM(p0, p1);
+    double d2 = getEuclideanDistanceM(p1, p2);
+    double d3 = getEuclideanDistanceM(p0, p2);
+    return Math.toDegrees(Math.asin((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2)));
+  }
+
+  public static double getRatio(TrajPoint p0, TrajPoint p1, TrajPoint p2) {
+    double d1 = getEuclideanDistanceM(p0, p1);
+    double d2 = getEuclideanDistanceM(p1, p2);
+    double d3 = getEuclideanDistanceM(p0, p2);
+    return (d1 + d2) / d3;
   }
 }

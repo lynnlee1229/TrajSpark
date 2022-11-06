@@ -9,20 +9,21 @@ import org.apache.spark.api.java.JavaRDD;
  * @date 2022/10/29
  **/
 public class CompositiveFilter implements IFilter {
-  private BasicFilter basicFilter;
   private PingpongFilter pingpongFilter;
 
+  private DriftFilter driftFilter;
 
   /**
    * 集成去噪
    *
-   * @param basicFilter    离群点去除
-   * @param pingpongFilter 乒乓效应去除
+   * @param pingpongFilter 乒乓效应去噪
+   * @param driftFilter    离群点去噪
    */
-  public CompositiveFilter(BasicFilter basicFilter, PingpongFilter pingpongFilter) {
-    this.basicFilter = basicFilter;
+  public CompositiveFilter(PingpongFilter pingpongFilter, DriftFilter driftFilter) {
     this.pingpongFilter = pingpongFilter;
+    this.driftFilter = driftFilter;
   }
+
 
   /**
    * 通过配置文件构造
@@ -30,27 +31,30 @@ public class CompositiveFilter implements IFilter {
    * @param config
    */
   public CompositiveFilter(CompositiveFilterConfig config) {
-    this.basicFilter = new BasicFilter(config.getBasicFilterConfig());
+    this.driftFilter = new DriftFilter(config.getDriftFilterConfig());
     this.pingpongFilter = new PingpongFilter(config.getPingpongFilterConfig());
   }
 
+
   /**
    * 通过参数构造
-   *
-   * @param maxSpeed         速度阈值，单位：km/h
-   * @param baseStationIndex 基站ID索引名
-   * @param maxPingpongTime  时间阈值，在该阈值内"A-B-A"被视作乒乓效应
-   * @param minTrajLength    最小轨迹长度，单位：km
+   * @param maxSpeed 速度阈值，单位：km/h
+   * @param minAlpha 角度阈值，单位：度
+   * @param maxRatio 距离位移比，无量纲
+   * @param baseStationIndex 基站ID索引位
+   * @param maxPingpongTime 乒乓效应判定时间阈值，单位：s
+   * @param minTrajLength 最小轨迹长度，单位：km
    */
-  public CompositiveFilter(double maxSpeed, String baseStationIndex, double maxPingpongTime,
-                           double minTrajLength) {
-    this.basicFilter = new BasicFilter(maxSpeed, minTrajLength);
+  public CompositiveFilter(double maxSpeed, double minAlpha, double maxRatio,
+                           String baseStationIndex, double maxPingpongTime, double minTrajLength) {
+    this.driftFilter = new DriftFilter(maxSpeed, minAlpha, maxRatio, minTrajLength);
     this.pingpongFilter = new PingpongFilter(baseStationIndex, maxPingpongTime, minTrajLength);
   }
 
   @Override
   public Trajectory filterFunction(Trajectory rawTrajectory) {
-    return basicFilter.filterFunction(pingpongFilter.filterFunction(rawTrajectory));
+//    return driftFilter.filterFunction(pingpongFilter.filterFunction(rawTrajectory));
+    return pingpongFilter.filterFunction(driftFilter.filterFunction(rawTrajectory));
   }
 
   @Override

@@ -2,7 +2,7 @@ package cn.edu.whu.trajspark.example.conf;
 
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
-import cn.edu.whu.trajspark.core.conf.process.detector.IDectorConfig;
+import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.ISegmenterConfig;
 import cn.edu.whu.trajspark.core.conf.store.IStoreConfig;
@@ -52,7 +52,7 @@ public class ExampleConfig {
    * 停留识别参数
    */
   @JsonProperty
-  private IDectorConfig dectorConfig;
+  private IDetectorConfig detectorConfig;
 
   public ILoadConfig getLoadConfig() {
     return loadConfig;
@@ -74,8 +74,8 @@ public class ExampleConfig {
     return segmenterConfig;
   }
 
-  public IDectorConfig getDectorConfig() {
-    return dectorConfig;
+  public IDetectorConfig getDetectorConfig() {
+    return detectorConfig;
   }
 
   /**

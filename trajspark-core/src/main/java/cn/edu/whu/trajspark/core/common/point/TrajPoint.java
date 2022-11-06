@@ -67,10 +67,14 @@ public class TrajPoint extends BasePoint implements Serializable {
     this.extendedValues.put(key, value);
   }
 
+  public void removeExtendedValue(String key) {
+    this.extendedValues.remove(key);
+  }
+
 
   public String toString() {
     return "TrajPoint{pid='" + this.pid + '\'' + ", longitude=" + this.getLng() + ", latitude="
-        + this.getLat() + ", timeStamp=" + this.getTimestamp() + ", extendedValues=" +
-        this.extendedValues + '}';
+        + this.getLat() + ", timeStamp=" + this.getTimestamp() + ", extendedValues="
+        + this.extendedValues + '}';
   }
 }

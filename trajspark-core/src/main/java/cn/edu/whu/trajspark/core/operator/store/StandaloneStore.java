@@ -3,8 +3,10 @@ package cn.edu.whu.trajspark.core.operator.store;
 import cn.edu.whu.trajspark.core.common.point.StayPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.StandaloneStoreConfig;
+import cn.edu.whu.trajspark.core.operator.store.convertor.basic.StayPointConvertor;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.TrajectoryConvertor;
 import cn.edu.whu.trajspark.core.util.IOUtils;
+import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
 
@@ -45,16 +47,35 @@ public class StandaloneStore implements IStore {
     }
   }
 
-  public void storeStayPoint(JavaRDD<StayPoint> stayPointJavaRDD) {
-    // TODO stayPoint 解析
-//    stayPointJavaRDD.mapToPair((stayPoint) -> {
-//          String record =
-//              stayPoint.getSid() + "," + stayPoint.getOid() + "," + stayPoint.getStartTime() + "," +
-//                  stayPoint.getEndTime() + ",'" + stayPoint.getCenterPoint() + "'";
-//          return new Tuple2(stayPoint.getSid(), record);
-//        }).persist(StorageLevels.MEMORY_AND_DISK)
-//        .saveAsHadoopFile(this.storeConfig.getLocation(), String.class, String.class,
-//            RDDMultipleTextOutputFormat.class);
+  // TODO 单stayPoint 解析
+  public void storeStayPointList(JavaRDD<List<StayPoint>> stayPointJavaRDD) {
+    stayPointJavaRDD.foreach(
+        s -> {
+          if (!s.isEmpty()) {
+            String outputString = StayPointConvertor.convertSPList(s);
+            String fileName =
+                String.format("%s/%s-splist.csv",
+                    storeConfig.getLocation(),
+                    s.get(0).getSid().split("_")[0]
+                    );
+            IOUtils.writeStringToFile(fileName, outputString);
+          }
+
+        }
+    );
+  }
+
+  public void storeStayPointASTraj(JavaRDD<StayPoint> stayPointJavaRDD) {
+    stayPointJavaRDD.foreach(
+        s -> {
+          String outputString = StayPointConvertor.convertSPAsTraj(s);
+          String fileName =
+              String.format("%s/%s-splist.csv",
+                  storeConfig.getLocation(),
+                  s.getSid());
+          IOUtils.writeStringToFile(fileName, outputString);
+        }
+    );
   }
 
 }

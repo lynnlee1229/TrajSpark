@@ -27,7 +27,7 @@ public class TrajectoryConvertor implements Serializable {
       record.append(tmpP.getPid()).append(splitter);
       record.append(tmpP.getLat()).append(splitter);
       record.append(tmpP.getLng()).append(splitter);
-      record.append(tmpP.getTimestamp().format(formatter).toString());
+      record.append(tmpP.getTimestamp().format(formatter));
       if (null != tmpP.getExtendedValues()) {
         Iterator pointIter =
             tmpP.getExtendedValues().entrySet().iterator();
