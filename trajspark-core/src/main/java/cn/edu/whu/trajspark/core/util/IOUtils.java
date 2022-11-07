@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -88,6 +89,16 @@ public class IOUtils {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public static String readFileToString(InputStream is) throws IOException {
+    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    StringBuilder stringBuilder = new StringBuilder();
+    String s = "";
+    while ((s = br.readLine()) != null) {
+      stringBuilder.append(s);
+    }
+    return stringBuilder.toString();
   }
 
   public static void writeStringToFile(String fileName, String content) throws IOException {

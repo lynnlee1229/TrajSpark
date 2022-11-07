@@ -9,6 +9,7 @@ import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
@@ -21,9 +22,15 @@ import org.apache.spark.sql.SparkSession;
 public class StandaloneDetectExample {
 
   public static void main(String[] args) throws IOException {
-    String confPath =
-        "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/ioconf/exampleDetectConfig.json";
-    String fileStr = IOUtils.readFileToString(confPath);
+    String fileStr;
+    if (args.length != 0) {
+      String confPath = args[0];
+      fileStr = IOUtils.readFileToString(confPath);
+    } else {
+      InputStream resourceAsStream = StandaloneDetectExample.class.getClassLoader()
+          .getResourceAsStream("ioconf/exampleDetectConfig.json");
+      fileStr = IOUtils.readFileToString(resourceAsStream);
+    }
     ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
 
     boolean isLocal = true;
