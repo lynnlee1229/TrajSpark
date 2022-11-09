@@ -79,7 +79,7 @@
   "segmenterConfig": {
     "@type": "STAYPOINTBASED_SEGMENTER",
     "minTrajLength": 0.05,
-    "dectorConfig": {
+    "detectorConfig": {
       "@type": "BASIC_DETECTOR",
       "maxStayDistInMeter": 900,
       "maxStayTimeInSecond": 900

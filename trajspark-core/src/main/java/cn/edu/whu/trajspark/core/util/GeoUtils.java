@@ -181,7 +181,10 @@ public class GeoUtils implements Serializable {
     double d1 = getEuclideanDistanceM(p0, p1);
     double d2 = getEuclideanDistanceM(p1, p2);
     double d3 = getEuclideanDistanceM(p0, p2);
-    return Math.toDegrees(Math.asin((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2)));
+    if (d1 * d2 == 0) {
+      return 180.0;
+    }
+    return Math.toDegrees(Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2)));
   }
 
   public static double getRatio(TrajPoint p0, TrajPoint p1, TrajPoint p2) {
