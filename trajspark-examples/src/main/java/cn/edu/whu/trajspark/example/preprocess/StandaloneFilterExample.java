@@ -32,7 +32,7 @@ public class StandaloneFilterExample {
     ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
     boolean isLocal = true;
     try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
-        MRPreProcessExample.class.getName(), isLocal)) {
+        StandaloneFilterExample.class.getName(), isLocal)) {
       ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),

@@ -33,7 +33,7 @@ public class StandaloneSegmentExample {
 
     boolean isLocal = true;
     try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
-        MRPreProcessExample.class.getName(), isLocal)) {
+        StandaloneSegmentExample.class.getName(), isLocal)) {
       ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),

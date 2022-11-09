@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.common.point;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,7 +53,7 @@ public class TrajPoint extends BasePoint implements Serializable {
   }
 
   public Map<String, Object> getExtendedValues() {
-    return this.extendedValues;
+    return this.extendedValues == null ? null : this.extendedValues;
   }
 
   public void setExtendedValues(Map<String, Object> extendedValues) {
@@ -60,15 +61,20 @@ public class TrajPoint extends BasePoint implements Serializable {
   }
 
   public Object getExtendedValue(String key) {
-    return this.extendedValues.get(key);
+    return this.extendedValues == null ? null : this.extendedValues.get(key);
   }
 
   public void setExtendedValue(String key, Object value) {
+    if (this.extendedValues == null) {
+      this.extendedValues = new HashMap<>();
+    }
     this.extendedValues.put(key, value);
   }
 
   public void removeExtendedValue(String key) {
-    this.extendedValues.remove(key);
+    if (this.extendedValues != null) {
+      this.extendedValues.remove(key);
+    }
   }
 
 
