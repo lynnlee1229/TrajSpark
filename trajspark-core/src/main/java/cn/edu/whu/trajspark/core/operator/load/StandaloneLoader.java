@@ -60,7 +60,7 @@ public class StandaloneLoader implements ILoader {
         .map((s) -> {
           // 解析、映射为Trajectory
           return TrajectoryParser.multifileParse(s._2(), trajectoryConfig,
-              standaloneLoadConfig.getSplitter());
+              standaloneLoadConfig.getSplitter(), standaloneLoadConfig.getLineBreaker());
         })
         .filter(Objects::nonNull);
   }
@@ -75,7 +75,8 @@ public class StandaloneLoader implements ILoader {
         .flatMap(
             s -> {
               return TrajectoryParser.singlefileParse(s, trajectoryConfig,
-                  standaloneLoadConfig.getSplitter()).iterator();
+                      standaloneLoadConfig.getSplitter(), standaloneLoadConfig.getLineBreaker())
+                  .iterator();
             }
         ).filter(Objects::nonNull);
   }

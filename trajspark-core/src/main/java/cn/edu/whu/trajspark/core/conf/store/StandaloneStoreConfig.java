@@ -13,12 +13,35 @@ public class StandaloneStoreConfig implements IStoreConfig {
   private String location;
   private StoreSchemaEnum schema;
 
+  private String splitter;
+  private String lineBreaker;
+
+  private String filePostFix;
+
   @JsonCreator
   public StandaloneStoreConfig(
       @JsonProperty("location") String location,
-      @JsonProperty("schema") StoreSchemaEnum schema) {
+      @JsonProperty("schema") StoreSchemaEnum schema,
+      @JsonProperty("splitter") String splitter,
+      @JsonProperty("lineBreaker") String lineBreaker,
+      @JsonProperty("filePostFix") String filePostFix) {
     this.location = location;
     this.schema = schema;
+    this.splitter = splitter;
+    this.lineBreaker = lineBreaker;
+    this.filePostFix = filePostFix;
+  }
+
+  public String getFilePostFix() {
+    return filePostFix;
+  }
+
+  public String getSplitter() {
+    return splitter;
+  }
+
+  public String getLineBreaker() {
+    return lineBreaker;
   }
 
   public StoreType getStoreType() {

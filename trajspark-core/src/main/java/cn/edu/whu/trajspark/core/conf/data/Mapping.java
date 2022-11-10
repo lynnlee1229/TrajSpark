@@ -12,11 +12,19 @@ import java.io.Serializable;
  * @author Lynn Lee
  * @date 2022/9/17
  **/
+
 public class Mapping implements Serializable {
   private Field sourceData;
   private String mappingName;
   private boolean indexable;
 
+  /**
+   * 映射类，记录原始数据映射关系
+   *
+   * @param sourceData  数据
+   * @param mappingName 映射名（列名）
+   * @param indexable   是否可索引，查询用
+   */
   @JsonCreator
   public Mapping(@JsonProperty("sourceData") Field sourceData,
                  @JsonProperty("mappingName") String mappingName,
@@ -52,8 +60,8 @@ public class Mapping implements Serializable {
   }
 
   public String toString() {
-    return this.indexable ?
-        this.getMappingName() + ":" + this.getDataType().getType() + ":index=true" :
-        this.getMappingName() + ":" + this.getDataType().getType();
+    return this.indexable
+        ? this.getMappingName() + ":" + this.getDataType().getType() + ":index=true"
+        : this.getMappingName() + ":" + this.getDataType().getType();
   }
 }

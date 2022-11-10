@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
  * @date 2022/11/2
  **/
 public class TrajectoryParser {
-  public static Trajectory multifileParse(String rawString, TrajectoryConfig trajectoryConfig,
-                                          String splitter) throws IOException {
-    String[] points = rawString.split("\n");
+  public static Trajectory multifileParse(String rawString,
+                                          TrajectoryConfig trajectoryConfig,
+                                          String splitter,
+                                          String lineBreaker) throws IOException {
+    String[] points = rawString.split(lineBreaker);
     int n = points.length;
     List<TrajPoint> trajPoints = new ArrayList(n);
     String trajId = "", objectId = "";
@@ -46,10 +48,11 @@ public class TrajectoryParser {
 
   public static List<Trajectory> singlefileParse(String rawString,
                                                  TrajectoryConfig trajectoryConfig,
-                                                 String splitter) throws IOException {
+                                                 String splitter,
+                                                 String lineBreaker) throws IOException {
     int objectIdIndex = trajectoryConfig.getObjectId().getIndex();
     int trajIdIndex = trajectoryConfig.getTrajId().getIndex();
-    String[] points = rawString.split("\n");
+    String[] points = rawString.split(lineBreaker);
     // 按tid+oid分组
     Map<String, List<String>> groupList = Arrays.stream(points).collect(
         Collectors.groupingBy(item -> getGroupKey(item, splitter, trajIdIndex, objectIdIndex)));

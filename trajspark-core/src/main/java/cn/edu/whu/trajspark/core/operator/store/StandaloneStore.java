@@ -26,11 +26,13 @@ public class StandaloneStore implements IStore {
     trajectoryJavaRDD.foreach(
         item -> {
           String fileName =
-              String.format("%s/%s-%s.csv",
+              String.format("%s/%s-%s%s",
                   storeConfig.getLocation(),
                   item.getObjectID(),
-                  item.getTrajectoryID());
-          String outputString = TrajectoryConvertor.convert(item);
+                  item.getTrajectoryID(),
+                  storeConfig.getFilePostFix());
+          String outputString = TrajectoryConvertor.convert(item, storeConfig.getSplitter(),
+              storeConfig.getLineBreaker());
           IOUtils.writeStringToFile(fileName, outputString);
         }
     );
@@ -52,12 +54,14 @@ public class StandaloneStore implements IStore {
     stayPointJavaRDD.foreach(
         s -> {
           if (!s.isEmpty()) {
-            String outputString = StayPointConvertor.convertSPList(s);
+            String outputString = StayPointConvertor.convertSPList(s, storeConfig.getSplitter(),
+                storeConfig.getLineBreaker());
             String fileName =
-                String.format("%s/%s-splist.csv",
+                String.format("%s/%s-splist%s",
                     storeConfig.getLocation(),
-                    s.get(0).getSid().split("_")[0]
-                    );
+                    s.get(0).getSid().split("_")[0],
+                    storeConfig.getFilePostFix()
+                );
             IOUtils.writeStringToFile(fileName, outputString);
           }
 
@@ -68,11 +72,13 @@ public class StandaloneStore implements IStore {
   public void storeStayPointASTraj(JavaRDD<StayPoint> stayPointJavaRDD) {
     stayPointJavaRDD.foreach(
         s -> {
-          String outputString = StayPointConvertor.convertSPAsTraj(s);
+          String outputString = StayPointConvertor.convertSPAsTraj(s, storeConfig.getSplitter(),
+              storeConfig.getLineBreaker());
           String fileName =
-              String.format("%s/%s-splist.csv",
+              String.format("%s/%s-splist%s",
                   storeConfig.getLocation(),
-                  s.getSid());
+                  s.getSid(),
+                  storeConfig.getFilePostFix());
           IOUtils.writeStringToFile(fileName, outputString);
         }
     );
