@@ -8,11 +8,10 @@ import cn.edu.whu.trajspark.coding.TimeLineCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.RowKeyRange;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
@@ -21,10 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.sfcurve.IndexRange;
 
 /**
  * @author Xu Qi
@@ -54,10 +50,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     return IndexType.TXZ2;
   }
 
-  @Override
-  public Polygon getSpatialRange(ByteArray byteArray) {
-    return null;
-  }
 
   @Override
   public TimeLine getTimeLineRange(ByteArray byteArray) {
@@ -132,8 +124,8 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public long getSpatialCodingVal(ByteArray byteArray) {
-    return 0;
+  public ByteArray extractSpatialCoding(ByteArray byteArray) {
+    return null;
   }
 
   @Override
@@ -171,7 +163,7 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public String getObjectId(ByteArray byteArray) {
+  public String getObjectTrajId(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
@@ -180,14 +172,9 @@ public class TimeIndexStrategy extends IndexStrategy {
     return new String(stringBytes, StandardCharsets.ISO_8859_1);
   }
 
-  @Override
-  public void buildUnserializableObjects() {
-
-  }
-
   public String timeIndexToString(ByteArray byteArray) {
     return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = "
-        + getObjectId(byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = "
+        + getObjectTrajId(byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = "
         + getTimeCodingVal(byteArray) + '}';
   }
 

@@ -73,6 +73,10 @@ public class ByteArray implements Serializable, Comparable<ByteArray> {
     return Arrays.equals(bytes, other.bytes);
   }
 
+  /**
+   * @return The offset of the byte buffer returned is set to the last position,
+   * if you want to read values from the ByteBuffer, remember to flip the returned object.
+   */
   public ByteBuffer toByteBuffer() {
     ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
     buffer.put(bytes);

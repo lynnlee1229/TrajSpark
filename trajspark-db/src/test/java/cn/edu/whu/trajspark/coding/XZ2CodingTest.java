@@ -4,8 +4,7 @@ import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import org.junit.Test;
-
-import java.util.List;
+import org.locationtech.jts.io.WKTWriter;
 
 import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
 
@@ -16,17 +15,14 @@ import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExample
 public class XZ2CodingTest {
 
   @Test
-  public void getSequence() {
-    XZ2Coding xz2Coding = new XZ2Coding((short) 16);
+  public void testGetXZ2Region() {
     Trajectory t = getExampleTrajectory();
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
-    long v1 = XZ2IndexStrategy.getSpatialCodingVal(byteArray);
-    List<Integer> list = xz2Coding.getSequence(v1);
-    long v2 = 0L;
-    for (int i = 0; i < list.size(); i++) {
-      v2 += 1L + list.get(i) *  ((long) Math.pow(4, 16 - i) - 1L) / 3L;
-    }
-    assert v1 == v2;
+    WKTWriter wktWriter = new WKTWriter();
+    ByteArray spatialCodingByteArray = XZ2IndexStrategy.extractSpatialCoding(byteArray);
+
+    assert wktWriter.write(XZ2IndexStrategy.getSpatialCoding().getCodingPolygon(spatialCodingByteArray))
+        .equals("POLYGON ((113.90625 22.5, 113.90625 22.67578125, 114.2578125 22.67578125, 114.2578125 22.5, 113.90625 22.5))");
   }
 }

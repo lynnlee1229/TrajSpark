@@ -50,7 +50,6 @@ public class IndexMeta implements Serializable {
 
   public static IndexMeta deserialize(byte[] bytes) {
     IndexMeta indexMeta = (IndexMeta) SerializerUtils.deserializeObject(bytes, IndexMeta.class);
-    indexMeta.getIndexStrategy().buildUnserializableObjects();
     return indexMeta;
   }
 

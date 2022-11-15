@@ -5,7 +5,7 @@ import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExample
 import cn.edu.whu.trajspark.coding.TimeLineCoding;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.RowKeyRange;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;

@@ -5,9 +5,8 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
-import cn.edu.whu.trajspark.datatypes.RowKeyRange;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.ArrayList;

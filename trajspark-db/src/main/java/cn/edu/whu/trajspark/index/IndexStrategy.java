@@ -2,14 +2,11 @@ package cn.edu.whu.trajspark.index;
 
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.RowKeyRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.locationtech.jts.geom.Polygon;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,8 +35,6 @@ public abstract class IndexStrategy implements Serializable {
     return indexType;
   }
 
-  public abstract Polygon getSpatialRange(ByteArray byteArray);
-
   public abstract TimeLine getTimeLineRange(ByteArray byteArray);
 
   /**
@@ -63,7 +58,7 @@ public abstract class IndexStrategy implements Serializable {
 
   public abstract SpatialCoding getSpatialCoding();
 
-  public abstract long getSpatialCodingVal(ByteArray byteArray);
+  public abstract ByteArray extractSpatialCoding(ByteArray byteArray);
 
   public abstract TimeCoding getTimeCoding();
 
@@ -71,7 +66,7 @@ public abstract class IndexStrategy implements Serializable {
 
   public abstract short getShardNum(ByteArray byteArray);
 
-  public abstract Object getObjectId(ByteArray byteArray);
+  public abstract Object getObjectTrajId(ByteArray byteArray);
 
   @Override
   public boolean equals(Object o) {
@@ -85,6 +80,4 @@ public abstract class IndexStrategy implements Serializable {
   public int hashCode() {
     return Objects.hash(shardNum, indexType);
   }
-
-  public abstract void buildUnserializableObjects();
 }

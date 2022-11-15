@@ -20,7 +20,8 @@ import static cn.edu.whu.trajspark.constant.CodingConstants.DEFAULT_TIME_PERIOD;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TIME_BIN_PRECISION;
 
 /**
- * @author Haocheng Wang Created on 2022/10/2
+ * @author Haocheng Wang
+ * Created on 2022/10/2
  */
 public class TimeLineCoding implements TimeCoding {
 

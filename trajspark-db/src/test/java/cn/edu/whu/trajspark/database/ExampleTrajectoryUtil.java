@@ -22,6 +22,7 @@ public class ExampleTrajectoryUtil {
     String objectID = null;
     boolean isFirst = true;
     boolean emptyBefore = false;
+    int tid = 0;
     List<Trajectory> res = new LinkedList<>();
     List<TrajPoint> trajPointList = new LinkedList<>();
     try {
@@ -44,7 +45,7 @@ public class ExampleTrajectoryUtil {
           Instant instant = Instant.ofEpochSecond(Long.parseLong(tokens[6]));
           if (emptyBefore) {
             if (trajPointList.size() >= 2) {
-              res.add(new Trajectory("tid", objectID, new LinkedList<>(trajPointList)));
+              res.add(new Trajectory(String.valueOf(tid++), objectID, new LinkedList<>(trajPointList)));
             }
             trajPointList.clear();
             emptyBefore = false;
@@ -57,7 +58,7 @@ public class ExampleTrajectoryUtil {
           Instant instant = Instant.ofEpochSecond(Long.parseLong(tokens[6]));
           if (!emptyBefore) {
             if (trajPointList.size() >= 2) {
-              res.add(new Trajectory("tid", objectID, new LinkedList<>(trajPointList)));
+              res.add(new Trajectory(String.valueOf(tid++), objectID, new LinkedList<>(trajPointList)));
             }
             trajPointList.clear();
             emptyBefore = true;
@@ -68,7 +69,7 @@ public class ExampleTrajectoryUtil {
               Double.parseDouble(tokens[2])));
         }
       }
-      res.add(new Trajectory(String.valueOf(System.currentTimeMillis()), objectID, new LinkedList<>(trajPointList)));
+      res.add(new Trajectory(String.valueOf(tid++), objectID, new LinkedList<>(trajPointList)));
     } catch (IOException e) {
       e.printStackTrace();
     }

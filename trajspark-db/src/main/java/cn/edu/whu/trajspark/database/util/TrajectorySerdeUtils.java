@@ -151,10 +151,11 @@ public class TrajectorySerdeUtils {
     return trajectory;
   }
 
-  public static Trajectory getTrajectory(byte[] trajPointsByteArray, byte[] objectID) throws IOException {
+  public static Trajectory getTrajectory(byte[] trajPointsByteArray, byte[] objectID, byte[] tidBytes) throws IOException {
     List<TrajPoint> trajPointList = SerializerUtils.deserializeList(trajPointsByteArray, TrajPoint.class);
     String objectStr = (String) SerializerUtils.deserializeObject(objectID, String.class);
-    return new Trajectory(null, objectStr, trajPointList);
+    String tidStr = (String) SerializerUtils.deserializeObject(tidBytes, String.class);
+    return new Trajectory(tidStr, objectStr, trajPointList);
   }
 
   public static TrajFeatures getTrajectoryFeatures(Result result) throws IOException {
