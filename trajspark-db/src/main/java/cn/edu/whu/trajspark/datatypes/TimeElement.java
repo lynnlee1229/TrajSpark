@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.datatypes;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Objects;
  * @author Xu Qi
  * @since 2022/10/13
  */
-public class TimeElement {
+public class TimeElement implements Serializable {
 
   private double timeStart;
   private double timeEnd;

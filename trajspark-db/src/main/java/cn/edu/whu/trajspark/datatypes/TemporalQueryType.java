@@ -6,11 +6,11 @@ package cn.edu.whu.trajspark.datatypes;
  */
 public enum TemporalQueryType {
   /**
-   * Query all data that is totally contained in query window.
+   * Query all data that may contained with query window.
    */
-  INCLUDE,
+  CONTAIN,
   /**
-   * Query all data that may INTERSECT with query window.
+   * Query all data that is totally INTERSECT in query window.
    */
-  OVERLAP;
+  INTERSECT;
 }

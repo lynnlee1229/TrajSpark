@@ -89,6 +89,11 @@ public class XZ2IndexStrategy extends IndexStrategy {
     throw new UnsupportedOperationException();
   }
 
+  @Override
+  public List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition,
+      String oID) {
+    return null;
+  }
 
   @Override
   public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,

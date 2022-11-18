@@ -58,6 +58,12 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
+  public List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition,
+      String oID) {
+    return null;
+  }
+
+  @Override
   public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition) {
     return null;
   }

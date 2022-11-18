@@ -51,6 +51,7 @@ public abstract class IndexStrategy implements Serializable {
   public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
 
   public abstract List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
+  public abstract List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
 
   public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition);
 
@@ -80,4 +81,5 @@ public abstract class IndexStrategy implements Serializable {
   public int hashCode() {
     return Objects.hash(shardNum, indexType);
   }
+
 }

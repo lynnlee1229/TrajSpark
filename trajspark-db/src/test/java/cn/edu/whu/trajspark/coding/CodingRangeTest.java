@@ -1,7 +1,5 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.coding.poscode.PosCode;
-import cn.edu.whu.trajspark.coding.poscode.PosCodeRange;
 import cn.edu.whu.trajspark.coding.sfc.SFCRange;
 import junit.framework.TestCase;
 
@@ -18,14 +16,14 @@ public class CodingRangeTest extends TestCase {
     System.out.println(codingRange);
   }
 
-  public void testConcatPosCodeRange() {
-    PosCodeRange posCodeRange = new PosCodeRange();
-    posCodeRange.setLower(new PosCode((byte) 10));
-    posCodeRange.setUpper(new PosCode((byte) 15));
-    CodingRange codingRange = new CodingRange();
-    SFCRange sfcRange = new SFCRange(10, 10, true);
-    codingRange.concatSfcRange(sfcRange);
-    codingRange.concatPosCodeRange(posCodeRange);
-    System.out.println(codingRange);
-  }
+//  public void testConcatPosCodeRange() {
+//    PosCodeRange posCodeRange = new PosCodeRange();
+//    posCodeRange.setLower(new PosCode((byte) 10));
+//    posCodeRange.setUpper(new PosCode((byte) 15));
+//    CodingRange codingRange = new CodingRange();
+//    SFCRange sfcRange = new SFCRange(10, 10, true);
+//    codingRange.concatSfcRange(sfcRange);
+//    codingRange.concatPosCodeRange(posCodeRange);
+//    System.out.println(codingRange);
+//  }
 }

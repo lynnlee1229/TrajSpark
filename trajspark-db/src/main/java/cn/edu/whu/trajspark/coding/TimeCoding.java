@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.datatypes.TimeBin;
-import cn.edu.whu.trajspark.datatypes.TimeIndexRange;
+import cn.edu.whu.trajspark.coding.sfc.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
@@ -25,5 +25,5 @@ public interface TimeCoding extends Serializable {
 
   long getIndex(ZonedDateTime start, ZonedDateTime end);
 
-  List<TimeIndexRange> ranges(TemporalQueryCondition condition);
+  List<CodingRange> ranges(TemporalQueryCondition condition);
 }

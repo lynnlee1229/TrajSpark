@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test;
  * @author Xu Qi
  * @since 2022/10/8
  */
-class TimeLineCodingTest extends TestCase {
+class XZTCodingTest extends TestCase {
 
   @Test
   public void getIndex() {
     Trajectory exampleTrajectory = getExampleTrajectory();
-    TimeLineCoding timeLineCoding = new TimeLineCoding();
-    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(timeLineCoding);
+    XZTCoding XZTCoding = new XZTCoding();
+    TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(XZTCoding);
     ByteArray index = timeIndexStrategy.index(exampleTrajectory);
     TimeLine timeLineRange = timeIndexStrategy.getTimeLineRange(index);
     System.out.println("ByteArray: " + index);
@@ -32,7 +32,7 @@ class TimeLineCodingTest extends TestCase {
     System.out.println(timeLineRange);
     short timeBinVal = timeIndexStrategy.getTimeBinVal(index);
     long timeCodingVal = timeIndexStrategy.getTimeCodingVal(index);
-    List<Integer> sequenceCode = timeLineCoding.getSequenceCode(timeCodingVal);
+    List<Integer> sequenceCode = XZTCoding.getSequenceCode(timeCodingVal);
     long coding = 0L;
     for (int i = 0; i < sequenceCode.size(); i++) {
       coding += 1L + sequenceCode.get(i) * ((long) Math.pow(2, MAX_TIME_BIN_PRECISION - i) - 1L);

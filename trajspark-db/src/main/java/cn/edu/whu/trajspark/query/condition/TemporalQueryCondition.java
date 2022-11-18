@@ -11,7 +11,7 @@ public class TemporalQueryCondition {
 
   private TimeLine queryWindow;
   private List<TimeLine> queryWindows;
-  private TemporalQueryType temporalQueryType;
+  private final TemporalQueryType temporalQueryType;
 
   public TemporalQueryCondition(TimeLine queryWindow,
       TemporalQueryType temporalQueryType) {

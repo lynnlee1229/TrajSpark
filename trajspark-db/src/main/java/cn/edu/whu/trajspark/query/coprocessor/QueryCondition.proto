@@ -26,13 +26,18 @@ message TemporalQueryWindow {
   required int64 endMs = 2;
 }
 
+message TemporalQueryWindows {
+  repeated TemporalQueryWindow temporalQueryWindow = 1;
+}
+
 
 message QueryRequest {
   repeated Range range = 1;
   optional QueryType spatialQueryType = 2;
   optional SpatialQueryWindow spatialQueryWindow = 3;
   optional QueryType temporalQueryType = 4;
-  optional TemporalQueryWindow temporalQueryWindow = 5;
+  optional TemporalQueryWindows temporalQueryWindows = 5;
+  optional string oid = 6;
 }
 
 message QueryResponse {
@@ -44,6 +49,8 @@ message TrajectoryResult {
   required bytes trajPointList = 2;
   required bytes objectId = 3;
   required bytes tid = 4;
+  required bytes startTime = 5;
+  required bytes endTime = 6;
 }
 
 service QueryService {
