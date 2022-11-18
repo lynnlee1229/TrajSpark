@@ -1,8 +1,7 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.coding.poscode.PosCode;
-import cn.edu.whu.trajspark.coding.poscode.PosCodeRange;
 import cn.edu.whu.trajspark.coding.sfc.SFCRange;
+import cn.edu.whu.trajspark.coding.sfc.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 
 import java.nio.ByteBuffer;
@@ -10,10 +9,10 @@ import java.nio.ByteBuffer;
 /**
  * 编码范围，边界以byte array存储，更通用。
  *
- * @author Haocheng Wang
- * Created on 2022/11/13
+ * @author Haocheng Wang Created on 2022/11/13
  */
 public class CodingRange {
+
   ByteArray lower;
   ByteArray upper;
   boolean contained;
@@ -55,19 +54,40 @@ public class CodingRange {
     }
   }
 
-  public void concatPosCodeRange(PosCodeRange posCodeRange) {
+  public void concatTimeIndexRange(TimeIndexRange timeIndexRange) {
     if (lower == null || upper == null) {
-      lower = new ByteArray(ByteBuffer.allocate(PosCode.SIZE / Byte.SIZE).put(posCodeRange.lower.getPoscodeByte()));
-      upper = new ByteArray(ByteBuffer.allocate(PosCode.SIZE / Byte.SIZE).put(posCodeRange.upper.getPoscodeByte()));
+      lower = new ByteArray(
+          ByteBuffer.allocate(Short.BYTES + Long.BYTES).putShort(timeIndexRange.getBin()).
+              putLong(timeIndexRange.getLower()));
+      upper = new ByteArray(
+          ByteBuffer.allocate(Short.BYTES + Long.BYTES).putShort(timeIndexRange.getBin()).
+              putLong(timeIndexRange.getUpper()));
     } else {
-      lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + PosCode.SIZE / Byte.SIZE)
+      lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + Short.BYTES + Long.BYTES)
           .put(lower.getBytes())
-          .put(posCodeRange.lower.getPoscodeByte()));
-      upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + PosCode.SIZE / Byte.SIZE)
+          .putShort(timeIndexRange.getBin())
+          .putLong(timeIndexRange.getLower()));
+      upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + Short.BYTES + Long.BYTES)
           .put(upper.getBytes())
-          .put(posCodeRange.upper.getPoscodeByte()));
+          .putShort(timeIndexRange.getBin())
+          .putLong(timeIndexRange.getUpper()));
     }
+    contained = timeIndexRange.isContained();
   }
+
+//  public void concatPosCodeRange(PosCodeRange posCodeRange) {
+//    if (lower == null || upper == null) {
+//      lower = new ByteArray(ByteBuffer.allocate(PosCode.SIZE / Byte.SIZE).put(posCodeRange.lower.getPoscodeByte()));
+//      upper = new ByteArray(ByteBuffer.allocate(PosCode.SIZE / Byte.SIZE).put(posCodeRange.upper.getPoscodeByte()));
+//    } else {
+//      lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + PosCode.SIZE / Byte.SIZE)
+//          .put(lower.getBytes())
+//          .put(posCodeRange.lower.getPoscodeByte()));
+//      upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + PosCode.SIZE / Byte.SIZE)
+//          .put(upper.getBytes())
+//          .put(posCodeRange.upper.getPoscodeByte()));
+//    }
+//  }
 
   @Override
   public String toString() {

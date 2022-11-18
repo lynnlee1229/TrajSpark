@@ -8,6 +8,7 @@ import cn.edu.whu.trajspark.core.util.SerializerUtils;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.DataTable;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -157,11 +158,31 @@ public class TrajectorySerdeUtils {
     String tidStr = (String) SerializerUtils.deserializeObject(tidBytes, String.class);
     return new Trajectory(tidStr, objectStr, trajPointList);
   }
+  public static Trajectory getTrajectory(byte[] trajPointsByteArray, byte[] objectID, byte[] tidBytes, byte[] startTime, byte[] endTime) throws IOException {
+    List<TrajPoint> trajPointList = SerializerUtils.deserializeList(trajPointsByteArray, TrajPoint.class);
+    String objectStr = (String) SerializerUtils.deserializeObject(objectID, String.class);
+    String tidStr = (String) SerializerUtils.deserializeObject(tidBytes, String.class);
+    ZonedDateTime startTimeStr = (ZonedDateTime) SerializerUtils.deserializeObject(startTime, ZonedDateTime.class);
+    ZonedDateTime endTimeStr = (ZonedDateTime) SerializerUtils.deserializeObject(endTime, ZonedDateTime.class);
+    TrajFeatures trajFeatures = new TrajFeatures(startTimeStr, endTimeStr, null, null, 0, null,
+        0, 0);
+    return new Trajectory(tidStr, objectStr, trajPointList, trajFeatures);
+  }
 
   public static TrajFeatures getTrajectoryFeatures(Result result) throws IOException {
     Trajectory trajectory = new Trajectory();
     setBasicTrajectoryInfos(result, trajectory);
     return trajectory.getTrajectoryFeatures();
+  }
+
+  public static TimeLine getTrajectoryTimeLine(Result result) throws IOException {
+    ZonedDateTime startTime = (ZonedDateTime) SerializerUtils.deserializeObject(
+        result.getValue(COLUMN_FAMILY, START_TIME_QUALIFIER),
+        ZonedDateTime.class);
+    ZonedDateTime endTime = (ZonedDateTime) SerializerUtils.deserializeObject(
+        result.getValue(COLUMN_FAMILY, END_TIME_QUALIFIER),
+        ZonedDateTime.class);
+    return new TimeLine(startTime, endTime);
   }
 
   public static byte[] getByteArrayByQualifier(Result result, byte[] qualifier) {
