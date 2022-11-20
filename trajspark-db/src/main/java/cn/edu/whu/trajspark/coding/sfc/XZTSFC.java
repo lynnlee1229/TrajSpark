@@ -258,7 +258,7 @@ public class XZTSFC implements Serializable {
     while (i < ranges.size()) {
       TimeIndexRange indexRange = ranges.get(i);
       if (indexRange.getTimeBin().equals(current.getTimeBin())
-          & indexRange.getLower() <= current.getUpper() + 1) {
+          & indexRange.getLower() == current.getUpper()) {
         // merge the two ranges
         current = new TimeIndexRange(current.getLower(),
             Math.max(current.getUpper(), indexRange.getUpper()), indexRange.getTimeBin(),
@@ -279,7 +279,7 @@ public class XZTSFC implements Serializable {
     long min = sequenceCode(timeStart, level);
     long max;
     if (flag) {
-      max = min;
+      max = min + 1;
     } else {
       //Hbase RowKey Scan
       max = min + (long) (Math.pow(2, g - level + 1) - 1L);

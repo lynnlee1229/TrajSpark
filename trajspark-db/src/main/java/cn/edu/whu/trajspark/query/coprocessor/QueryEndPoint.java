@@ -156,16 +156,9 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
     for (Range range : rangeList) {
       List<MultiRowRangeFilter.RowRange> listToAdd =
           range.getContained() ? rowRangeListConfirmed : rowRangeListSuspected;
-      //时间bin的划分会导致前一个bin的[0,0]range编码进入到scan序列中，空间编码只有一个bin概念，不会出现以下情况
-      if (Bytes.compareTo(range.getStart().toByteArray(), range.getEnd().toByteArray()) == 0) {
-        listToAdd.add(new MultiRowRangeFilter.RowRange(
+      listToAdd.add(new MultiRowRangeFilter.RowRange(
             range.getStart().toByteArray(), true,
-            getRangeEndAsPrefix(range.getEnd().toByteArray()), true));
-      } else {
-        listToAdd.add(new MultiRowRangeFilter.RowRange(
-            range.getStart().toByteArray(), true,
-            getRangeEndAsPrefix(range.getEnd().toByteArray()), false));
-      }
+            range.getEnd().toByteArray(), false));
     }
     List<InnerScan> innerScans = new LinkedList<>();
     if (!rowRangeListConfirmed.isEmpty()) {
