@@ -167,13 +167,14 @@ public class XZ2SFC implements Serializable {
   long[] sequenceInterval(double x, double y, short length, boolean partial) {
     long min = sequenceCode(x, y, length);
     // if a partial match, we just use the single sequence code as an interval
-    // if a full match, we have to match all sequence codes starting with the single sequence code
+    // if a full match, we have to match all sequence codes starting with the single sequence code,
+    // and max is included.
     long max;
     if (partial) {
-      max = min + 1;
+      max = min;
     } else {
       // from lemma 3 in the XZ-Ordering paper
-      max = (long) (min + (Math.pow(4, g - length + 1) - 1L) / 3L);
+      max = (long) (min + (Math.pow(4, g - length + 1) - 1L) / 3L) - 1L;
     }
     return new long[]{min, max};
   }
@@ -306,7 +307,7 @@ public class XZ2SFC implements Serializable {
     int i = 1;
     while (i < ranges.size()) {
       SFCRange range = ranges.get(i);
-      if (range.lower == current.upper && range.contained == current.contained) {
+      if (range.lower == current.upper + 1 && range.contained == current.contained) {
         current = new SFCRange(current.lower, Math.max(current.upper, range.upper),
             range.contained);
       } else {
