@@ -33,7 +33,7 @@ import java.util.List;
  * @author Haocheng Wang
  * Created on 2022/10/27
  */
-public class SpatialQueryTest extends TestCase {
+public class XZ2QueryTest extends TestCase {
 
   static String DATASET_NAME = "xz2_intersect_query_test";
   static SpatialQueryCondition spatialQueryCondition;

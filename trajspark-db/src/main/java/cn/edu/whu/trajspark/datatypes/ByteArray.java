@@ -5,6 +5,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -19,6 +20,19 @@ public class ByteArray implements Serializable, Comparable<ByteArray> {
 
   public ByteArray(byte[] bytes) {
     this.bytes = bytes;
+  }
+
+  public ByteArray(List<byte[]> bytesList) {
+    int arrLen = 0;
+    for (byte[] value : bytesList) {
+      arrLen += value.length;
+    }
+    bytes = new byte[arrLen];
+    int offset = 0;
+    for (byte[] value : bytesList) {
+      System.arraycopy(value, 0, bytes, offset, value.length);
+      offset += value.length;
+    }
   }
 
   public ByteArray(ByteBuffer byteBuffer) {

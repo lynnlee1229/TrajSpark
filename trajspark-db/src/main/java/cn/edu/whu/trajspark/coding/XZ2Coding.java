@@ -26,6 +26,8 @@ public class XZ2Coding implements SpatialCoding {
 
   private static final Logger logger = LoggerFactory.getLogger(XZ2Coding.class);
 
+  public static final int BYTES = Long.BYTES;
+
   private XZ2SFC xz2Sfc;
 
   short xz2Precision;

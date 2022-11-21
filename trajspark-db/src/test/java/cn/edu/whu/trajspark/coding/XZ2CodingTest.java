@@ -20,7 +20,7 @@ public class XZ2CodingTest {
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
     WKTWriter wktWriter = new WKTWriter();
-    ByteArray spatialCodingByteArray = XZ2IndexStrategy.extractSpatialCoding(byteArray);
+    ByteArray spatialCodingByteArray = XZ2IndexStrategy.extractSpatialCode(byteArray);
 
     assert wktWriter.write(XZ2IndexStrategy.getSpatialCoding().getCodingPolygon(spatialCodingByteArray))
         .equals("POLYGON ((113.90625 22.5, 113.90625 22.67578125, 114.2578125 22.67578125, 114.2578125 22.5, 113.90625 22.5))");

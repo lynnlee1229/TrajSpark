@@ -29,7 +29,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   private XZ2Coding xz2Coding;
 
   // shard(short) + index type(int) + xz2(long)
-  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + Long.BYTES;
+  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + XZ2Coding.BYTES;
 
   public XZ2IndexStrategy() {
     indexType = IndexType.XZ2;
@@ -64,7 +64,6 @@ public class XZ2IndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (CodingRange xz2Coding : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
-        // make sure range end is exclusive
         result.add(new RowKeyRange(toIndex(shard, xz2Coding.getLower())
             , toIndex(shard, xz2Coding.getUpper()), xz2Coding.isContained()));
       }
@@ -102,10 +101,10 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public String indexToString(ByteArray byteArray) {
+  public String parseIndex2String(ByteArray byteArray) {
     return "Row key index: {" +
         "shardNum=" + getShardNum(byteArray) +
-        ", xz2=" + extractSpatialCoding(byteArray) +
+        ", xz2=" + extractSpatialCode(byteArray) +
         ", tid=" + getObjectTrajId(byteArray) +
         '}';
   }
@@ -116,7 +115,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public ByteArray extractSpatialCoding(ByteArray byteArray) {
+  public ByteArray extractSpatialCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();

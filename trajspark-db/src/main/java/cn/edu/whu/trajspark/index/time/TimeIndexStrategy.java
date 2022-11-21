@@ -144,7 +144,7 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public String indexToString(ByteArray byteArray) {
+  public String parseIndex2String(ByteArray byteArray) {
     return null;
   }
 
@@ -154,7 +154,7 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public ByteArray extractSpatialCoding(ByteArray byteArray) {
+  public ByteArray extractSpatialCode(ByteArray byteArray) {
     return null;
   }
 

@@ -55,11 +55,11 @@ public abstract class IndexStrategy implements Serializable {
 
   public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition);
 
-  public abstract String indexToString(ByteArray byteArray);
+  public abstract String parseIndex2String(ByteArray byteArray);
 
   public abstract SpatialCoding getSpatialCoding();
 
-  public abstract ByteArray extractSpatialCoding(ByteArray byteArray);
+  public abstract ByteArray extractSpatialCode(ByteArray byteArray);
 
   public abstract TimeCoding getTimeCoding();
 
