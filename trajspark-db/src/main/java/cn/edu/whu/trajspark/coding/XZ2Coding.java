@@ -68,7 +68,7 @@ public class XZ2Coding implements SpatialCoding {
     Envelope envelope = spatialQueryCondition.getQueryWindow();
     List<CodingRange> codingRangeList = new LinkedList<>();
     if (spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.INTERSECT) {
-      List<SFCRange> sfcRangeList = xz2Sfc.ranges(envelope);
+      List<SFCRange> sfcRangeList = xz2Sfc.ranges(envelope, false);
       for (SFCRange sfcRange : sfcRangeList) {
         CodingRange codingRange = new CodingRange();
         codingRange.concatSfcRange(sfcRange);

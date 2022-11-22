@@ -57,6 +57,10 @@ public class XZ2SFC implements Serializable {
     return index(bound.xmin, bound.xmax, bound.ymin, bound.ymax, false);
   }
 
+  public long index(Envelope envelope) {
+    return index(envelope.getMinX(), envelope.getMaxX(), envelope.getMinY(), envelope.getMaxY(), false);
+  }
+
   /**
    * Index a polygon by it's bounding box
    *
@@ -99,8 +103,9 @@ public class XZ2SFC implements Serializable {
 
   // predicate for checking how many axis the polygon intersects
   // math.floor(min / w2) * w2 == start of cell containing min
+  // change <= to < for build region.
   private boolean predicate(double min, double max, double w2) {
-    return max <= (Math.floor(min / w2) * w2) + (2 * w2);
+    return max < (Math.floor(min / w2) * w2) + (2 * w2);
   }
 
   /**
@@ -244,27 +249,29 @@ public class XZ2SFC implements Serializable {
   }
 
 
-  public List<SFCRange> ranges(double xmin, double ymin, double xmax, double ymax) {
-    Bound[] query = new Bound[]{normalize(xmin, ymin, xmax, ymax, false)};
-    return ranges(query, Integer.MAX_VALUE);
+  public List<SFCRange> ranges(double xmin, double ymin, double xmax, double ymax, boolean contained) {
+    Bound query = normalize(xmin, ymin, xmax, ymax, false);
+    return ranges(query, Integer.MAX_VALUE, contained);
   }
 
-  public List<SFCRange> ranges(Envelope envelope) {
+  public List<SFCRange> ranges(Envelope envelope, boolean contained) {
     double xMin = envelope.getMinX();
     double yMin = envelope.getMinY();
     double xMax = envelope.getMaxX();
     double yMax = envelope.getMaxY();
-    return ranges(xMin, yMin, xMax, yMax);
+    return ranges(xMin, yMin, xMax, yMax, contained);
   }
 
   /**
    * Determine XZ-curve ranges that will cover a given query window
    *
-   * @param query     a sequence of OR'd windows to cover, normalized to [0,1]
+   * @param query     a window to cover, normalized to [0,1]
    * @param rangeStop a rough max value for the number of ranges to return
+   * @param contained True if you only want to get ranges that are possible to store the objects
+   *                  completely contained by the query box.
    * @return
    */
-  private List<SFCRange> ranges(Bound[] query, int rangeStop) {
+  private List<SFCRange> ranges(Bound query, int rangeStop, boolean contained) {
     List<SFCRange> ranges = new ArrayList<>(100);
     Deque<XElement> remaining = new ArrayDeque<>(100);
     // initial level
@@ -283,7 +290,7 @@ public class XZ2SFC implements Serializable {
           remaining.add(LevelTerminator);
         }
       } else {
-        checkValue(next, level, query, ranges, remaining);
+        checkValue(next, level, query, ranges, remaining, contained);
       }
     }
 
@@ -323,52 +330,73 @@ public class XZ2SFC implements Serializable {
     return result;
   }
 
-  // checks if a quad is contained in the search space
-  private boolean isContained(XElement quad, Bound[] query) {
-    int i = 0;
-    while (i < query.length) {
-      if (quad.isContained(query[i])) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  }
-
-  // checks if a quad overlaps the search space
-  private boolean isOverlapped(XElement quad, Bound[] query) {
-    int i = 0;
-    while (i < query.length) {
-      if (quad.overlaps(query[i])) {
-        return true;
-      }
-      i += 1;
-    }
-    return false;
-  }
-
-  // checks a single value and either:
-  //   eliminates it as out of bounds
-  //   adds it to our results as fully matching, or
-  //   adds it to our results as partial matching and queues up it's children for further processing
-  void checkValue(XElement quad, Short level, Bound[] query, List<SFCRange> ranges,
-      Deque<XElement> remaining) {
-    if (isContained(quad, query)) {
+  /**
+   * Checks a single value and either:
+   *  <ul>
+   *    <li>eliminates it as out of bounds</li>
+   *    <li>eliminates it as all objects inside the XElement can't contained by the
+   *    element when contained is set to true</li>
+   *    <li>adds it to our results as fully matching</li>
+   *    <li>adds it to our results as partial matching and queues up it's children for further processing</li>
+   *  </ul>
+   *
+   * @param element XElement to be checked.
+   * @param level Current quad-tree level
+   * @param query Spatial query bound
+   * @param ranges SFCRanges obtained to meet query condition until now.
+   * @param remaining Other XElements wait be checked.
+   * @param contained True if you only want to get ranges that are possible to store the objects
+   *                  completely contained by the query box.
+   */
+  void checkValue(XElement element, Short level, Bound query, List<SFCRange> ranges,
+      Deque<XElement> remaining, boolean contained) {
+    if (element.extContained(query)) {
       // whole range matches, happy day
-      long[] minMax = sequenceInterval(quad.xmin, quad.ymin, level, false);
+      long[] minMax = sequenceInterval(element.xmin, element.ymin, level, false);
       ranges.add(new SFCRange(minMax[0], minMax[1], true));
-    } else if (isOverlapped(quad, query)) {
+    } else if (element.extOverlaps(query)) {
       // some portion of this range is excluded
-      // add the partial match and queue up each sub-range for processing
-      long[] minMax = sequenceInterval(quad.xmin, quad.ymin, level, true);
-      ranges.add(new SFCRange(minMax[0], minMax[1], false));
-      remaining.addAll(quad.children());
+      if (!contained || canStoreContainedObjects(element, query)) {
+        // add the partial match and queue up each sub-range for processing
+        long[] minMax = sequenceInterval(element.xmin, element.ymin, level, true);
+        ranges.add(new SFCRange(minMax[0], minMax[1], false));
+      }
+      remaining.addAll(element.children());
     }
+  }
+
+  /**
+   * 判断某XZ2 Element是否可能存储了被query bound完全包含的对象，其应满足以下条件：
+   * <ol>
+   *   <li>Element本身与query bound非相离</li>
+   *   <li>Element的右侧、上侧、右上侧同大小Element至少有一个与当前query bound非相离</li>
+   *   <li>Element Ext与Query Bound重叠范围的最大边长大于Element边长的一半</li>
+   * </ol>
+   */
+  private boolean canStoreContainedObjects(XElement element, Bound query) {
+    // condition 1
+    if (!element.overlap(query) || !element.contained(query)) {
+      return false;
+    }
+    List<XElement> neighbors = element.extNeighbors();
+    for (XElement neighbor : neighbors) {
+      // condition 2
+      if (neighbor.contained(query) || neighbor.overlap(query)) {
+        // condition 3
+        // Bound overlapped = element.getExtOverlappedBound(query);
+        // if (overlapped == null) {
+        //   return false;
+        // }
+        // return Math.max(overlapped.xmax - overlapped.xmin, overlapped.ymax - overlapped.ymin) > element.length / 2;
+        return true;
+      }
+    }
+    return false;
   }
 
 
 
-  public Bound getXZ2Bound(long codeSequence) {
+  public Bound getBound(long codeSequence) {
     // 1. get sequence
     List<Integer> quadrantSequence = getQuadrantSequence(codeSequence);
 
@@ -419,13 +447,21 @@ public class XZ2SFC implements Serializable {
 
   /**
    * @param codeSequence Spatial coding value generated by this coding strategy.
+   * @return Unenlarged region represented by the spatial coding.
+   */
+  public Polygon getRegion(long codeSequence) {
+    return getQuadRegion(codeSequence, 0);
+  }
+
+  /**
+   * @param codeSequence Spatial coding value generated by this coding strategy.
    * @return Enlarged region represented by the spatial coding.
    */
   private Bound getEnlargedBound(long codeSequence) {
-    Bound xz2Region = getXZ2Bound(codeSequence);
-    double xExt = xz2Region.xmin + 2 * (xz2Region.xmax - xz2Region.xmin);
-    double yExt = xz2Region.ymin + 2 * (xz2Region.ymax - xz2Region.ymin);
-    return new Bound(xz2Region.xmin, xz2Region.ymin, xExt, yExt);
+    Bound xz2BoundNoExt = getBound(codeSequence);
+    double xExt = xz2BoundNoExt.xmin + 2 * (xz2BoundNoExt.xmax - xz2BoundNoExt.xmin);
+    double yExt = xz2BoundNoExt.ymin + 2 * (xz2BoundNoExt.ymax - xz2BoundNoExt.ymin);
+    return new Bound(xz2BoundNoExt.xmin, xz2BoundNoExt.ymin, xExt, yExt);
   }
 
   /**
@@ -481,10 +517,10 @@ public class XZ2SFC implements Serializable {
       if (sequenceCode == 0L) {
         break;
       }
-      long x = ((long) Math.pow(4, g - i) - 1L) / 3L;
-      long y = sequenceCode / x;
-      list.add((int) y);
-      sequenceCode = sequenceCode - x * y - 1L;
+      double x = (Math.pow(4, g - i) - 1) / 3;
+      long q = (long) ((sequenceCode - 1) / x);
+      list.add((int) q);
+      sequenceCode = sequenceCode - (long) (x * q) - 1L;
     }
     return list;
   }
@@ -536,16 +572,41 @@ public class XZ2SFC implements Serializable {
       yext = ymax + length;
     }
 
-    public boolean isContained(Bound window) {
+    /**
+     * XElement的扩展网格是否包含于Query Bound
+     */
+    public boolean extContained(Bound window) {
       return window.xmin <= xmin && window.ymin <= ymin && window.xmax >= xext
           && window.ymax >= yext;
     }
 
-    public boolean overlaps(Bound window) {
+    /**
+     * XElement的扩展网格是否与Query Bound相交
+     */
+    public boolean extOverlaps(Bound window) {
       return window.xmax >= xmin && window.ymax >= ymin && window.xmin <= xext
           && window.ymin <= yext;
     }
 
+    /**
+     * XElement自身（非扩展网格）是否包含于Query Bound
+     */
+    public boolean contained(Bound window) {
+      return window.xmin <= xmin && window.ymin <= ymin && window.xmax >= xmax
+          && window.ymax >= ymax;
+    }
+
+    /**
+     * XElement自身（非扩展网格）是否与Query Bound相交
+     */
+    public boolean overlap(Bound window) {
+      return window.xmax >= xmin && window.ymax >= ymin && window.xmin <= xmax
+          && window.ymin <= ymax;
+    }
+
+    /**
+     * 当前XElement下一个层级的四个子XElement
+     */
     public List<XElement> children() {
       List<XElement> res = new LinkedList<>();
       double xCenter = (xmin + xmax) / 2.0;
@@ -558,6 +619,32 @@ public class XZ2SFC implements Serializable {
       return res;
     }
 
-  }
+    /**
+     * 与当前XElement同层级的另外3个XElement，加上自身可以组成XElement的扩展网格。
+     */
+    public List<XElement> extNeighbors() {
+      List<XElement> res = new LinkedList<>();
+      double xCenter = (xmin + xext) / 2.0;
+      double yCenter = (ymin + yext) / 2.0;
+      res.add(new XElement(xmin, yCenter, xCenter, yext, length));
+      res.add(new XElement(xCenter, ymin, xext, yCenter, length));
+      res.add(new XElement(xCenter, yCenter, xext, yext, length));
+      return res;
+    }
 
+    /**
+     * 获取扩展网格与查询Bound相交的Bound
+     */
+    public Bound getExtOverlappedBound(Bound bound) {
+      if (this.extOverlaps(bound) || this.extContained(bound)) {
+        double oXMin = Math.max(bound.xmin, xmin);
+        double oYMin = Math.max(bound.ymin, ymin);
+        double oXMax = Math.min(bound.xmax, xmax);
+        double oYMax = Math.min(bound.ymax, ymax);
+        return new Bound(oXMin, oYMin, oXMax, oYMax);
+      } else {
+        return null;
+      }
+    }
+  }
 }

@@ -69,7 +69,7 @@ public class XZ2PCoding implements SpatialCoding {
     List<CodingRange> res = new ArrayList<>(100);
     Envelope envelope = spatialQueryCondition.getQueryWindow();
     if (spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.INTERSECT) {
-      List<SFCRange> rawSFCRange = xz2Sfc.ranges(envelope);
+      List<SFCRange> rawSFCRange = xz2Sfc.ranges(envelope, false);
       // 以上为xz2的索引范围, 接下来需要串接PosCode
       for (SFCRange sfcRange : rawSFCRange) {
         // contained, 该Index range的所有轨迹都位于查询范围内部
