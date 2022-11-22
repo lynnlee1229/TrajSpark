@@ -29,10 +29,10 @@
     <name>hbase.cluster.distributed</name>
     <value>true</value>
   </property>
-  <property>
-    <name>hbase.tmp.dir</name>
-    <value>/usr/local/hbase-1.4.13/tmp</value>
-  </property>
+<!--  <property>-->
+<!--    <name>hbase.tmp.dir</name>-->
+<!--    <value>/usr/local/hbase-1.4.13/tmp</value>-->
+<!--  </property>-->
   <property>
     <name>hbase.zookeeper.quorum</name>
     <value>localhost</value>

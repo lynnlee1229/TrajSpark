@@ -27,8 +27,7 @@ public class XZ2SFCTest extends TestCase {
   WKTWriter wktWriter = new WKTWriter();
 
   static String QUERY_WKT =
-      "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407," +
-          "114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
+          "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
 
 
   public void testCode() throws ParseException {
@@ -109,7 +108,7 @@ public class XZ2SFCTest extends TestCase {
   public void testContainedRangesWkt() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
     cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
-    List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, false);
+    List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, true);
     List<MultiPolygon> multiPolygons = new LinkedList<>();
     for (SFCRange range : ranges) {
       List<Polygon> polygons = new LinkedList<>();
@@ -125,7 +124,6 @@ public class XZ2SFCTest extends TestCase {
     for (MultiPolygon mp : multiPolygons) {
       System.out.println(new WKTWriter().write(mp));
     }
-
   }
 
   public void testGetEnlargedRegion() {

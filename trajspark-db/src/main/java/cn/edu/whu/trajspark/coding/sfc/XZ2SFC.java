@@ -375,20 +375,18 @@ public class XZ2SFC implements Serializable {
    */
   private boolean canStoreContainedObjects(XElement element, Bound query) {
     // condition 1
-    if (!element.overlap(query) || !element.contained(query)) {
-      return false;
-    }
-    List<XElement> neighbors = element.extNeighbors();
-    for (XElement neighbor : neighbors) {
-      // condition 2
-      if (neighbor.contained(query) || neighbor.overlap(query)) {
-        // condition 3
-        // Bound overlapped = element.getExtOverlappedBound(query);
-        // if (overlapped == null) {
-        //   return false;
-        // }
-        // return Math.max(overlapped.xmax - overlapped.xmin, overlapped.ymax - overlapped.ymin) > element.length / 2;
-        return true;
+    if (element.overlap(query) || element.contained(query)) {
+      List<XElement> neighbors = element.extNeighbors();
+      for (XElement neighbor : neighbors) {
+        // condition 2
+        if (neighbor.contained(query) || neighbor.overlap(query)) {
+          // condition 3
+          Bound overlapped = element.getExtOverlappedBound(query);
+          if (overlapped == null) {
+            return false;
+          }
+          return Math.max(overlapped.xmax - overlapped.xmin, overlapped.ymax - overlapped.ymin) > element.length / 2;
+        }
       }
     }
     return false;
