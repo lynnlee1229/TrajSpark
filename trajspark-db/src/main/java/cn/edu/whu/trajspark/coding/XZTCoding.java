@@ -32,6 +32,8 @@ public class XZTCoding implements TimeCoding {
   private final TimePeriod timePeriod;
   private cn.edu.whu.trajspark.coding.sfc.XZTSFC XZTSFC;
 
+  public static final int BYTES = Short.BYTES + Long.BYTES;
+
   @SuppressWarnings("checkstyle:StaticVariableName")
   static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
   private static Logger logger = LoggerFactory.getLogger(XZTCoding.class);

@@ -21,8 +21,7 @@ import java.util.List;
 /**
  * row key: shard(short) + index type(int) + XZPCode + [oid(string) + tid(string)]
  *
- * @author Haocheng Wang
- * Created on 2022/11/1
+ * @author Haocheng Wang Created on 2022/11/1
  */
 public class XZ2PlusIndexStrategy extends IndexStrategy {
 
@@ -57,25 +56,21 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
+      int maxRangeNum) {
     List<RowKeyRange> result = new ArrayList<>();
     // 1. xz2p coding
     List<CodingRange> codeRanges = xz2PCoding.ranges(spatialQueryCondition);
+    List<CodingRange> keyScanRange = getKeyScanRange(codeRanges);
+
     // 2. concat shard index and index type.
-    for (CodingRange xz2PCode : codeRanges) {
+    for (CodingRange xz2PCode : keyScanRange) {
       for (short shard = 0; shard < shardNum; shard++) {
-        result.add(new RowKeyRange(
-            new ByteArray(
-                Arrays.asList(
-                  Bytes.toBytes(shard),
-                  Bytes.toBytes(indexType.getId()),
-                  xz2PCode.getLower().getBytes())),
-            new ByteArray(
-                Arrays.asList(
-                    Bytes.toBytes(shard),
-                    Bytes.toBytes(indexType.getId()),
-                    xz2PCode.getUpper().getBytes()))
-            , xz2PCode.isContained()));
+        result.add(new RowKeyRange(new ByteArray(
+            Arrays.asList(Bytes.toBytes(shard), Bytes.toBytes(indexType.getId()),
+                xz2PCode.getLower().getBytes())), new ByteArray(
+            Arrays.asList(Bytes.toBytes(shard), Bytes.toBytes(indexType.getId()),
+                xz2PCode.getUpper().getBytes())), xz2PCode.isContained()));
       }
     }
     return result;
@@ -87,12 +82,14 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
+      TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
     return null;
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID) {
+  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition,
+      String oID) {
     throw new UnsupportedOperationException();
   }
 
@@ -103,18 +100,16 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition) {
+  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
+      TemporalQueryCondition temporalQueryCondition) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public String parseIndex2String(ByteArray byteArray) {
-    return "Row key index: {" +
-        "shardNum=" + getShardNum(byteArray) +
-        ", indexId=" + getIndexType() +
-        ", xz2P=" + extractSpatialCode(byteArray) +
-        ", oidTid=" + getObjectTrajId(byteArray) +
-        '}';
+    return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", indexId=" + getIndexType()
+        + ", xz2P=" + extractSpatialCode(byteArray) + ", oidTid=" + getObjectTrajId(byteArray)
+        + '}';
   }
 
   @Override
@@ -163,5 +158,33 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     byte[] objTIDArray = new byte[objTIDArrayLen];
     buffer.get(objTIDArray);
     return new String(objTIDArray, StandardCharsets.UTF_8);
+  }
+
+  private List<CodingRange> getKeyScanRange(List<CodingRange> codingRanges) {
+    List<CodingRange> codingRangesList = new ArrayList<>();
+    for (CodingRange codingRange : codingRanges) {
+      ByteArray lower = codingRange.getLower();
+      ByteArray upper = codingRange.getUpper();
+      if (codingRange.isContained()) {
+        ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES);
+        ByteBuffer byteBuffer = upper.toByteBuffer();
+        byteBuffer.flip();
+        long xz2Coding = byteBuffer.getLong() + 1;
+        byteBufferTemp.putLong(xz2Coding);
+        ByteArray newUpper = new ByteArray(byteBufferTemp);
+        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
+      } else {
+        ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES + Byte.BYTES);
+        ByteBuffer byteBuffer = upper.toByteBuffer();
+        byteBuffer.flip();
+        long xz2Coding = byteBuffer.getLong();
+        byte posCode = (byte) (byteBuffer.get() + 1);
+        byteBufferTemp.putLong(xz2Coding);
+        byteBufferTemp.put(posCode);
+        ByteArray newUpper = new ByteArray(byteBufferTemp);
+        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
+      }
+    }
+    return codingRangesList;
   }
 }

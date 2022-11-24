@@ -17,12 +17,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /**
  * row key: shard(short) + index type(int) + xz2(long) + oid(string) + tid(string)
  *
- * @author Haocheng Wang
- * Created on 2022/10/4
+ * @author Haocheng Wang Created on 2022/10/4
  */
 public class XZ2IndexStrategy extends IndexStrategy {
 
@@ -64,8 +64,8 @@ public class XZ2IndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (CodingRange xz2Coding : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
-        result.add(new RowKeyRange(toIndex(shard, xz2Coding.getLower())
-            , toIndex(shard, xz2Coding.getUpper()), xz2Coding.isContained()));
+        result.add(new RowKeyRange(toIndex(shard, xz2Coding.getLower(), false),
+            toIndex(shard, xz2Coding.getUpper(), true), xz2Coding.isContained()));
       }
     }
     return result;
@@ -102,11 +102,8 @@ public class XZ2IndexStrategy extends IndexStrategy {
 
   @Override
   public String parseIndex2String(ByteArray byteArray) {
-    return "Row key index: {" +
-        "shardNum=" + getShardNum(byteArray) +
-        ", xz2=" + extractSpatialCode(byteArray) +
-        ", tid=" + getObjectTrajId(byteArray) +
-        '}';
+    return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", xz2="
+        + extractSpatialCode(byteArray) + ", tid=" + getObjectTrajId(byteArray) + '}';
   }
 
   @Override
@@ -164,20 +161,22 @@ public class XZ2IndexStrategy extends IndexStrategy {
     return new ByteArray(byteBuffer);
   }
 
-  private ByteArray toIndex(short shard, ByteArray xz2coding) {
+  private ByteArray toIndex(short shard, ByteArray xz2coding, Boolean flag) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
     byteBuffer.putShort(shard);
     byteBuffer.putInt(indexType.getId());
-    byteBuffer.put(xz2coding.getBytes());
+    if (flag) {
+      long xz2code = Bytes.toLong(xz2coding.getBytes()) + 1;
+      byteBuffer.putLong(xz2code);
+    } else {
+      byteBuffer.put(xz2coding.getBytes());
+    }
     return new ByteArray(byteBuffer);
   }
 
   @Override
   public String toString() {
-    return "XZ2IndexStrategy{" +
-        "shardNum=" + shardNum +
-        ", indexType=" + indexType +
-        ", xz2Coding=" + xz2Coding +
-        '}';
+    return "XZ2IndexStrategy{" + "shardNum=" + shardNum + ", indexType=" + indexType
+        + ", xz2Coding=" + xz2Coding + '}';
   }
 }

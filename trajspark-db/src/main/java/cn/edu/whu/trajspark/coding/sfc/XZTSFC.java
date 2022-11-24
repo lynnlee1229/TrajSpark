@@ -243,6 +243,7 @@ public class XZTSFC implements Serializable {
       } else {
         TimeIndexRange timeIndexRange = sequenceInterval(poll.getTimeStart(), level, timeBin,
             false);
+        timeIndexRange.setContained(false);
         ranges.add(timeIndexRange);
       }
     }
@@ -258,11 +259,12 @@ public class XZTSFC implements Serializable {
     while (i < ranges.size()) {
       TimeIndexRange indexRange = ranges.get(i);
       if (indexRange.getTimeBin().equals(current.getTimeBin())
-          & indexRange.getLower() == current.getUpper()) {
+          & indexRange.getLower() == current.getUpper() + 1
+          & indexRange.isContained() == current.isContained()) {
         // merge the two ranges
         current = new TimeIndexRange(current.getLower(),
             Math.max(current.getUpper(), indexRange.getUpper()), indexRange.getTimeBin(),
-            indexRange.isContained() & current.isContained());
+            indexRange.isContained());
       } else {
         // append the last range and set the current range for future merging
         result.add(current);
@@ -279,10 +281,10 @@ public class XZTSFC implements Serializable {
     long min = sequenceCode(timeStart, level);
     long max;
     if (flag) {
-      max = min + 1;
+      max = min;
     } else {
       //Hbase RowKey Scan
-      max = min + (long) (Math.pow(2, g - level + 1) - 1L);
+      max = min + (long) (Math.pow(2, g - level + 1) - 1L) - 1;
     }
     return new TimeIndexRange(min, max, timeBin, !flag);
   }

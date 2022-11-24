@@ -63,7 +63,8 @@ class TimeIndexStrategyTest extends TestCase {
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
           "start : " + timeIndexStrategy.timeIndexToString(scanRange.getStartKey()) + " end : "
-              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()));
+              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()) + " isContained "
+              + scanRange.isContained());
     }
   }
 
@@ -93,6 +94,7 @@ class TimeIndexStrategyTest extends TestCase {
               + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()));
     }
   }
+
   @Test
   public void testMultiInnerBinScan() {
     long start = System.currentTimeMillis();

@@ -7,6 +7,7 @@ import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TIME_BIN_PRECISI
 
 import cn.edu.whu.trajspark.coding.CodingRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
+import cn.edu.whu.trajspark.coding.XZ2Coding;
 import cn.edu.whu.trajspark.coding.XZTCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.coding.sfc.XZTSFC;
@@ -29,12 +30,16 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.locationtech.jts.geom.Polygon;
 
 /**
+ * row key: shard(short) + index type(int) + oid(string) + XZTCoding(short + long) + tid(string)
+ *
  * @author Xu Qi
  * @since 2022/10/7
  */
 public class TimeIndexStrategy extends IndexStrategy {
 
   private final XZTCoding timeCoding;
+  private static final int KEY_BYTE_LEN =
+      Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + XZTCoding.BYTES;
 
   public TimeIndexStrategy(XZTCoding timeCoding) {
     indexType = IndexType.OBJECT_ID_T;
@@ -98,12 +103,10 @@ public class TimeIndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (CodingRange codingRange : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
-        ByteBuffer byteBuffer1 = ByteBuffer.allocate(
-            Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
-        ByteBuffer byteBuffer2 = ByteBuffer.allocate(
-            Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
-        ByteArray byteArray1 = toIndex(shard, codingRange.getLower(), oId);
-        ByteArray byteArray2 = toIndex(shard, codingRange.getUpper(), oId);
+        ByteBuffer byteBuffer1 = ByteBuffer.allocate(KEY_BYTE_LEN);
+        ByteBuffer byteBuffer2 = ByteBuffer.allocate(KEY_BYTE_LEN);
+        ByteArray byteArray1 = toIndex(shard, codingRange.getLower(), oId, false);
+        ByteArray byteArray2 = toIndex(shard, codingRange.getUpper(), oId, true);
         byteBuffer1.put(byteArray1.getBytes());
         byteBuffer2.put(byteArray2.getBytes());
         result.add(new RowKeyRange(new ByteArray(byteBuffer1), new ByteArray(byteBuffer2),
@@ -122,12 +125,10 @@ public class TimeIndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (CodingRange codingRange : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
-        ByteBuffer byteBuffer1 = ByteBuffer.allocate(
-            Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
-        ByteBuffer byteBuffer2 = ByteBuffer.allocate(
-            Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
-        ByteArray byteArray1 = toIndex(shard, codingRange.getLower(), oId);
-        ByteArray byteArray2 = toIndex(shard, codingRange.getUpper(), oId);
+        ByteBuffer byteBuffer1 = ByteBuffer.allocate(KEY_BYTE_LEN);
+        ByteBuffer byteBuffer2 = ByteBuffer.allocate(KEY_BYTE_LEN);
+        ByteArray byteArray1 = toIndex(shard, codingRange.getLower(), oId, false);
+        ByteArray byteArray2 = toIndex(shard, codingRange.getUpper(), oId, true);
         byteBuffer1.put(byteArray1.getBytes());
         byteBuffer2.put(byteArray2.getBytes());
         result.add(new RowKeyRange(new ByteArray(byteBuffer1), new ByteArray(byteBuffer2),
@@ -211,9 +212,9 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   public String timeIndexToString(ByteArray byteArray) {
-    return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = "
-        + getObjectId(byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = "
-        + getTimeCodingVal(byteArray) + '}';
+    return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = " + getObjectId(
+        byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = " + getTimeCodingVal(
+        byteArray) + '}';
   }
 
   private ByteArray toIndex(short shard, short bin, long timeCode, String oId, String tId) {
@@ -232,15 +233,23 @@ public class TimeIndexStrategy extends IndexStrategy {
     return new ByteArray(byteBuffer);
   }
 
-  private ByteArray toIndex(short shard, ByteArray timeBytes, String oId) {
+  private ByteArray toIndex(short shard, ByteArray timeBytes, String oId, Boolean flag) {
     byte[] oidBytes = oId.getBytes(StandardCharsets.ISO_8859_1);
     byte[] oidBytesPadding = bytePadding(oidBytes, MAX_OID_LENGTH);
-    ByteBuffer byteBuffer = ByteBuffer.allocate(
-        Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
     byteBuffer.putShort(shard);
     byteBuffer.putInt(indexType.getId());
     byteBuffer.put(oidBytesPadding);
-    byteBuffer.put(timeBytes.getBytes());
+    if (flag) {
+      ByteBuffer byteBuffer1 = timeBytes.toByteBuffer();
+      byteBuffer1.flip();
+      short bin = byteBuffer1.getShort();
+      long timeCode = byteBuffer1.getLong() + 1;
+      byteBuffer.putShort(bin);
+      byteBuffer.putLong(timeCode);
+    } else {
+      byteBuffer.put(timeBytes.getBytes());
+    }
     return new ByteArray(byteBuffer);
   }
 
