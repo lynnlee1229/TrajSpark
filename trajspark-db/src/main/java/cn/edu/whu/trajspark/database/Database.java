@@ -48,6 +48,9 @@ public final class Database {
   public boolean dataSetExists(String datasetName) throws IOException {
     return metaTable.dataSetExists(datasetName);
   }
+  public boolean isTableExist(String tableName) throws IOException {
+    return admin.tableExists(TableName.valueOf(tableName));
+  }
 
   public void createDataSet(DataSetMeta dataSetMeta) throws IOException {
     String dataSetName = dataSetMeta.getDataSetName();

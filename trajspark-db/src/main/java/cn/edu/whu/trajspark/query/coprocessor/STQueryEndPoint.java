@@ -44,9 +44,9 @@ import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.*;
 /**
  * @author Haocheng Wang Created on 2022/10/27
  */
-public class QueryEndPoint extends QueryService implements Coprocessor, CoprocessorService {
+public class STQueryEndPoint extends QueryService implements Coprocessor, CoprocessorService {
 
-  private final Logger logger = LoggerFactory.getLogger(QueryEndPoint.class);
+  private final Logger logger = LoggerFactory.getLogger(STQueryEndPoint.class);
   private RegionCoprocessorEnvironment env;
 
   @Override
@@ -264,7 +264,7 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
   /**
    * 根据需要配置具体的精过滤条件, 对于最常用的时间\空间条件, 已提供了如下开箱即用的精过滤方法:
    *
-   * @see QueryEndPoint#spatialFineFilter(Result, QueryRequest)
+   * @see STQueryEndPoint#spatialFineFilter(Result, QueryRequest)
    */
   protected boolean fineFilter(Result result, QueryRequest queryRequest) throws IOException {
     boolean validate = true;

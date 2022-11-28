@@ -1,9 +1,5 @@
 package cn.edu.whu.trajspark.query;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
-import static cn.edu.whu.trajspark.query.coprocessor.AddCoprocessor.addCoprocessor;
-import static cn.edu.whu.trajspark.query.coprocessor.AddCoprocessor.deleteCoprocessor;
-
 import cn.edu.whu.trajspark.coding.XZTCoding;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
@@ -16,7 +12,6 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import cn.edu.whu.trajspark.query.coprocessor.QueryEndPoint;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,8 +22,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.junit.jupiter.api.Test;
 
 
@@ -38,7 +31,7 @@ import org.junit.jupiter.api.Test;
  */
 class TemporalQueryTest extends TestCase {
 
-  static String DATASET_NAME = "IDDDTemporal_query_test_1";
+  static String DATASET_NAME = "ID_Temporal_query_test";
   static TemporalQueryCondition temporalQueryCondition;
   static String Oid = "CBQBDS";
   static TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
@@ -98,23 +91,6 @@ class TemporalQueryTest extends TestCase {
 //    assert scanRanges.size() == 144;
   }
 
-  // TODO: 2022/11/19 test addcoprocessor
-  @Test
-  void AddCoprocessor() throws IOException {
-    Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
-    String className = QueryEndPoint.class.getCanonicalName();
-    String jarPath = "hdfs://localhost:9000/processjar/trajspark-db-1.0-SNAPSHOT.jar";
-    addCoprocessor(conf, tableName, className, jarPath);
-  }
-
-  // TODO: 2022/11/19 deletcoprocessor
-  @Test
-  void DeleteCoprocessor() throws IOException {
-    Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
-    deleteCoprocessor(conf, tableName);
-  }
 
   @Test
   void executeQuery() throws IOException {
@@ -132,6 +108,7 @@ class TemporalQueryTest extends TestCase {
     assert temporalQuery.executeQuery().size() == 2;
   }
 
+  @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();
