@@ -67,17 +67,11 @@ public class XZ2Coding implements SpatialCoding {
   public List<CodingRange> ranges(SpatialQueryCondition spatialQueryCondition) {
     Envelope envelope = spatialQueryCondition.getQueryWindow();
     List<CodingRange> codingRangeList = new LinkedList<>();
-    if (spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.INTERSECT) {
-      List<SFCRange> sfcRangeList = xz2Sfc.ranges(envelope, false);
-      for (SFCRange sfcRange : sfcRangeList) {
-        CodingRange codingRange = new CodingRange();
-        codingRange.concatSfcRange(sfcRange);
-        codingRangeList.add(codingRange);
-      }
-    } else if (spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN) {
-      // TODO: 严格包含查询
-      logger.error("Spatial query type: {} is not supported", spatialQueryCondition.getQueryType());
-      throw new IllegalArgumentException();
+    List<SFCRange> sfcRangeList = xz2Sfc.ranges(envelope, spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN);
+    for (SFCRange sfcRange : sfcRangeList) {
+      CodingRange codingRange = new CodingRange();
+      codingRange.concatSfcRange(sfcRange);
+      codingRangeList.add(codingRange);
     }
     return codingRangeList;
   }

@@ -161,11 +161,11 @@ public class XZ2IndexStrategy extends IndexStrategy {
     return new ByteArray(byteBuffer);
   }
 
-  private ByteArray toIndex(short shard, ByteArray xz2coding, Boolean flag) {
+  private ByteArray toIndex(short shard, ByteArray xz2coding, Boolean isEndCoding) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
     byteBuffer.putShort(shard);
     byteBuffer.putInt(indexType.getId());
-    if (flag) {
+    if (isEndCoding) {
       long xz2code = Bytes.toLong(xz2coding.getBytes()) + 1;
       byteBuffer.putLong(xz2code);
     } else {

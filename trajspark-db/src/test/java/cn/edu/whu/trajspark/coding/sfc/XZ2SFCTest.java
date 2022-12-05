@@ -27,7 +27,7 @@ public class XZ2SFCTest extends TestCase {
   WKTWriter wktWriter = new WKTWriter();
 
   static String QUERY_WKT =
-          "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
+          "POLYGON((114.05348463177889 22.53709431984974,114.07494230389803 22.537015043892307,114.07511396527498 22.512675173600506,114.05082388043611 22.51251659361334,114.05039472699373 22.537094319849704,114.05348463177889 22.53709431984974))";
 
 
   public void testCode() throws ParseException {
@@ -114,13 +114,34 @@ public class XZ2SFCTest extends TestCase {
       List<Polygon> polygons = new LinkedList<>();
       for (long i = range.lower; i <= range.upper; i++) {
         polygons.add(xz2SfcWhu.getRegion(i));
-        polygons.add((Polygon) wktReader.read(QUERY_WKT));
-        Polygon[] polygonsArr = new Polygon[polygons.size()];
-        polygons.toArray(polygonsArr);
-        MultiPolygon multiPolygon = new MultiPolygon(polygonsArr, new GeometryFactory());
-        multiPolygons.add(multiPolygon);
+      }
+      polygons.add((Polygon) wktReader.read(QUERY_WKT));
+      Polygon[] polygonsArr = new Polygon[polygons.size()];
+      polygons.toArray(polygonsArr);
+      MultiPolygon multiPolygon = new MultiPolygon(polygonsArr, new GeometryFactory());
+      multiPolygons.add(multiPolygon);
+    }
+    for (MultiPolygon mp : multiPolygons) {
+      System.out.println(new WKTWriter().write(mp));
+    }
+  }
+
+  public void testContainedElementsWkt() throws ParseException {
+    Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
+    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, true);
+    List<MultiPolygon> multiPolygons = new LinkedList<>();
+    List<Polygon> polygons = new LinkedList<>();
+    for (SFCRange range : ranges) {
+      for (long i = range.lower; i <= range.upper; i++) {
+        polygons.add(xz2SfcWhu.getRegion(i));
       }
     }
+    polygons.add((Polygon) wktReader.read(QUERY_WKT));
+    Polygon[] polygonsArr = new Polygon[polygons.size()];
+    polygons.toArray(polygonsArr);
+    MultiPolygon multiPolygon = new MultiPolygon(polygonsArr, new GeometryFactory());
+    multiPolygons.add(multiPolygon);
     for (MultiPolygon mp : multiPolygons) {
       System.out.println(new WKTWriter().write(mp));
     }

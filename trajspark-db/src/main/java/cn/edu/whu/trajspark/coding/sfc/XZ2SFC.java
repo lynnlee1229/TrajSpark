@@ -300,8 +300,13 @@ public class XZ2SFC implements Serializable {
       if (quad.equals(LevelTerminator)) {
         level = (short) (level + 1);
       } else {
-        long[] minMax = sequenceInterval(quad.xmin, quad.ymin, level, false);
-        ranges.add(new SFCRange(minMax[0], minMax[1], false));
+        if (quad.extContained(query)) {
+          long[] minMax = sequenceInterval(quad.xmin, quad.ymin, level, false);
+          ranges.add(new SFCRange(minMax[0], minMax[1], true));
+        } else if (quad.extOverlaps(query)) {
+          long[] minMax = sequenceInterval(quad.xmin, quad.ymin, level, false);
+          ranges.add(new SFCRange(minMax[0], minMax[1], false));
+        }
       }
     }
 
@@ -356,8 +361,8 @@ public class XZ2SFC implements Serializable {
       ranges.add(new SFCRange(minMax[0], minMax[1], true));
     } else if (element.extOverlaps(query)) {
       // some portion of this range is excluded
+      // add the partial match and queue up each sub-range for processing
       if (!contained || canStoreContainedObjects(element, query)) {
-        // add the partial match and queue up each sub-range for processing
         long[] minMax = sequenceInterval(element.xmin, element.ymin, level, true);
         ranges.add(new SFCRange(minMax[0], minMax[1], false));
       }
@@ -375,7 +380,7 @@ public class XZ2SFC implements Serializable {
    */
   private boolean canStoreContainedObjects(XElement element, Bound query) {
     // condition 1
-    if (element.overlap(query) || element.contained(query)) {
+    if (element.contained(query) || element.overlap(query)) {
       List<XElement> neighbors = element.extNeighbors();
       for (XElement neighbor : neighbors) {
         // condition 2
