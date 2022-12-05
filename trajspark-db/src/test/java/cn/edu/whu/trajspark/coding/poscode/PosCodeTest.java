@@ -37,14 +37,65 @@ public class PosCodeTest extends TestCase {
   }
 
 
-  public void testListPossiblePosCodes() {
+  public void testListPossiblePosCodesContain1() {
     Set<QuadID> set = new HashSet<>();
-    System.out.println(PosCode.listPossiblePosCodes(set));
+    set.addAll(QuadID.allQuadIDs());
+    assertEquals(10, PosCode.listPossiblePosCodes(set, true).size());
+  }
+
+  public void testListPossiblePosCodesIntersect1() {
+    Set<QuadID> set = new HashSet<>();
+    set.addAll(QuadID.allQuadIDs());
+    assertEquals(10, PosCode.listPossiblePosCodes(set, false).size());
+  }
+
+  public void testListPossiblePosCodesContain2() {
+    Set<QuadID> set = new HashSet<>();
+    set.add(QuadID.LEFT_BOTTOM);
+    assertEquals(0, PosCode.listPossiblePosCodes(set, true).size());
+  }
+
+  public void testListPossiblePosCodesIntersect2() {
+    Set<QuadID> set = new HashSet<>();
+    set.add(QuadID.LEFT_BOTTOM);
+    assertEquals(7, PosCode.listPossiblePosCodes(set, false).size());
+  }
+
+  public void testListPossiblePosCodesContain3() {
+    Set<QuadID> set = new HashSet<>();
+    set.add(QuadID.LEFT_BOTTOM);
+    set.add(QuadID.RIGHT_TOP);
+    assertEquals(1, PosCode.listPossiblePosCodes(set, true).size());
+  }
+
+  public void testListPossiblePosCodesIntersect3() {
+    Set<QuadID> set = new HashSet<>();
+    set.add(QuadID.LEFT_BOTTOM);
+    set.add(QuadID.RIGHT_TOP);
+    assertEquals(9, PosCode.listPossiblePosCodes(set, false).size());
+  }
+
+  public void testListPossiblePosCodesIntersect4() {
+    Set<QuadID> set = new HashSet<>();
+    set.add(QuadID.LEFT_BOTTOM);
+    set.add(QuadID.RIGHT_TOP);
+    set.add(QuadID.LEFT_TOP);
+    assertEquals(10, PosCode.listPossiblePosCodes(set, false).size());
+  }
+
+
+
+  public void testGetQuadIDSet() {
+    PosCode posCode = new PosCode();
+    posCode.setPosition(QuadID.LEFT_BOTTOM);
+    posCode.setPosition(QuadID.RIGHT_BOTTOM);
+    posCode.setPosition(QuadID.RIGHT_BOTTOM);
+    System.out.println(posCode.getQuadIDSet());
   }
 
   public void testGetPosCodeRanges() {
     Set<QuadID> list = new HashSet<>();
-    for (PosCodeRange range : PosCode.toPosCodeRanges(PosCode.listPossiblePosCodes(list))) {
+    for (PosCodeRange range : PosCode.toPosCodeRanges(PosCode.listPossiblePosCodes(list, true))) {
       System.out.printf("Range start: {%s}, ", range.lower);
       System.out.printf("Range end: {%s}. \n", range.upper);
     }

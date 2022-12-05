@@ -68,37 +68,34 @@ public class XZ2PCoding implements SpatialCoding {
   public List<CodingRange> ranges(SpatialQueryCondition spatialQueryCondition) {
     List<CodingRange> res = new ArrayList<>(100);
     Envelope envelope = spatialQueryCondition.getQueryWindow();
-    if (spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.INTERSECT) {
-      List<SFCRange> rawSFCRange = xz2Sfc.ranges(envelope, false);
-      // 以上为xz2的索引范围, 接下来需要串接PosCode
-      for (SFCRange sfcRange : rawSFCRange) {
-        // contained, 该Index range的所有轨迹都位于查询范围内部
-        if (sfcRange.contained) {
-          CodingRange codingRange = new CodingRange();
-          codingRange.concatSfcRange(sfcRange);
-          res.add(codingRange);
-        } else {
-          // not contained, 该Index range的ext range与查询范围交叉, index range的max与min相同.
-          Set<QuadID> quads = getIntersectedQuadIDs(envelope, sfcRange.lower);
-          List<PosCodeRange> posCodeRanges = PosCode.toPosCodeRanges(PosCode.listPossiblePosCodes(quads));
+    boolean isSpatialContainQuery = spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN;
+    List<SFCRange> rawSFCRange = xz2Sfc.ranges(envelope, isSpatialContainQuery);
+    // 以上为xz2的索引范围, 接下来需要串接PosCode
+    for (SFCRange sfcRange : rawSFCRange) {
+      // contained, 该Index range的所有轨迹都位于查询范围内部
+      if (sfcRange.contained) {
+        CodingRange codingRange = new CodingRange();
+        codingRange.concatSfcRange(sfcRange);
+        res.add(codingRange);
+      } else {
+        // not contained, 该Index range内所有的xz2 code的ext range与查询范围交叉
+        for (long i = sfcRange.lower; i <= sfcRange.upper; i++) {
+          Set<QuadID> quads = getIntersectedQuadIDs(envelope, i);
+          List<PosCodeRange> posCodeRanges = PosCode.toPosCodeRanges(PosCode.listPossiblePosCodes(quads, isSpatialContainQuery));
           for (PosCodeRange posCodeRange : posCodeRanges) {
             CodingRange codingRange = new CodingRange();
-            codingRange.concatSfcRange(sfcRange);
+            codingRange.concatSfcRange(new SFCRange(i, i, false));
             codingRange.concatPosCodeRange(posCodeRange);
             res.add(codingRange);
           }
         }
       }
-    } else if (spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN) {
-      // TODO: 严格包含查询
-      logger.error("Spatial query type: {} is not supported", spatialQueryCondition.getQueryType());
-      throw new IllegalArgumentException();
     }
     return res;
   }
 
   public Polygon getCodingPolygon(ByteArray xz2pCode) {
-    return xz2Sfc.getEnlargedRegion(extractXZ2CodingVal(xz2pCode));
+    return xz2Sfc.getRegion(extractXZ2CodingVal(xz2pCode));
   }
 
   private long extractXZ2CodingVal(ByteArray xz2pCode) {

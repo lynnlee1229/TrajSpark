@@ -8,6 +8,9 @@ import org.locationtech.jts.geom.Polygon;
 import java.util.*;
 
 /**
+ * pos code记录了一条轨迹在一个xz2 element中存储的位置，由四个{@code QuadID}表达，记录于poscodeByte的低4bit中。 <br>
+ * Pos Code的四个QuadID中，LeftBottom(0)、LeftTop(2)二者至少有一个为1，且至少涉及两个QuadID.
+ *
  * @author Haocheng Wang
  * Created on 2022/11/7
  */
@@ -45,6 +48,21 @@ public class PosCode implements Comparable<PosCode> {
     poscodeByte = (byte) (poscodeByte | (1 << (3 - quadID.quadID)));
   }
 
+  public void dropPosition(QuadID quadID) {
+    poscodeByte = (byte) (poscodeByte & ~(1 << (3 - quadID.quadID)));
+  }
+
+  public Set<QuadID> getQuadIDSet() {
+    Set<QuadID> set = new HashSet<>();
+    for (int i = 0; i < 4; i++) {
+      if ((poscodeByte >> (3 - i) & 1) == 1) {
+        set.add(new QuadID(i));
+      }
+    }
+    return set;
+  }
+
+
   public PosCode(byte poscodeByte) {
     this.poscodeByte = poscodeByte;
   }
@@ -71,38 +89,96 @@ public class PosCode implements Comparable<PosCode> {
 
 
   /**
-   * 获取当PosCode的某些bit为1时，所有可能的PosCode.
-   * @param quadIDS
-   * @return
+   * 根据某XZ2编码与查询范围相交的QuadID集合与查询要求，获取所有可能符合查询条件的PosCode.
+   * @param relatedQuadIDs 某XZ2编码与查询范围相交的QuadID集合
+   * @param isContainQuery 是否为包含查询
+   * @return 所有可能符合查询条件的PosCode
    */
-  public static Set<PosCode> listPossiblePosCodes(Set<QuadID> quadIDS) {
-    // Left bottom(0) will always be true.
-    boolean[] flags = {true, false, false, false};
-    List<PosCode> res = new LinkedList<>();
-    PosCode basicPosCode = new PosCode();
-    basicPosCode.setPosition(QuadID.LEFT_BOTTOM_ID);
-    for (QuadID quadID : quadIDS) {
-      flags[quadID.quadID] = true;
-      basicPosCode.setPosition(quadID);
+  public static Set<PosCode> listPossiblePosCodes(Set<QuadID> relatedQuadIDs, boolean isContainQuery) {
+    if (isContainQuery) {
+      return listPossiblePosCodesContained(relatedQuadIDs);
+    } else {
+      return listPossiblePosCodesIntersect(relatedQuadIDs);
     }
-    int pos = 0;
-    res.add(new PosCode(basicPosCode.getPoscodeByte()));
-    while (pos < 4) {
-      if (!flags[pos]) {
-        int size = res.size();
-        for (int j = 0; j < size; j++) {
-          PosCode p = res.get(j);
-          PosCode copy = new PosCode(p.getPoscodeByte());
-          copy.setPosition(new QuadID(pos));
-          res.add(copy);
+  }
+
+  /**
+   * 包含查询时符合条件的Pos Code应满足以下要求：
+   * <ol>
+   *     <li>基本要求：至少有两个QuadID，且LB、LT中至少有一个</li>
+   *     <li>PosCode中所有的Quad ID均包含于{@param quadIDS}中</li>
+   * </ol>
+   */
+  public static Set<PosCode> listPossiblePosCodesContained(Set<QuadID> relatedQuadIDs) {
+    Set<PosCode> set = new HashSet<>();
+    if (relatedQuadIDs.size() < 2 || (!relatedQuadIDs.contains(QuadID.LEFT_BOTTOM) && !relatedQuadIDs.contains(QuadID.LEFT_TOP))) {
+      return set;
+    }
+    ArrayList<QuadID> list = new ArrayList<>(relatedQuadIDs);
+    Collections.sort(list);
+    backtrack(set, 0, list, new PosCode());
+    return getValidatedPosCodes(set);
+  }
+
+  private static void backtrack(Set<PosCode> res, int offset, List<QuadID> choices, PosCode posCode) {
+    if (offset == choices.size()) {
+      res.add(new PosCode(posCode.poscodeByte));
+      return;
+    }
+    for (int i = offset; i < choices.size(); i++) {
+      posCode.setPosition(choices.get(i));
+      backtrack(res, i+1, choices, posCode);
+      posCode.dropPosition(choices.get(i));
+      backtrack(res, i+1, choices, posCode);
+    }
+  }
+
+  private static Set<PosCode> getValidatedPosCodes(Set<PosCode> set) {
+    // 抹去不符合基本要求的
+    Set<PosCode> res = new HashSet<>();
+    for (PosCode posCode : set) {
+      Set<QuadID> quadIDS = posCode.getQuadIDSet();
+      if (quadIDS.size() >= 2 && (quadIDS.contains(QuadID.LEFT_BOTTOM) || quadIDS.contains(QuadID.LEFT_TOP))) {
+        res.add(posCode);
+      }
+    }
+    return res;
+  }
+
+  /**
+   * 交叉查询时符合条件的Pos Code应满足以下要求：
+   * <ol>
+   *     <li>基本要求：至少有两个QuadID，且LB、LT中至少有一个</li>
+   *     <li>与{@param quadIDS}存在交集</li>
+   * </ol>
+   */
+  public static Set<PosCode> listPossiblePosCodesIntersect(Set<QuadID> relatedQuadIDs) {
+    if (relatedQuadIDs.size() == 0) {
+      return new HashSet<>();
+    }
+    Set<PosCode> possibles = getAllPossiblePosCodes();
+    Set<PosCode> res = new HashSet<>();
+    for (PosCode possible : possibles) {
+      Set<QuadID> quadIDS = possible.getQuadIDSet();
+      boolean match = false;
+      for (QuadID quadID : relatedQuadIDs) {
+        if (quadIDS.contains(quadID)) {
+          match = true;
+          break;
         }
       }
-      pos++;
+      if (match) {
+        res.add(possible);
+      }
     }
-    if (res.size() == 1) {
-      res.clear();
-    }
-    return new HashSet<>(res);
+    return res;
+  }
+
+  private static Set<PosCode> getAllPossiblePosCodes() {
+    List<QuadID> choices = QuadID.allQuadIDs();
+    Set<PosCode> set = new HashSet<>();
+    backtrack(set, 0, choices, new PosCode());
+    return getValidatedPosCodes(set);
   }
 
   /**
