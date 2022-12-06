@@ -105,7 +105,20 @@ public class XZ2PQueryTest {
   }
 
   @Test
-  public void testExecuteQuery() throws IOException {
+  public void testExecuteIntersectQuery() throws IOException {
+    Database instance = Database.getInstance();
+    instance.openConnection();
+    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialIntersectQueryCondition);
+    List<Trajectory> results = spatialQuery.executeQuery();
+    for (Trajectory result : results) {
+      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(result));
+    }
+    assertEquals(13, spatialQuery.executeQuery().size());
+  }
+
+  @Test
+  public void testExecuteContainQuery() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();
     DataTable dataTable = instance.getDataTable(DATASET_NAME);

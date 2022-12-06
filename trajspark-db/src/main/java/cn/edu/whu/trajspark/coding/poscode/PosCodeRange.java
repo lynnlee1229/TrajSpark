@@ -40,4 +40,12 @@ public class PosCodeRange implements Comparable<PosCodeRange> {
     }
     return Byte.compare(upper.getPoscodeByte(), o.upper.getPoscodeByte());
   }
+
+  @Override
+  public String toString() {
+    return "PosCodeRange{" +
+        "lower=" + lower +
+        ", upper=" + upper +
+        '}';
+  }
 }
