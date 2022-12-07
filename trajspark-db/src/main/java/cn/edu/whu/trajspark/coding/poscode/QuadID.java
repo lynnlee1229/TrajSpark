@@ -35,6 +35,13 @@ public class QuadID implements Comparable<QuadID> {
   }
 
   @Override
+  public String toString() {
+    return "QuadID{" +
+        "quadID=" + quadID +
+        '}';
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(quadID);
   }

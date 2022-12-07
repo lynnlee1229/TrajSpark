@@ -1,16 +1,12 @@
 package cn.edu.whu.trajspark.coding.poscode;
 
 import cn.edu.whu.trajspark.coding.XZ2PCoding;
-import cn.edu.whu.trajspark.coding.poscode.PosCode;
-import cn.edu.whu.trajspark.coding.poscode.QuadID;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import junit.framework.TestCase;
 import org.locationtech.jts.io.WKTWriter;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
@@ -83,14 +79,17 @@ public class PosCodeTest extends TestCase {
     assertEquals(10, PosCode.listPossiblePosCodes(set, false).size());
   }
 
-
-
   public void testGetQuadIDSet() {
     PosCode posCode = new PosCode();
-    posCode.setPosition(QuadID.LEFT_BOTTOM);
-    posCode.setPosition(QuadID.RIGHT_BOTTOM);
-    posCode.setPosition(QuadID.RIGHT_BOTTOM);
+    posCode.setQuadID(QuadID.LEFT_BOTTOM);
+    posCode.setQuadID(QuadID.RIGHT_BOTTOM);
+    posCode.setQuadID(QuadID.RIGHT_BOTTOM);
     System.out.println(posCode.getQuadIDSet());
+  }
+  public void testPosCodeRange() {
+    Set<QuadID> set = new HashSet<>();
+    set.add(QuadID.LEFT_TOP);
+    System.out.println(PosCode.toPosCodeRanges(PosCode.listPossiblePosCodes(set, false)));
   }
 
   public void testGetPosCodeRanges() {

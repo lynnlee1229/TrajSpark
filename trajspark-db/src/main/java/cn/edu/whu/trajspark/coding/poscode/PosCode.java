@@ -16,6 +16,7 @@ import java.util.*;
  */
 public class PosCode implements Comparable<PosCode> {
 
+  // Pos Code的字节值取值范围为[5, 7]与[9, 15]
   private byte poscodeByte;
   private final XZ2SFC XZ2 = XZ2SFC.getInstance(CodingConstants.MAX_XZ2_PRECISION);
 
@@ -35,7 +36,7 @@ public class PosCode implements Comparable<PosCode> {
     for (int quadID = 0; quadID < 4; quadID++) {
       Polygon quadRegion = XZ2.getQuadRegion(xz2Sequence, quadID);
       if (lineString.intersects(quadRegion)) {
-        this.setPosition(new QuadID(quadID));
+        this.setQuadID(new QuadID(quadID));
       }
     }
   }
@@ -44,11 +45,11 @@ public class PosCode implements Comparable<PosCode> {
     return poscodeByte;
   }
 
-  public void setPosition(QuadID quadID) {
+  public void setQuadID(QuadID quadID) {
     poscodeByte = (byte) (poscodeByte | (1 << (3 - quadID.quadID)));
   }
 
-  public void dropPosition(QuadID quadID) {
+  public void dropQuadID(QuadID quadID) {
     poscodeByte = (byte) (poscodeByte & ~(1 << (3 - quadID.quadID)));
   }
 
@@ -126,9 +127,9 @@ public class PosCode implements Comparable<PosCode> {
       return;
     }
     for (int i = offset; i < choices.size(); i++) {
-      posCode.setPosition(choices.get(i));
+      posCode.setQuadID(choices.get(i));
       backtrack(res, i+1, choices, posCode);
-      posCode.dropPosition(choices.get(i));
+      posCode.dropQuadID(choices.get(i));
       backtrack(res, i+1, choices, posCode);
     }
   }
@@ -188,8 +189,11 @@ public class PosCode implements Comparable<PosCode> {
    */
   public static List<PosCodeRange> toPosCodeRanges(Set<PosCode> posCodesSet) {
     List<PosCode> posCodes = new ArrayList<>(posCodesSet);
-    Collections.sort(posCodes);
     List<PosCodeRange> ranges = new LinkedList<>();
+    if (posCodesSet.isEmpty()) {
+      return ranges;
+    }
+    Collections.sort(posCodes);
     PosCodeRange range = new PosCodeRange();
     for (PosCode posCode : posCodes) {
       byte posCodeByte = posCode.poscodeByte;
