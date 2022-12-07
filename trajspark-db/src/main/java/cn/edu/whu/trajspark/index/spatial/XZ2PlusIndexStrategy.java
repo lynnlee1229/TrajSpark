@@ -8,6 +8,7 @@ import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
+import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -82,8 +83,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition, int maxRangeNum) {
     return null;
   }
 
@@ -94,14 +94,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition,
-      String oID) {
-    return null;
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      TemporalQueryCondition temporalQueryCondition) {
+  public List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition) {
     throw new UnsupportedOperationException();
   }
 
@@ -131,6 +124,11 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   @Override
   public TimeCoding getTimeCoding() {
     return null;
+  }
+
+  @Override
+  public short getTimeBinVal(ByteArray byteArray) {
+    throw new UnsupportedOperationException();
   }
 
   @Override

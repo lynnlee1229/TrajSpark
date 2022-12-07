@@ -84,8 +84,8 @@ class TemporalQueryTest extends TestCase {
     System.out.println("Multi InnerBin ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + timeIndexStrategy.timeIndexToString(scanRange.getStartKey()) + " end : "
-              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()) + "isContained "
+          "start : " + timeIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
+              + timeIndexStrategy.parseIndex2String(scanRange.getEndKey()) + "isContained "
               + scanRange.isContained());
     }
 //    assert scanRanges.size() == 144;

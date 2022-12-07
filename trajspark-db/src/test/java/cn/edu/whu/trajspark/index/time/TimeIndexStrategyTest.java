@@ -62,8 +62,8 @@ class TimeIndexStrategyTest extends TestCase {
     System.out.println("Single ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + timeIndexStrategy.timeIndexToString(scanRange.getStartKey()) + " end : "
-              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()) + " isContained "
+          "start : " + timeIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
+              + timeIndexStrategy.parseIndex2String(scanRange.getEndKey()) + " isContained "
               + scanRange.isContained());
     }
   }
@@ -90,8 +90,8 @@ class TimeIndexStrategyTest extends TestCase {
     System.out.println("Multi ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + timeIndexStrategy.timeIndexToString(scanRange.getStartKey()) + " end : "
-              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()));
+          "start : " + timeIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
+              + timeIndexStrategy.parseIndex2String(scanRange.getEndKey()));
     }
   }
 
@@ -118,8 +118,8 @@ class TimeIndexStrategyTest extends TestCase {
     System.out.println("Multi InnerBin ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + timeIndexStrategy.timeIndexToString(scanRange.getStartKey()) + " end : "
-              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()));
+          "start : " + timeIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
+              + timeIndexStrategy.parseIndex2String(scanRange.getEndKey()));
     }
     long end = System.currentTimeMillis();
     System.out.println(end - start);

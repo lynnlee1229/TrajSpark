@@ -61,7 +61,6 @@ public class TextMapper extends Mapper<LongWritable, Text, ImmutableBytesWritabl
     Trajectory trajectory = parseJsonToTrajectory(lineValue);
     DataSetMeta dataSetMeta = dataTable.getDataSetMeta();
     List<IndexMeta> indexMetaList = dataSetMeta.getIndexMetaList();
-    dataSetMeta.sortByMainIndexMeta(indexMetaList);
     for (IndexMeta indexMeta : indexMetaList) {
       final byte[] rowKey = getMapRowKey(trajectory, indexMeta);
       Put put = getMapPut(trajectory, indexMeta);

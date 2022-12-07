@@ -20,6 +20,7 @@ import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
+import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.locationtech.jts.geom.Polygon;
+import scala.Tuple2;
 
 /**
  * row key: shard(short) + index type(int) + oid(string) + XZTCoding(short + long) + tid(string)
@@ -45,6 +47,10 @@ public class TimeIndexStrategy extends IndexStrategy {
     indexType = IndexType.OBJECT_ID_T;
     this.timeCoding = timeCoding;
   }
+  public TimeIndexStrategy() {
+    indexType = IndexType.OBJECT_ID_T;
+    this.timeCoding = new XZTCoding();
+  }
 
   @Override
   public ByteArray index(Trajectory trajectory) {
@@ -56,12 +62,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     return toIndex(shard, binNum, timeIndex, trajectory.getObjectID(),
         trajectory.getTrajectoryID());
   }
-
-  @Override
-  public IndexType getIndexType() {
-    return IndexType.TXZ2;
-  }
-
 
   @Override
   public TimeLine getTimeLineRange(ByteArray byteArray) {
@@ -84,8 +84,8 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(
+      SpatialTemporalQueryCondition spatialTemporalQueryCondition, int maxRangeNum) {
     return null;
   }
 
@@ -116,7 +116,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     return result;
   }
 
-  @Override
   public List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition,
       String oId) {
     List<RowKeyRange> result = new ArrayList<>();
@@ -139,14 +138,16 @@ public class TimeIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      TemporalQueryCondition temporalQueryCondition) {
+  public List<RowKeyRange> getScanRanges(
+      SpatialTemporalQueryCondition spatialTemporalQueryCondition) {
     return null;
   }
 
   @Override
   public String parseIndex2String(ByteArray byteArray) {
-    return null;
+    return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = " + getObjectId(
+        byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = " + getTimeCodingVal(
+        byteArray) + '}';
   }
 
   @Override
@@ -211,12 +212,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     return new String(stringBytes, StandardCharsets.ISO_8859_1);
   }
 
-  public String timeIndexToString(ByteArray byteArray) {
-    return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = " + getObjectId(
-        byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = " + getTimeCodingVal(
-        byteArray) + '}';
-  }
-
   private ByteArray toIndex(short shard, short bin, long timeCode, String oId, String tId) {
     byte[] oidBytes = oId.getBytes(StandardCharsets.ISO_8859_1);
     byte[] oidBytesPadding = bytePadding(oidBytes, MAX_OID_LENGTH);
@@ -241,12 +236,9 @@ public class TimeIndexStrategy extends IndexStrategy {
     byteBuffer.putInt(indexType.getId());
     byteBuffer.put(oidBytesPadding);
     if (flag) {
-      ByteBuffer byteBuffer1 = timeBytes.toByteBuffer();
-      byteBuffer1.flip();
-      short bin = byteBuffer1.getShort();
-      long timeCode = byteBuffer1.getLong() + 1;
-      byteBuffer.putShort(bin);
-      byteBuffer.putLong(timeCode);
+      Tuple2<Short, Long> extractTimeKeyBytes = timeCoding.getExtractTimeKeyBytes(timeBytes);
+      byteBuffer.putShort(extractTimeKeyBytes._1);
+      byteBuffer.putLong(extractTimeKeyBytes._2);
     } else {
       byteBuffer.put(timeBytes.getBytes());
     }
