@@ -642,8 +642,8 @@ public class XZ2SFC implements Serializable {
       if (this.extOverlaps(bound) || this.extContained(bound)) {
         double oXMin = Math.max(bound.xmin, xmin);
         double oYMin = Math.max(bound.ymin, ymin);
-        double oXMax = Math.min(bound.xmax, xmax);
-        double oYMax = Math.min(bound.ymax, ymax);
+        double oXMax = Math.min(bound.xmax, xext);
+        double oYMax = Math.min(bound.ymax, yext);
         return new Bound(oXMin, oYMin, oXMax, oYMax);
       } else {
         return null;

@@ -143,7 +143,7 @@ public class XZ2TIndexStrategy extends IndexStrategy {
           byteBuffer1.put(byteArray1.getBytes());
           byteBuffer2.put(byteArray2.getBytes());
           result.add(new RowKeyRange(new ByteArray(byteBuffer1), new ByteArray(byteBuffer2),
-              codingRange.isContained() & spatialCodingRange.isContained()));
+              false));
         }
       }
     }

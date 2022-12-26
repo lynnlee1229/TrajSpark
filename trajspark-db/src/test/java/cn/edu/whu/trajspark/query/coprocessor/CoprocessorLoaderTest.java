@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  * @since 2022/11/25
  */
 class CoprocessorLoaderTest extends TestCase {
-  static String DATASET_NAME = "ID_Temporal_query_test";
+  static String DATASET_NAME = "xz2_intersect_query_test";
   static TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
 
   @Test

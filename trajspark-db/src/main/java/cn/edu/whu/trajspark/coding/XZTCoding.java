@@ -90,17 +90,11 @@ public class XZTCoding implements TimeCoding {
   public List<CodingRange> ranges(TemporalQueryCondition condition) {
     List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
     if (condition.getQueryWindows() == null) {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindow(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     } else {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindows(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     }
     return rangesToCodingRange(indexRangeList);
   }
@@ -108,17 +102,11 @@ public class XZTCoding implements TimeCoding {
   public List<CodingRange> rangesMerged(TemporalQueryCondition condition) {
     List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
     if (condition.getQueryWindows() == null) {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindow(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     } else {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindows(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     }
     List<TimeIndexRange> intervalKeyMerge = getIntervalKeyMerge(indexRangeList);
     return rangesToCodingRange(intervalKeyMerge);

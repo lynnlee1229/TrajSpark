@@ -23,6 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 
 /**
@@ -33,23 +36,25 @@ class TemporalQueryTest extends TestCase {
 
   static String DATASET_NAME = "ID_Temporal_query_test";
   static TemporalQueryCondition temporalQueryCondition;
+  static TemporalQueryCondition temporalQueryConditionContain;
   static String Oid = "CBQBDS";
   static TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
 
+  static List<TimeLine> timeLineList = new ArrayList<>();
   static {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(
             ZoneId.systemDefault());
-    ZonedDateTime start = ZonedDateTime.parse("2015-12-25 00:06:45", dateTimeFormatter);
-    ZonedDateTime end = ZonedDateTime.parse("2015-12-25 00:36:32", dateTimeFormatter);
-    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 01:00:45", dateTimeFormatter);
-    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 01:40:33", dateTimeFormatter);
+    ZonedDateTime start = ZonedDateTime.parse("2015-12-25 06:00:00", dateTimeFormatter);
+    ZonedDateTime end = ZonedDateTime.parse("2015-12-25 07:00:00", dateTimeFormatter);
+    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 15:00:00", dateTimeFormatter);
+    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 16:00:00", dateTimeFormatter);
     TimeLine timeLine = new TimeLine(start, end);
     TimeLine timeLine1 = new TimeLine(start1, end1);
-    List<TimeLine> timeLineList = new ArrayList<>();
     timeLineList.add(timeLine);
     timeLineList.add(timeLine1);
     temporalQueryCondition = new TemporalQueryCondition(timeLineList, TemporalQueryType.INTERSECT);
+    temporalQueryConditionContain = new TemporalQueryCondition(timeLineList, TemporalQueryType.CONTAIN);
   }
 
   @Test
@@ -93,7 +98,7 @@ class TemporalQueryTest extends TestCase {
 
 
   @Test
-  void executeQuery() throws IOException {
+  void executeINTERSECTQuery() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();
     DataTable dataTable = instance.getDataTable(DATASET_NAME);
@@ -105,7 +110,52 @@ class TemporalQueryTest extends TestCase {
       ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
       System.out.println(new TimeLine(startTime, endTime));
     }
-    assert temporalQuery.executeQuery().size() == 2;
+    assertEquals(temporalQuery.executeQuery().size(), 10);
+  }
+
+  @Test
+  void executeContainQuery() throws IOException {
+    Database instance = Database.getInstance();
+    instance.openConnection();
+    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    TemporalQuery temporalQuery = new TemporalQuery(dataTable, temporalQueryConditionContain, Oid);
+    List<Trajectory> trajectories = temporalQuery.executeQuery();
+    System.out.println(trajectories.size());
+    for (Trajectory trajectory : trajectories) {
+      ZonedDateTime startTime = trajectory.getTrajectoryFeatures().getStartTime();
+      ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
+      System.out.println(new TimeLine(startTime, endTime));
+    }
+    assertEquals(temporalQuery.executeQuery().size(), 6);
+  }
+
+  @Test
+  public void testGetAnswer() throws URISyntaxException, IOException {
+    Database instance = Database.getInstance();
+    instance.openConnection();
+    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
+        new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
+    int i = 0;
+    int j = 0;
+    for (Trajectory trajectory : trips) {
+      ZonedDateTime startTime = trajectory.getTrajectoryFeatures().getStartTime();
+      ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
+      for (TimeLine timeLine : timeLineList) {
+        if (timeLine.getTimeStart().toEpochSecond() <= startTime.toEpochSecond()
+            && endTime.toEpochSecond() <= timeLine.getTimeEnd().toEpochSecond()) {
+          System.out.println(new TimeLine(startTime, endTime));
+          i++;
+        }
+        if (startTime.toEpochSecond() <= timeLine.getTimeEnd().toEpochSecond()
+            && timeLine.getTimeStart().toEpochSecond() <= endTime.toEpochSecond()) {
+          System.out.println(new TimeLine(startTime, endTime));
+          j++;
+        }
+      }
+    }
+    System.out.println("CONTAIN: " + i);
+    System.out.println("INTERSECT: " + j);
   }
 
   @Test

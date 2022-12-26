@@ -89,15 +89,21 @@ public class XZ2QueryTest extends TestCase {
     }
   }
 
-  @Test
+ @Test
   public void testExecuteIntersectQuery() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();
     DataTable dataTable = instance.getDataTable(DATASET_NAME);
     SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialIntersectQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
+    System.out.println(results.size());
     for (Trajectory result : results) {
-      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(result));
+      ByteArray index = dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy()
+          .index(result);
+      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().parseIndex2String(index));
+      ZonedDateTime startTime = result.getTrajectoryFeatures().getStartTime();
+      ZonedDateTime endTime = result.getTrajectoryFeatures().getEndTime();
+      System.out.println(new TimeLine(startTime, endTime));
     }
     assert spatialQuery.executeQuery().size() == 13;
   }
@@ -131,13 +137,26 @@ public class XZ2QueryTest extends TestCase {
         new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
     WKTReader wktReader = new WKTReader();
     Polygon envelope = (Polygon) wktReader.read(QUERY_WKT_CONTAIN).getEnvelope();
+    Polygon envelope1 = (Polygon) wktReader.read(QUERY_WKT_INTERSECT).getEnvelope();
     System.out.println(trips.size());
+    int i = 0;
+    int j = 0;
     for (Trajectory trajectory : trips) {
       if (envelope.contains(trajectory.getLineString())) {
         System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(trajectory));
         // System.out.println(trajectory);
+        i++;
       }
     }
+    System.out.println("CONTAIN: " + i);
+    for (Trajectory trajectory : trips) {
+      if (envelope1.intersects(trajectory.getLineString())) {
+        System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(trajectory));
+        // System.out.println(trajectory);
+        j++;
+      }
+    }
+    System.out.println("INTERSECT: " + j);
   }
 
 //  public void testAllScanTrajectories() {
