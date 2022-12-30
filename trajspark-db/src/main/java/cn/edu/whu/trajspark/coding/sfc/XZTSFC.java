@@ -2,6 +2,8 @@ package cn.edu.whu.trajspark.coding.sfc;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.LOG_FIVE;
 
+import cn.edu.whu.trajspark.coding.sfc.XZ2SFC.Bound;
+import cn.edu.whu.trajspark.coding.sfc.XZ2SFC.XElement;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeElement;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
@@ -67,20 +69,20 @@ public class XZTSFC implements Serializable {
     return sequenceCode(binTime[0], level);
   }
 
-  public List<TimeIndexRange> ranges(TimeLine timeLine) {
+  public List<TimeIndexRange> ranges(TimeLine timeLine, Boolean isContained) {
     List<TimeLine> timeLineList = new ArrayList<>(1);
     timeLineList.add(timeLine);
-    return ranges(timeLineList);
+    return ranges(timeLineList, isContained);
   }
 
-  public List<TimeIndexRange> ranges(List<TimeLine> timeLineList) {
-    List<TimeIndexRange> ranges = new ArrayList<>(500);
-    Deque<TimeElement> remaining = new ArrayDeque<>(500);
+  public List<TimeIndexRange> ranges(List<TimeLine> timeLineList, Boolean isContained) {
+    List<TimeIndexRange> ranges = new ArrayList<>(5000);
+    Deque<TimeElement> remaining = new ArrayDeque<>(5000);
     Boolean checkBin = checkBin(timeLineList);
     if (checkBin) {
-      return innerBinRanges(timeLineList, ranges, remaining);
+      return innerBinRanges(timeLineList, ranges, remaining, isContained);
     } else {
-      return outBinRanges(timeLineList, ranges, remaining);
+      return outBinRanges(timeLineList, ranges, remaining, isContained);
     }
   }
 
@@ -103,8 +105,7 @@ public class XZTSFC implements Serializable {
   }
 
   public List<TimeIndexRange> innerBinRanges(List<TimeLine> timeLineList,
-      List<TimeIndexRange> ranges,
-      Deque<TimeElement> remaining) {
+      List<TimeIndexRange> ranges, Deque<TimeElement> remaining, Boolean isContained) {
     List<TimeBin> timeBinList = getTimeBinList(timeLineList.get(0));
     for (TimeBin timeBin : timeBinList) {
       List<TimeLine> timeLines = timeToRefBinLong(timeLineList, timeBin);
@@ -120,19 +121,18 @@ public class XZTSFC implements Serializable {
             remaining.add(levelSeparator);
           }
         } else {
-          ranges = innerBinSequenceCodeRange(next, timeLines, level, ranges, remaining, timeBin);
+          ranges = innerBinSequenceCodeRange(next, timeLines, level, ranges, remaining, timeBin,
+              isContained);
         }
       }
-      ranges = getMaxLevelSequenceCodeRange(level, ranges,
-          remaining, timeBin);
+      ranges = getMaxLevelSequenceCodeRange(level, timeLines, ranges, remaining, timeBin);
     }
     ranges = getCodeRangeKeyMerge(ranges);
     return ranges;
   }
 
-  public List<TimeIndexRange> outBinRanges(List<TimeLine> timeLineList,
-      List<TimeIndexRange> ranges,
-      Deque<TimeElement> remaining) {
+  public List<TimeIndexRange> outBinRanges(List<TimeLine> timeLineList, List<TimeIndexRange> ranges,
+      Deque<TimeElement> remaining, Boolean isContained) {
     for (TimeLine timeLine : timeLineList) {
       List<TimeBin> timeBinList = getTimeBinList(timeLine);
       for (TimeBin timeBin : timeBinList) {
@@ -151,21 +151,23 @@ public class XZTSFC implements Serializable {
               remaining.add(levelSeparator);
             }
           } else {
-            ranges = getSequenceCodeRange(line, next, level, ranges, remaining, timeBin);
+            ranges = getSequenceCodeRange(line, next, level, ranges, remaining, timeBin,
+                isContained);
           }
         }
-        ranges = getMaxLevelSequenceCodeRange(level, ranges,
-            remaining, timeBin);
+        ArrayList<TimeLine> timeLines = new ArrayList<>();
+        timeLines.add(line);
+        ranges = getMaxLevelSequenceCodeRange(level, timeLines, ranges, remaining, timeBin);
       }
     }
     ranges = getCodeRangeKeyMerge(ranges);
     return ranges;
   }
 
-  public Boolean isContained(TimeElement timeElement, List<TimeLine> timeLineList) {
+  public Boolean isExContained(TimeElement timeElement, List<TimeLine> timeLineList) {
     int i = 0;
     while (i < timeLineList.size()) {
-      if (timeElement.isContained(timeLineList.get(i))) {
+      if (timeElement.isExContained(timeLineList.get(i))) {
         return true;
       }
       i += 1;
@@ -184,19 +186,43 @@ public class XZTSFC implements Serializable {
     return false;
   }
 
+  public Boolean isContained(TimeElement timeElement, List<TimeLine> timeLineList) {
+    int i = 0;
+    while (i < timeLineList.size()) {
+      if (timeElement.isContained(timeLineList.get(i))) {
+        return true;
+      }
+      i += 1;
+    }
+    return false;
+  }
+
+  public Boolean isExOverlapped(TimeElement timeElement, List<TimeLine> timeLineList) {
+    int i = 0;
+    while (i < timeLineList.size()) {
+      if (timeElement.isExOverlaps(timeLineList.get(i))) {
+        return true;
+      }
+      i += 1;
+    }
+    return false;
+  }
+
   public List<TimeIndexRange> innerBinSequenceCodeRange(TimeElement timeElement,
-      List<TimeLine> timeLineList,
-      short level, List<TimeIndexRange> ranges, Deque<TimeElement> remaining, TimeBin timeBin) {
-    if (isContained(timeElement, timeLineList)) {
+      List<TimeLine> timeLineList, short level, List<TimeIndexRange> ranges,
+      Deque<TimeElement> remaining, TimeBin timeBin, Boolean isContained) {
+    if (isExContained(timeElement, timeLineList)) {
       TimeIndexRange timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
           false);
       ranges.add(timeIndexRange);
-    } else if (isOverlapped(timeElement, timeLineList)) {
+    } else if (isExOverlapped(timeElement, timeLineList)) {
       // some portion of this range is excluded
       // add the partial match and queue up each sub-range for processing
-      TimeIndexRange timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
-          true);
-      ranges.add(timeIndexRange);
+      if (!isContained || canStoreContainedObjects(timeElement, timeLineList)) {
+        TimeIndexRange timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
+            true);
+        ranges.add(timeIndexRange);
+      }
       remaining.addAll(timeElement.getChildren());
     }
     return ranges;
@@ -205,8 +231,7 @@ public class XZTSFC implements Serializable {
   public List<TimeLine> timeToRefBinLong(List<TimeLine> timeLineList, TimeBin timeBin) {
     List<TimeLine> timeLineArrayList = new ArrayList<>();
     for (TimeLine timeLine : timeLineList) {
-      double[] doubles = normalize(timeLine.getTimeStart(), timeLine.getTimeEnd(), timeBin,
-          false);
+      double[] doubles = normalize(timeLine.getTimeStart(), timeLine.getTimeEnd(), timeBin, false);
       TimeLine line = new TimeLine(doubles[0], doubles[1]);
       timeLineArrayList.add(line);
     }
@@ -214,36 +239,46 @@ public class XZTSFC implements Serializable {
   }
 
   public List<TimeIndexRange> getSequenceCodeRange(TimeLine timeLine, TimeElement timeElement,
-      short level, List<TimeIndexRange> ranges, Deque<TimeElement> remaining, TimeBin timeBin
-  ) {
-    if (timeElement.isContained(timeLine)) {
+      short level, List<TimeIndexRange> ranges, Deque<TimeElement> remaining, TimeBin timeBin,
+      Boolean isContained) {
+    if (timeElement.isExContained(timeLine)) {
       // whole range matches
       TimeIndexRange timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
           false);
       ranges.add(timeIndexRange);
-    } else if (timeElement.isOverlaps(timeLine)) {
+    } else if (timeElement.isExOverlaps(timeLine)) {
       // some portion of this range is excluded
       // add the partial match and queue up each sub-range for processing
-      TimeIndexRange timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
-          true);
-      ranges.add(timeIndexRange);
+      ArrayList<TimeLine> timeLines = new ArrayList<>();
+      timeLines.add(timeLine);
+      if (!isContained || canStoreContainedObjects(timeElement, timeLines)) {
+        TimeIndexRange timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
+            true);
+        ranges.add(timeIndexRange);
+      }
       remaining.addAll(timeElement.getChildren());
     }
     return ranges;
   }
 
-  public List<TimeIndexRange> getMaxLevelSequenceCodeRange(
-      short level, List<TimeIndexRange> ranges, Deque<TimeElement> remaining, TimeBin timeBin
-  ) {
+  public List<TimeIndexRange> getMaxLevelSequenceCodeRange(short level, List<TimeLine> timeLines,
+      List<TimeIndexRange> ranges, Deque<TimeElement> remaining, TimeBin timeBin) {
     // bottom out and get all the ranges that partially overlapped but we didn't fully process
     while (!remaining.isEmpty()) {
       TimeElement poll = remaining.poll();
       if (poll.equals(levelSeparator)) {
         level = (short) (level + 1);
       } else {
-        TimeIndexRange timeIndexRange = sequenceInterval(poll.getTimeStart(), level, timeBin,
-            false);
-        ranges.add(timeIndexRange);
+        if (isExContained(poll, timeLines)) {
+          TimeIndexRange timeIndexRange = sequenceInterval(poll.getTimeStart(), level, timeBin,
+              false);
+          ranges.add(timeIndexRange);
+        } else if (isExOverlapped(poll, timeLines)) {
+          TimeIndexRange timeIndexRange = sequenceInterval(poll.getTimeStart(), level, timeBin,
+              false);
+          timeIndexRange.setContained(false);
+          ranges.add(timeIndexRange);
+        }
       }
     }
     return ranges;
@@ -258,11 +293,12 @@ public class XZTSFC implements Serializable {
     while (i < ranges.size()) {
       TimeIndexRange indexRange = ranges.get(i);
       if (indexRange.getTimeBin().equals(current.getTimeBin())
-          & indexRange.getLower() <= current.getUpper() + 1) {
+          & indexRange.getLower() == current.getUpper() + 1
+          & indexRange.isContained() == current.isContained()) {
         // merge the two ranges
         current = new TimeIndexRange(current.getLower(),
             Math.max(current.getUpper(), indexRange.getUpper()), indexRange.getTimeBin(),
-            indexRange.isContained() & current.isContained());
+            indexRange.isContained());
       } else {
         // append the last range and set the current range for future merging
         result.add(current);
@@ -282,7 +318,7 @@ public class XZTSFC implements Serializable {
       max = min;
     } else {
       //Hbase RowKey Scan
-      max = min + (long) (Math.pow(2, g - level + 1) - 1L);
+      max = min + (long) (Math.pow(2, g - level + 1) - 1L) - 1;
     }
     return new TimeIndexRange(min, max, timeBin, !flag);
   }
@@ -298,6 +334,21 @@ public class XZTSFC implements Serializable {
     return timeBins;
   }
 
+  private boolean canStoreContainedObjects(TimeElement element, List<TimeLine> timeLineList) {
+    // condition 1
+    if (isContained(element, timeLineList) || isOverlapped(element, timeLineList)) {
+      TimeElement extElement = element.getExtElement();
+      // condition 2
+      if (isContained(extElement, timeLineList) || isOverlapped(extElement, timeLineList)) {
+        // condition 3
+        TimeLine extOverlappedTimeLine = extElement.getExtOverlappedTimeLine(timeLineList);
+        return extOverlappedTimeLine.getReTimeEnd() - extOverlappedTimeLine.getReTimeStart()
+            > element.getLength() / 2;
+      }
+    }
+    return false;
+  }
+
   public double[] normalize(ZonedDateTime startTime, ZonedDateTime endTime, TimeBin timeBin,
       Boolean flag) {
     double nStart = (timeBin.getRefTime(startTime) * 1.0) / timePeriod.getChronoUnit().getDuration()
@@ -306,9 +357,8 @@ public class XZTSFC implements Serializable {
     if (flag) {
       if (timePeriod.getChronoUnit().getDuration()
           .compareTo(Duration.ofSeconds(timeBin.getRefTime(endTime) / 2)) > 0) {
-        nEnd =
-            timeBin.getRefTime(endTime) * 1.0 / timePeriod.getChronoUnit().getDuration()
-                .getSeconds();
+        nEnd = timeBin.getRefTime(endTime) * 1.0 / timePeriod.getChronoUnit().getDuration()
+            .getSeconds();
       } else {
         LOGGER.error(
             "The timeBin granules are too small to accommodate this length of time,please adopt a larger time granularity");

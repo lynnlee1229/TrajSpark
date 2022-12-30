@@ -1,9 +1,5 @@
 package cn.edu.whu.trajspark.query;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
-import static cn.edu.whu.trajspark.query.coprocessor.AddCoprocessor.addCoprocessor;
-import static cn.edu.whu.trajspark.query.coprocessor.AddCoprocessor.deleteCoprocessor;
-
 import cn.edu.whu.trajspark.coding.XZTCoding;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
@@ -16,7 +12,6 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import cn.edu.whu.trajspark.query.coprocessor.QueryEndPoint;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,9 +22,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 
 /**
@@ -38,25 +34,27 @@ import org.junit.jupiter.api.Test;
  */
 class TemporalQueryTest extends TestCase {
 
-  static String DATASET_NAME = "IDDDTemporal_query_test_1";
+  static String DATASET_NAME = "ID_Temporal_query_test";
   static TemporalQueryCondition temporalQueryCondition;
+  static TemporalQueryCondition temporalQueryConditionContain;
   static String Oid = "CBQBDS";
   static TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
 
+  static List<TimeLine> timeLineList = new ArrayList<>();
   static {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(
             ZoneId.systemDefault());
-    ZonedDateTime start = ZonedDateTime.parse("2015-12-25 00:06:45", dateTimeFormatter);
-    ZonedDateTime end = ZonedDateTime.parse("2015-12-25 00:36:32", dateTimeFormatter);
-    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 01:00:45", dateTimeFormatter);
-    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 01:40:33", dateTimeFormatter);
+    ZonedDateTime start = ZonedDateTime.parse("2015-12-25 06:00:00", dateTimeFormatter);
+    ZonedDateTime end = ZonedDateTime.parse("2015-12-25 07:00:00", dateTimeFormatter);
+    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 15:00:00", dateTimeFormatter);
+    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 16:00:00", dateTimeFormatter);
     TimeLine timeLine = new TimeLine(start, end);
     TimeLine timeLine1 = new TimeLine(start1, end1);
-    List<TimeLine> timeLineList = new ArrayList<>();
     timeLineList.add(timeLine);
     timeLineList.add(timeLine1);
     temporalQueryCondition = new TemporalQueryCondition(timeLineList, TemporalQueryType.INTERSECT);
+    temporalQueryConditionContain = new TemporalQueryCondition(timeLineList, TemporalQueryType.CONTAIN);
   }
 
   @Test
@@ -91,33 +89,16 @@ class TemporalQueryTest extends TestCase {
     System.out.println("Multi InnerBin ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + timeIndexStrategy.timeIndexToString(scanRange.getStartKey()) + " end : "
-              + timeIndexStrategy.timeIndexToString(scanRange.getEndKey()) + "isContained "
+          "start : " + timeIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
+              + timeIndexStrategy.parseIndex2String(scanRange.getEndKey()) + "isContained "
               + scanRange.isContained());
     }
 //    assert scanRanges.size() == 144;
   }
 
-  // TODO: 2022/11/19 test addcoprocessor
-  @Test
-  void AddCoprocessor() throws IOException {
-    Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
-    String className = QueryEndPoint.class.getCanonicalName();
-    String jarPath = "hdfs://localhost:9000/processjar/trajspark-db-1.0-SNAPSHOT.jar";
-    addCoprocessor(conf, tableName, className, jarPath);
-  }
-
-  // TODO: 2022/11/19 deletcoprocessor
-  @Test
-  void DeleteCoprocessor() throws IOException {
-    Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
-    deleteCoprocessor(conf, tableName);
-  }
 
   @Test
-  void executeQuery() throws IOException {
+  void executeINTERSECTQuery() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();
     DataTable dataTable = instance.getDataTable(DATASET_NAME);
@@ -129,9 +110,55 @@ class TemporalQueryTest extends TestCase {
       ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
       System.out.println(new TimeLine(startTime, endTime));
     }
-    assert temporalQuery.executeQuery().size() == 2;
+    assertEquals(temporalQuery.executeQuery().size(), 10);
   }
 
+  @Test
+  void executeContainQuery() throws IOException {
+    Database instance = Database.getInstance();
+    instance.openConnection();
+    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    TemporalQuery temporalQuery = new TemporalQuery(dataTable, temporalQueryConditionContain, Oid);
+    List<Trajectory> trajectories = temporalQuery.executeQuery();
+    System.out.println(trajectories.size());
+    for (Trajectory trajectory : trajectories) {
+      ZonedDateTime startTime = trajectory.getTrajectoryFeatures().getStartTime();
+      ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
+      System.out.println(new TimeLine(startTime, endTime));
+    }
+    assertEquals(temporalQuery.executeQuery().size(), 6);
+  }
+
+  @Test
+  public void testGetAnswer() throws URISyntaxException, IOException {
+    Database instance = Database.getInstance();
+    instance.openConnection();
+    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
+        new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
+    int i = 0;
+    int j = 0;
+    for (Trajectory trajectory : trips) {
+      ZonedDateTime startTime = trajectory.getTrajectoryFeatures().getStartTime();
+      ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
+      for (TimeLine timeLine : timeLineList) {
+        if (timeLine.getTimeStart().toEpochSecond() <= startTime.toEpochSecond()
+            && endTime.toEpochSecond() <= timeLine.getTimeEnd().toEpochSecond()) {
+          System.out.println(new TimeLine(startTime, endTime));
+          i++;
+        }
+        if (startTime.toEpochSecond() <= timeLine.getTimeEnd().toEpochSecond()
+            && timeLine.getTimeStart().toEpochSecond() <= endTime.toEpochSecond()) {
+          System.out.println(new TimeLine(startTime, endTime));
+          j++;
+        }
+      }
+    }
+    System.out.println("CONTAIN: " + i);
+    System.out.println("INTERSECT: " + j);
+  }
+
+  @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
     instance.openConnection();

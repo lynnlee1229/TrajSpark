@@ -2,22 +2,27 @@ package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.coding.sfc.XZTSFC;
 import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
+import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.coding.sfc.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import scala.Tuple2;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.DEFAULT_TIME_PERIOD;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TIME_BIN_PRECISION;
@@ -31,6 +36,8 @@ public class XZTCoding implements TimeCoding {
   private final int g;
   private final TimePeriod timePeriod;
   private cn.edu.whu.trajspark.coding.sfc.XZTSFC XZTSFC;
+
+  public static final int BYTES = Short.BYTES + Long.BYTES;
 
   @SuppressWarnings("checkstyle:StaticVariableName")
   static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
@@ -70,21 +77,24 @@ public class XZTCoding implements TimeCoding {
     return XZTSFC.index(timeLine, bin);
   }
 
+  public ByteArray code(TimeLine timeLine) {
+    ByteBuffer br = ByteBuffer.allocate(Short.BYTES + Long.BYTES);
+    short bin = dateToBinnedTime(timeLine.getTimeStart()).getBin();
+    long index = getIndex(timeLine);
+    br.putShort(bin);
+    br.putLong(index);
+    return new ByteArray(br);
+  }
+
   @Override
   public List<CodingRange> ranges(TemporalQueryCondition condition) {
     List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
     if (condition.getQueryWindows() == null) {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindow(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     } else {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindows(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     }
     return rangesToCodingRange(indexRangeList);
   }
@@ -92,17 +102,11 @@ public class XZTCoding implements TimeCoding {
   public List<CodingRange> rangesMerged(TemporalQueryCondition condition) {
     List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
     if (condition.getQueryWindows() == null) {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindow());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindow(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     } else {
-      if (condition.getTemporalQueryType() == TemporalQueryType.CONTAIN) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      } else if (condition.getTemporalQueryType() == TemporalQueryType.INTERSECT) {
-        indexRangeList = XZTSFC.ranges(condition.getQueryWindows());
-      }
+      indexRangeList = XZTSFC.ranges(condition.getQueryWindows(),
+          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     }
     List<TimeIndexRange> intervalKeyMerge = getIntervalKeyMerge(indexRangeList);
     return rangesToCodingRange(intervalKeyMerge);
@@ -117,7 +121,9 @@ public class XZTCoding implements TimeCoding {
     while (i < ranges.size()) {
       TimeIndexRange indexRange = ranges.get(i);
       if (indexRange.getTimeBin().equals(current.getTimeBin())
-          & indexRange.getLower() <= current.getUpper() + g) {
+          & indexRange.getLower() <= current.getUpper() + g
+          & indexRange.isContained() == current.isContained()
+      ) {
         // merge the two ranges
         current = new TimeIndexRange(current.getLower(),
             indexRange.getUpper(), indexRange.getTimeBin(),
@@ -152,6 +158,13 @@ public class XZTCoding implements TimeCoding {
     return timePeriod;
   }
 
+  public Tuple2<Short, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
+    ByteBuffer byteBuffer1 = timeBytes.toByteBuffer();
+    byteBuffer1.flip();
+    short bin = byteBuffer1.getShort();
+    long timeCode = byteBuffer1.getLong() + 1;
+    return new Tuple2<>(bin, timeCode);
+  }
 
   public TimeBin getTrajectoryTimeBin(TrajFeatures features) {
     ZonedDateTime zonedDateTime = features.getStartTime();

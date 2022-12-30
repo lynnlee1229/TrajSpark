@@ -44,9 +44,9 @@ import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.*;
 /**
  * @author Haocheng Wang Created on 2022/10/27
  */
-public class QueryEndPoint extends QueryService implements Coprocessor, CoprocessorService {
+public class STQueryEndPoint extends QueryService implements Coprocessor, CoprocessorService {
 
-  private final Logger logger = LoggerFactory.getLogger(QueryEndPoint.class);
+  private final Logger logger = LoggerFactory.getLogger(STQueryEndPoint.class);
   private RegionCoprocessorEnvironment env;
 
   @Override
@@ -67,25 +67,23 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
         while (hasMore) {
           Result result = Result.create(cells);
           if (!innerScan.needFilter) {
+            // 如果当前索引result 的定位到多个indexstrategy，如xz2与xz2+
+            // (这种两个空间键都存在的情况是不应该的，但是否需要考虑一个容错机制)，是否考虑增加一个去重操作？
             if (!TrajectorySerdeUtils.isMainIndexed(result)) {
               result = getMainIndexedResult(result);
             }
-            TrajectoryResult trajectoryResult =
-                TrajectoryResult.newBuilder().setRowkey(ByteString.copyFrom(result.getRow()))
-                    .setTrajPointList(ByteString.copyFrom(
-                        TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                            TRAJ_POINTS_QUALIFIER)))
-                    .setObjectId(ByteString.copyFrom(
-                        TrajectorySerdeUtils.getByteArrayByQualifier(result, OBJECT_ID_QUALIFIER)))
-                    .setTid(ByteString.copyFrom(TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                        TRAJECTORY_ID_QUALIFIER)))
-                    .setStartTime(ByteString.copyFrom(
-                        TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                            START_TIME_QUALIFIER)))
-                    .setEndTime(ByteString.copyFrom(
-                        TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                            END_TIME_QUALIFIER)))
-                    .build();
+            TrajectoryResult trajectoryResult = TrajectoryResult.newBuilder()
+                .setRowkey(ByteString.copyFrom(result.getRow())).setTrajPointList(
+                    ByteString.copyFrom(TrajectorySerdeUtils.getByteArrayByQualifier(result,
+                        TRAJ_POINTS_QUALIFIER))).setObjectId(ByteString.copyFrom(
+                    TrajectorySerdeUtils.getByteArrayByQualifier(result, OBJECT_ID_QUALIFIER)))
+                .setTid(ByteString.copyFrom(
+                    TrajectorySerdeUtils.getByteArrayByQualifier(result, TRAJECTORY_ID_QUALIFIER)))
+                .setStartTime(ByteString.copyFrom(
+                    TrajectorySerdeUtils.getByteArrayByQualifier(result, START_TIME_QUALIFIER)))
+                .setEndTime(ByteString.copyFrom(
+                    TrajectorySerdeUtils.getByteArrayByQualifier(result, END_TIME_QUALIFIER)))
+                .build();
             trajectoryResults.add(trajectoryResult);
           } else {
             // 使用pos code, mbr等粗过滤
@@ -96,24 +94,19 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
                 result = getMainIndexedResult(result);
               }
               if (fineFilter(result, request)) {
-                TrajectoryResult trajectoryResult =
-                    TrajectoryResult.newBuilder().setRowkey(ByteString.copyFrom(result.getRow()))
-                        .setTrajPointList(ByteString.copyFrom(
-                            TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                                TRAJ_POINTS_QUALIFIER)))
-                        .setObjectId(ByteString.copyFrom(
-                            TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                                OBJECT_ID_QUALIFIER)))
-                        .setTid(ByteString.copyFrom(
-                            TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                                TRAJECTORY_ID_QUALIFIER)))
-                        .setStartTime(ByteString.copyFrom(
-                            TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                                START_TIME_QUALIFIER)))
-                        .setEndTime(ByteString.copyFrom(
-                            TrajectorySerdeUtils.getByteArrayByQualifier(result,
-                                END_TIME_QUALIFIER)))
-                        .build();
+                TrajectoryResult trajectoryResult = TrajectoryResult.newBuilder()
+                    .setRowkey(ByteString.copyFrom(result.getRow())).setTrajPointList(
+                        ByteString.copyFrom(TrajectorySerdeUtils.getByteArrayByQualifier(result,
+                            TRAJ_POINTS_QUALIFIER))).
+                    setObjectId(ByteString.copyFrom(
+                        TrajectorySerdeUtils.getByteArrayByQualifier(result, OBJECT_ID_QUALIFIER)))
+                    .setTid(ByteString.copyFrom(TrajectorySerdeUtils.getByteArrayByQualifier(result,
+                        TRAJECTORY_ID_QUALIFIER))).
+                    setStartTime(ByteString.copyFrom(
+                        TrajectorySerdeUtils.getByteArrayByQualifier(result, START_TIME_QUALIFIER)))
+                    .setEndTime(ByteString.copyFrom(
+                        TrajectorySerdeUtils.getByteArrayByQualifier(result, END_TIME_QUALIFIER)))
+                    .build();
                 trajectoryResults.add(trajectoryResult);
               }
             }
@@ -126,8 +119,7 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
     } catch (IOException e) {
       e.printStackTrace();
     }
-    QueryResponse response = QueryResponse.newBuilder()
-        .addAllList(trajectoryResults).build();
+    QueryResponse response = QueryResponse.newBuilder().addAllList(trajectoryResults).build();
     done.run(response);
   }
 
@@ -156,16 +148,8 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
     for (Range range : rangeList) {
       List<MultiRowRangeFilter.RowRange> listToAdd =
           range.getContained() ? rowRangeListConfirmed : rowRangeListSuspected;
-      //时间bin的划分会导致前一个bin的[0,0]range编码进入到scan序列中，空间编码只有一个bin概念，不会出现以下情况
-      if (Bytes.compareTo(range.getStart().toByteArray(), range.getEnd().toByteArray()) == 0) {
-        listToAdd.add(new MultiRowRangeFilter.RowRange(
-            range.getStart().toByteArray(), true,
-            getRangeEndAsPrefix(range.getEnd().toByteArray()), true));
-      } else {
-        listToAdd.add(new MultiRowRangeFilter.RowRange(
-            range.getStart().toByteArray(), true,
-            getRangeEndAsPrefix(range.getEnd().toByteArray()), false));
-      }
+      listToAdd.add(new MultiRowRangeFilter.RowRange(range.getStart().toByteArray(), true,
+          range.getEnd().toByteArray(), false));
     }
     List<InnerScan> innerScans = new LinkedList<>();
     if (!rowRangeListConfirmed.isEmpty()) {
@@ -253,8 +237,7 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
             TemporalQueryType.INTERSECT);
       }
       TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
-      List<RowKeyRange> scanRanges = timeIndexStrategy.getScanRanges(temporalQueryCondition,
-          queryRequest.getOid());
+      List<RowKeyRange> scanRanges = timeIndexStrategy.getScanRanges(temporalQueryCondition, queryRequest.getOid());
       for (RowKeyRange range : scanRanges) {
         int startKey = Bytes.toInt(range.getStartKey().getBytes());
         int endKey = Bytes.toInt(range.getEndKey().getBytes());
@@ -271,14 +254,15 @@ public class QueryEndPoint extends QueryService implements Coprocessor, Coproces
   /**
    * 根据需要配置具体的精过滤条件, 对于最常用的时间\空间条件, 已提供了如下开箱即用的精过滤方法:
    *
-   * @see QueryEndPoint#spatialFineFilter(Result, QueryRequest)
+   * @see STQueryEndPoint#spatialFineFilter(Result, QueryRequest)
    */
   protected boolean fineFilter(Result result, QueryRequest queryRequest) throws IOException {
     boolean validate = true;
     if (queryRequest.hasSpatialQueryWindow()) {
       validate = spatialFineFilter(result, queryRequest);
-    } else if (queryRequest.hasTemporalQueryWindows()) {
-      validate = temporalFineFilter(result, queryRequest);
+    }
+    if (queryRequest.hasTemporalQueryWindows()) {
+      validate = validate & temporalFineFilter(result, queryRequest);
     }
     return validate;
   }

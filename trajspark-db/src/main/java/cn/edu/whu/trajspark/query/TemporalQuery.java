@@ -45,7 +45,7 @@ public class TemporalQuery extends AbstractQuery {
   @Override
   public List<RowKeyRange> getIndexRanges() {
     IndexMeta indexMeta = findBestIndex();
-    return indexMeta.getIndexStrategy().getMergeScanRanges(temporalQueryCondition, oID);
+    return indexMeta.getIndexStrategy().getScanRanges(temporalQueryCondition, oID);
   }
 
   @Override

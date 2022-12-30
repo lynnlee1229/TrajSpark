@@ -6,6 +6,7 @@ import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
+import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 
 import java.io.Serializable;
@@ -48,20 +49,20 @@ public abstract class IndexStrategy implements Serializable {
 
   public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition);
 
-  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition, int maxRangeNum);
+  public abstract List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition, int maxRangeNum);
 
   public abstract List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
-  public abstract List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
 
-  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, TemporalQueryCondition temporalQueryCondition);
+  public abstract List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition);
 
-  public abstract String indexToString(ByteArray byteArray);
+  public abstract String parseIndex2String(ByteArray byteArray);
 
   public abstract SpatialCoding getSpatialCoding();
 
-  public abstract ByteArray extractSpatialCoding(ByteArray byteArray);
+  public abstract ByteArray extractSpatialCode(ByteArray byteArray);
 
   public abstract TimeCoding getTimeCoding();
+  public abstract short getTimeBinVal(ByteArray byteArray);
 
   public abstract long getTimeCodingVal(ByteArray byteArray);
 

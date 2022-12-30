@@ -29,6 +29,7 @@ public class DataSetMeta {
     this.dataSetName = dataSetName;
     assert check(indexMetaList);
     this.indexMetaList = indexMetaList;
+    sortByMainIndexMeta();
   }
 
   public String getDataSetName() {
@@ -77,7 +78,7 @@ public class DataSetMeta {
     return new DataSetMeta(dataSetName, indexMetaList);
   }
 
-  public void sortByMainIndexMeta(List<IndexMeta> indexMetaList) {
+  public void sortByMainIndexMeta() {
     Deque<IndexMeta> indexMetaDeque = new LinkedList<>(indexMetaList);
     while (!indexMetaDeque.isEmpty()) {
       IndexMeta indexMeta = indexMetaDeque.pollFirst();

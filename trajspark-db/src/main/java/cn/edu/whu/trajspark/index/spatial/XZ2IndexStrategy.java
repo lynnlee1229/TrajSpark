@@ -11,25 +11,26 @@ import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
+import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /**
  * row key: shard(short) + index type(int) + xz2(long) + oid(string) + tid(string)
  *
- * @author Haocheng Wang
- * Created on 2022/10/4
+ * @author Haocheng Wang Created on 2022/10/4
  */
 public class XZ2IndexStrategy extends IndexStrategy {
 
   private XZ2Coding xz2Coding;
 
   // shard(short) + index type(int) + xz2(long)
-  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + Long.BYTES;
+  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + XZ2Coding.BYTES;
 
   public XZ2IndexStrategy() {
     indexType = IndexType.XZ2;
@@ -64,9 +65,8 @@ public class XZ2IndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (CodingRange xz2Coding : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
-        // make sure range end is exclusive
-        result.add(new RowKeyRange(toIndex(shard, xz2Coding.getLower())
-            , toIndex(shard, xz2Coding.getUpper()), xz2Coding.isContained()));
+        result.add(new RowKeyRange(toIndex(shard, xz2Coding.getLower(), false),
+            toIndex(shard, xz2Coding.getUpper(), true), xz2Coding.isContained()));
       }
     }
     return result;
@@ -78,8 +78,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      TemporalQueryCondition temporalQueryCondition, int maxRangeNum) {
+  public List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition, int maxRangeNum) {
     throw new UnsupportedOperationException();
   }
 
@@ -90,24 +89,14 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public List<RowKeyRange> getMergeScanRanges(TemporalQueryCondition temporalQueryCondition,
-      String oID) {
-    return null;
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      TemporalQueryCondition temporalQueryCondition) {
+  public List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public String indexToString(ByteArray byteArray) {
-    return "Row key index: {" +
-        "shardNum=" + getShardNum(byteArray) +
-        ", xz2=" + extractSpatialCoding(byteArray) +
-        ", tid=" + getObjectTrajId(byteArray) +
-        '}';
+  public String parseIndex2String(ByteArray byteArray) {
+    return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", xz2="
+        + extractSpatialCode(byteArray) + ", tid=" + getObjectTrajId(byteArray) + '}';
   }
 
   @Override
@@ -116,7 +105,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public ByteArray extractSpatialCoding(ByteArray byteArray) {
+  public ByteArray extractSpatialCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
@@ -128,6 +117,11 @@ public class XZ2IndexStrategy extends IndexStrategy {
 
   @Override
   public TimeCoding getTimeCoding() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public short getTimeBinVal(ByteArray byteArray) {
     throw new UnsupportedOperationException();
   }
 
@@ -165,20 +159,22 @@ public class XZ2IndexStrategy extends IndexStrategy {
     return new ByteArray(byteBuffer);
   }
 
-  private ByteArray toIndex(short shard, ByteArray xz2coding) {
+  private ByteArray toIndex(short shard, ByteArray xz2coding, Boolean isEndCoding) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
     byteBuffer.putShort(shard);
     byteBuffer.putInt(indexType.getId());
-    byteBuffer.put(xz2coding.getBytes());
+    if (isEndCoding) {
+      long xz2code = Bytes.toLong(xz2coding.getBytes()) + 1;
+      byteBuffer.putLong(xz2code);
+    } else {
+      byteBuffer.put(xz2coding.getBytes());
+    }
     return new ByteArray(byteBuffer);
   }
 
   @Override
   public String toString() {
-    return "XZ2IndexStrategy{" +
-        "shardNum=" + shardNum +
-        ", indexType=" + indexType +
-        ", xz2Coding=" + xz2Coding +
-        '}';
+    return "XZ2IndexStrategy{" + "shardNum=" + shardNum + ", indexType=" + indexType
+        + ", xz2Coding=" + xz2Coding + '}';
   }
 }
