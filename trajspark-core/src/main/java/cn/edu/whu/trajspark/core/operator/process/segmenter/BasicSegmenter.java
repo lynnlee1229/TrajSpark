@@ -49,8 +49,8 @@ public class BasicSegmenter implements ISegmenter {
     segIndex.add(-1);
     for (int i = 0; i < tmpPointList.size() - 1; ++i) {
       TrajPoint p0 = tmpPointList.get(i), p1 = tmpPointList.get(i + 1);
-      if (ChronoUnit.SECONDS.between(p0.getTimestamp(), p1.getTimestamp()) >= maxTimeInterval ||
-          GeoUtils.getEuclideanDistanceM(p0, p1) >= maxDis) {
+      if (ChronoUnit.SECONDS.between(p0.getTimestamp(), p1.getTimestamp()) >= maxTimeInterval
+          || GeoUtils.getEuclideanDistanceM(p0, p1) >= maxDis) {
         // record segIndex
         segIndex.add(i);
       }

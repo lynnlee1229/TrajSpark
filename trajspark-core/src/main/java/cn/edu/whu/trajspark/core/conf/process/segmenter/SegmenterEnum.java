@@ -6,5 +6,6 @@ package cn.edu.whu.trajspark.core.conf.process.segmenter;
  **/
 public enum SegmenterEnum {
   BASIC_SEGMENTER,
-  STAYPOINTBASED_SEGMENTER;
+  STAYPOINTBASED_SEGMENTER,
+  USERDEFINED_SEGMENTER;
 }
