@@ -36,6 +36,9 @@ public class TrajPoint extends BasePoint implements Serializable {
     this.extendedValues = extendedValues;
   }
 
+  public void setTimestamp(ZonedDateTime timestamp) {
+    this.timestamp = timestamp;
+  }
   public void setPid(String pid) {
     this.pid = pid;
   }

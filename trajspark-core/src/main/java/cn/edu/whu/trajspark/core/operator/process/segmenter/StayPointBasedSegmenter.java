@@ -80,7 +80,7 @@ public class StayPointBasedSegmenter implements ISegmenter {
         // 从trajIdx到最近停留点的前一点
         if (!newSpFlag && i == spEndIdx) {
           tmpPts = new ArrayList<>(ptList.subList(trajIdx, spStartIdx));
-          movingTraj = SegmenterUtils.genNewTrajectory(
+          movingTraj = SegmentUtils.genNewTrajectory(
               rawTrajectory.getTrajectoryID(),
               rawTrajectory.getObjectID(),
               tmpPts,
@@ -98,7 +98,7 @@ public class StayPointBasedSegmenter implements ISegmenter {
       // 若未发现停留点，则轨迹归为一段
       if (newSpFlag) {
         tmpPts = new ArrayList<>(ptList.subList(trajIdx, ptList.size()));
-        movingTraj = SegmenterUtils.genNewTrajectory(
+        movingTraj = SegmentUtils.genNewTrajectory(
             rawTrajectory.getTrajectoryID(),
             rawTrajectory.getObjectID(),
             tmpPts,

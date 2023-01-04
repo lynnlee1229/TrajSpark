@@ -48,7 +48,7 @@ public class StandaloneDetectExample {
 
       // 执行预处理
       JavaRDD<Trajectory> segmentedTraj = mySegmenter.segment(trajRDD);
-      JavaRDD<List<StayPoint>> stayPointList = segmentedTraj.map(myDector::detectFunction);
+      JavaRDD<List<StayPoint>> stayPointList = (JavaRDD<List<StayPoint>>) segmentedTraj.map(myDector::detectFunction);
       JavaRDD<StayPoint> detectRDD = myDector.detect(segmentedTraj);
       // 存储
       IStore iStore =
