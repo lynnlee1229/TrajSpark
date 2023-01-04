@@ -2,7 +2,7 @@
   "loadConfig": {
     "@type": "standalone",
     "master": "local[*]",
-    "location": "/Users/lynnlee/DW/project/10 华为三期&轨迹大数据处理引擎/技术点1/实验Python/预处理测试-去噪",
+    "location": "/Users/lynnlee/Downloads/tmp/filtered",
     "fileMode": "multi_file",
     "partNum": 8,
     "splitter": ","
@@ -12,12 +12,12 @@
     "trajId": {
       "sourceName": "traj_id",
       "dataType": "String",
-      "index": 0
+      "index": 1
     },
     "objectId": {
       "sourceName": "object_id",
       "dataType": "String",
-      "index": 1
+      "index": 0
     },
     "trajPointConfig": {
       "@type": "traj_point",
@@ -41,32 +41,34 @@
         "dataType": "Date",
         "index": 5,
         "format": "yyyy-MM-dd HH:mm:ss"
-      },
-      "trajPointMetas": [
-        {
-          "sourceData": {
-            "sourceName": "bsid",
-            "dataType": "String",
-            "index": 6
-          },
-          "mappingName": "bsid",
-          "indexable": true
-        }
-      ]
+      }
     }
   },
   "segmenterConfig": {
-    "@type": "STAYPOINTBASED_SEGMENTER",
-    "minTrajLength": 0.05,
-    "detectorConfig": {
-      "@type": "BASIC_DETECTOR",
-      "maxStayDistInMeter": 900,
-      "maxStayTimeInSecond": 900
-    }
+    "@type": "USERDEFINED_SEGMENTER",
+    "segmenterConfigList": [
+      {
+        "@type": "BASIC_SEGMENTER",
+        "maxDis": 10000,
+        "maxTimeInterval":1800,
+        "minTrajLength": 0.05
+      },
+      {
+        "@type": "STAYPOINTBASED_SEGMENTER",
+        "minTrajLength": 0.05,
+        "detectorConfig": {
+          "@type": "BASIC_DETECTOR",
+          "maxStayDistInMeter": 300,
+          "maxStayTimeInSecond": 900
+        }
+      }
+    ]
   },
   "storeConfig": {
     "@type": "standalone",
-    "location": "/Users/lynnlee/DW/project/10 华为三期&轨迹大数据处理引擎/技术点1/实验Python/预处理测试-分段",
-    "schema": "POINT_BASED_TRAJECTORY"
+    "location": "/Users/lynnlee/Downloads/tmp/segmented",
+    "schema": "POINT_BASED_TRAJECTORY",
+    "splitter": ",",
+    "filePostFix": ".csv"
   }
 }

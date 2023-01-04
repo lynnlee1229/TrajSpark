@@ -25,21 +25,18 @@ public class StayPointConvertor implements Serializable {
   }
 
   public static String convertSPList(List<StayPoint> spList,
-                                     String splitter,
-                                     String lineBreaker) {
+                                     String splitter) {
     StringBuilder records = new StringBuilder();
     for (StayPoint stayPoint : spList) {
-      records.append(convertSP(stayPoint, splitter)).append(lineBreaker);
+      records.append(convertSP(stayPoint, splitter)).append(System.lineSeparator());
     }
     return records.toString();
   }
 
   public static String convertSPAsTraj(StayPoint stayPoint,
-                                       String splitter,
-                                       String lineBreaker) {
+                                       String splitter) {
     return TrajectoryConvertor.convert(
-        new Trajectory(stayPoint.getSid(), stayPoint.getOid(), stayPoint.getPlist()), splitter,
-        lineBreaker);
+        new Trajectory(stayPoint.getSid(), stayPoint.getOid(), stayPoint.getPlist()), splitter);
   }
 
 }

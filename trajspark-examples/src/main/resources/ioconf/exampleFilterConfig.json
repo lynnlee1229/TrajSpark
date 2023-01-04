@@ -2,7 +2,7 @@
   "loadConfig": {
     "@type": "standalone",
     "master": "local[*]",
-    "location": "/Users/lynnlee/DW/project/10\\ 华为三期\\&轨迹大数据处理引擎/技术点1/实验Python/预处理测试IN",
+    "location": "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/data/geolife",
     "fileMode": "multi_file",
     "partNum": 8,
     "splitter": ","
@@ -12,12 +12,12 @@
     "trajId": {
       "sourceName": "traj_id",
       "dataType": "String",
-      "index": 0
+      "index": 1
     },
     "objectId": {
       "sourceName": "object_id",
       "dataType": "String",
-      "index": 1
+      "index": 0
     },
     "trajPointConfig": {
       "@type": "traj_point",
@@ -41,39 +41,32 @@
         "dataType": "Date",
         "index": 5,
         "format": "yyyy-MM-dd HH:mm:ss"
-      },
-      "trajPointMetas": [
-        {
-          "sourceData": {
-            "sourceName": "bsid",
-            "dataType": "String",
-            "index": 6
-          },
-          "mappingName": "bsid",
-          "indexable": true
-        }
-      ]
+      }
     }
   },
   "filterConfig": {
-    "@type": "COMPOSITIVEFILTER_FILTER",
-    "driftFilterConfig": {
-      "@type": "DRIFT_FILTER",
-      "maxSpeed": 150.0,
-      "minAlpha": 15,
-      "maxRatio": 3.0,
-      "minTrajLength": 0.05
-    },
-    "pingpongFilterConfig": {
-      "@type": "PINGPONG_FILTER",
-      "baseStationIndex": "bsid",
-      "maxPingpongTime": 150.0,
-      "minTrajLength": 0.05
-    }
+    "@type": "USERDEFINED_FILTER",
+    "filterConfigList": [
+      {
+        "@type": "DRIFT_FILTER",
+        "maxSpeed": 150.0,
+        "minAlpha": 15,
+        "maxRatio": 3.0,
+        "minTrajLength": 0.05
+      },
+      {
+        "@type": "PINGPONG_FILTER",
+        "baseStationIndex": "bsid",
+        "maxPingpongTime": 60,
+        "minTrajLength": 0.05
+      }
+    ]
   },
   "storeConfig": {
     "@type": "standalone",
-    "location": "/Users/lynnlee/DW/project/10 华为三期&轨迹大数据处理引擎/技术点1/实验Python/预处理测试-去噪",
-    "schema": "POINT_BASED_TRAJECTORY"
+    "location": "/Users/lynnlee/Downloads/tmp/filtered",
+    "schema": "POINT_BASED_TRAJECTORY",
+    "splitter": ",",
+    "filePostFix": ".csv"
   }
 }

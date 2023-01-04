@@ -6,6 +6,7 @@ import cn.edu.whu.trajspark.core.conf.process.noisefilter.CompositiveFilterConfi
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.DriftFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.PingpongFilterConfig;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.UserDefinedFilterConfig;
 import java.io.Serializable;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
@@ -48,9 +49,14 @@ public interface IFilter extends Serializable {
           return new DriftFilter((DriftFilterConfig) config);
         }
         throw new NoSuchMethodError();
-      case COMPOSITIVEFILTER_FILTER:
+      case COMPOSITIVE_FILTER:
         if (config instanceof CompositiveFilterConfig) {
           return new CompositiveFilter((CompositiveFilterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      case USERDEFINED_FILTER:
+        if (config instanceof UserDefinedFilterConfig) {
+          return new UserDefinedFilter((UserDefinedFilterConfig) config);
         }
         throw new NoSuchMethodError();
       default:
