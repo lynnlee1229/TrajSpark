@@ -4,11 +4,7 @@ import cn.edu.whu.trajspark.core.common.point.TrajPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.PingpongFilterConfig;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import org.apache.spark.api.java.JavaRDD;
 
 /**
@@ -47,16 +43,16 @@ public class PingpongFilter implements IFilter {
 
   @Override
   public Trajectory filterFunction(Trajectory rawTrajectory) {
-    // 时间去重
-    Set<TrajPoint> tmpSet = new TreeSet<>(Comparator.comparing(TrajPoint::getTimestamp));
-    tmpSet.addAll(rawTrajectory.getPointList());
-    List<TrajPoint> tmpPointList = new ArrayList<>(tmpSet);
+    // 时空去重
+    List<TrajPoint> tmpPointList = FilterUtils.sortPointList(rawTrajectory.getPointList());
+    tmpPointList = FilterUtils.dropTimeDuplication(tmpPointList);
     // 去除乒乓效应
-    tmpPointList = filterABCA(filterABA(tmpPointList));
+    List<TrajPoint> filterABA = filterABA(tmpPointList);
+    List<TrajPoint> cleanPointList = filterABCA(filterABA);
     // 去除乒乓效应完成
     Trajectory cleanedTrajtroy =
         new Trajectory(rawTrajectory.getTrajectoryID(), rawTrajectory.getObjectID(),
-            tmpPointList, rawTrajectory.getExtendedValues());
+            cleanPointList, rawTrajectory.getExtendedValues());
     return cleanedTrajtroy.getTrajectoryFeatures().getLen() > minTrajLength ? cleanedTrajtroy
         : null;
   }
@@ -72,15 +68,19 @@ public class PingpongFilter implements IFilter {
     for (int i = 0; i < rawList.size() - 2; ++i) {
       // 循环判断 i ，i+1，i+2是否发生乒乓效应
       TrajPoint tp0 = rawList.get(i);
-      if (tp0.getExtendedValue(baseStationIndex) == null) {
-        break;
-      }
       TrajPoint tp1 = rawList.get(i + 1);
       TrajPoint tp2 = rawList.get(i + 2);
       String bs0, bs1, bs2;
-      bs0 = (String) tp0.getExtendedValue(baseStationIndex);
-      bs1 = (String) tp1.getExtendedValue(baseStationIndex);
-      bs2 = (String) tp2.getExtendedValue(baseStationIndex);
+      // 数据不含基站ID列，则根据位置拼接生成
+      if (tp0.getExtendedValue(baseStationIndex) == null) {
+        bs0 = genBSID(tp0);
+        bs1 = genBSID(tp1);
+        bs2 = genBSID(tp2);
+      } else {
+        bs0 = (String) tp0.getExtendedValue(baseStationIndex);
+        bs1 = (String) tp1.getExtendedValue(baseStationIndex);
+        bs2 = (String) tp2.getExtendedValue(baseStationIndex);
+      }
       if (bs2.equals(bs0) && !bs1.equals(bs0)) {
         // 基站表现为A-B-A，计算时间tp0和tp2的时间差
         double deltaT = (double) ChronoUnit.SECONDS.between(tp2.getTimestamp(), tp0.getTimestamp());
@@ -88,7 +88,6 @@ public class PingpongFilter implements IFilter {
           // 时间差小于阈值，认为发生了乒乓效应
           // 删除
           rawList.remove(i + 1);
-          i -= 1;
         }
       }
     }
@@ -106,17 +105,22 @@ public class PingpongFilter implements IFilter {
     for (int i = 0; i < rawList.size() - 3; ++i) {
       // 循环判断 i ，i+1，i+2,i+3是否发生乒乓效应
       TrajPoint tp0 = rawList.get(i);
-      if (tp0.getExtendedValue(baseStationIndex) == null) {
-        break;
-      }
       TrajPoint tp1 = rawList.get(i + 1);
       TrajPoint tp2 = rawList.get(i + 2);
       TrajPoint tp3 = rawList.get(i + 3);
       String bs0, bs1, bs2, bs3;
-      bs0 = (String) tp0.getExtendedValue(baseStationIndex);
-      bs1 = (String) tp1.getExtendedValue(baseStationIndex);
-      bs2 = (String) tp2.getExtendedValue(baseStationIndex);
-      bs3 = (String) tp3.getExtendedValue(baseStationIndex);
+      // 数据不含基站ID列，则根据位置拼接生成
+      if (tp0.getExtendedValue(baseStationIndex) == null) {
+        bs0 = genBSID(tp0);
+        bs1 = genBSID(tp1);
+        bs2 = genBSID(tp2);
+        bs3 = genBSID(tp3);
+      } else {
+        bs0 = (String) tp0.getExtendedValue(baseStationIndex);
+        bs1 = (String) tp1.getExtendedValue(baseStationIndex);
+        bs2 = (String) tp2.getExtendedValue(baseStationIndex);
+        bs3 = (String) tp3.getExtendedValue(baseStationIndex);
+      }
       if (bs3.equals(bs0) && !bs1.equals(bs0) && !bs2.equals(bs0)) {
         // 基站表现为A-B-C-A，计算时间tp0和tp3的时间差
         double deltaT = (double) ChronoUnit.SECONDS.between(tp3.getTimestamp(), tp0.getTimestamp());
@@ -125,11 +129,14 @@ public class PingpongFilter implements IFilter {
           // 删除
           rawList.remove(i + 1);
           rawList.remove(i + 1);
-          i -= 2;
         }
       }
     }
     return rawList;
+  }
+
+  private String genBSID(TrajPoint p) {
+    return p.getLat() + "#" + p.getLng();
   }
 
   @Override

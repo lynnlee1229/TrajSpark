@@ -95,7 +95,7 @@ public class BasicDector implements IDetector {
     List<TrajPoint> ptList = rawTrajectory.getPointList();
     if (ptList != null && !ptList.isEmpty()) {
       if (!(ptList instanceof ArrayList)) {
-        ptList = new ArrayList(ptList);
+        ptList = new ArrayList<>(ptList);
       }
 
       List<StayPoint> spList = new ArrayList<>();

@@ -105,6 +105,7 @@ public class IOUtils {
     try {
       File file = new File(fileName);
       if (!file.exists()) {
+        file.getParentFile().mkdirs();
         file.createNewFile();
       }
       FileWriter fw = new FileWriter(file.getAbsoluteFile());

@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 public class TrajectoryParser {
   public static Trajectory multifileParse(String rawString,
                                           TrajectoryConfig trajectoryConfig,
-                                          String splitter,
-                                          String lineBreaker) throws IOException {
-    String[] points = rawString.split(lineBreaker);
+                                          String splitter) throws IOException {
+    String[] points = rawString.split(System.lineSeparator());
     int n = points.length;
-    List<TrajPoint> trajPoints = new ArrayList(n);
-    String trajId = "", objectId = "";
+    List<TrajPoint> trajPoints = new ArrayList<>(n);
+    String trajId = "";
+    String objectId = "";
     String pStr;
     boolean genPid = false;
     for (int i = 0; i < n; ++i) {
@@ -32,8 +32,12 @@ public class TrajectoryParser {
         String[] firstP = pStr.split(splitter);
         int objectIdIndex = trajectoryConfig.getObjectId().getIndex();
         int trajIdIndex = trajectoryConfig.getTrajId().getIndex();
-        trajId = firstP[trajIdIndex];
-        objectId = firstP[objectIdIndex];
+        if (trajIdIndex >= 0) {
+          trajId = firstP[trajIdIndex];
+        }
+        if (objectIdIndex >= 0) {
+          objectId = firstP[objectIdIndex];
+        }
       }
       TrajPoint point =
           TrajPointParser.parse(pStr, trajectoryConfig.getTrajPointConfig(),
@@ -48,11 +52,10 @@ public class TrajectoryParser {
 
   public static List<Trajectory> singlefileParse(String rawString,
                                                  TrajectoryConfig trajectoryConfig,
-                                                 String splitter,
-                                                 String lineBreaker) throws IOException {
+                                                 String splitter) throws IOException {
     int objectIdIndex = trajectoryConfig.getObjectId().getIndex();
     int trajIdIndex = trajectoryConfig.getTrajId().getIndex();
-    String[] points = rawString.split(lineBreaker);
+    String[] points = rawString.split(System.lineSeparator());
     // 按tid+oid分组
     Map<String, List<String>> groupList = Arrays.stream(points).collect(
         Collectors.groupingBy(item -> getGroupKey(item, splitter, trajIdIndex, objectIdIndex)));
@@ -79,7 +82,7 @@ public class TrajectoryParser {
                                       int objectIdIndex, TrajectoryConfig trajectoryConfig)
       throws IOException {
     String trajId = "", objectId = "";
-    List<TrajPoint> trajPoints = new ArrayList(points.size());
+    List<TrajPoint> trajPoints = new ArrayList<>(points.size());
     for (String point : points) {
       String[] tmpP = point.split(splitter);
       trajId = tmpP[trajIdIndex];

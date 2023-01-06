@@ -33,6 +33,7 @@ public class BasicSegmenter implements ISegmenter {
 
   /**
    * 通过配置文件初始化
+   *
    * @param config
    */
   public BasicSegmenter(BasicSegmenterConfig config) {
@@ -46,34 +47,31 @@ public class BasicSegmenter implements ISegmenter {
     List<TrajPoint> tmpPointList = rawTrajectory.getPointList();
     List<Trajectory> res = new ArrayList<>();
     List<Integer> segIndex = new ArrayList<>();
-    segIndex.add(-1);
+    segIndex.add(0);
     for (int i = 0; i < tmpPointList.size() - 1; ++i) {
       TrajPoint p0 = tmpPointList.get(i), p1 = tmpPointList.get(i + 1);
-      if (ChronoUnit.SECONDS.between(p0.getTimestamp(), p1.getTimestamp()) >= maxTimeInterval ||
-          GeoUtils.getEuclideanDistanceM(p0, p1) >= maxDis) {
+      if (ChronoUnit.SECONDS.between(p0.getTimestamp(), p1.getTimestamp()) >= maxTimeInterval
+          || GeoUtils.getEuclideanDistanceM(p0, p1) >= maxDis) {
         // record segIndex
-        segIndex.add(i);
+        segIndex.add(i + 1);
       }
     }
-    segIndex.add(tmpPointList.size() - 1);
+    segIndex.add(tmpPointList.size());
     // do segment
     int n = segIndex.size();
-    int count = 0;
-    if (n == 2) {
-      rawTrajectory.setTrajectoryID(rawTrajectory.getTrajectoryID() + "-" + count);
-      res.add(rawTrajectory);
-    } else {
-      for (int i = 0; i < n - 1; ++i) {
-        List<TrajPoint> tmpPts =
-            new ArrayList<>(tmpPointList.subList(segIndex.get(i) + 1, segIndex.get(i + 1)));
-        if (GeoUtils.getTrajListLen(tmpPts) < minTrajLength) {
-          continue;
-        }
-        Trajectory tmp = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + count,
-            rawTrajectory.getObjectID(), tmpPts, rawTrajectory.getExtendedValues());
-        res.add(tmp);
-        count++;
+    for (int i = 0; i < n - 1; ++i) {
+      List<TrajPoint> tmpPts =
+          new ArrayList<>(tmpPointList.subList(segIndex.get(i), segIndex.get(i + 1)));
+      Trajectory tmp = SegmentUtils.genNewTrajectory(
+          rawTrajectory.getTrajectoryID(),
+          rawTrajectory.getObjectID(),
+          tmpPts,
+          rawTrajectory.getExtendedValues(),
+          minTrajLength);
+      if (tmp == null) {
+        continue;
       }
+      res.add(tmp);
     }
     return res;
   }

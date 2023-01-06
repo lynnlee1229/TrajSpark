@@ -15,26 +15,18 @@ public class StandaloneLoadConfig implements ILoadConfig {
   private int partNum;
   private String splitter;
 
-  private String lineBreaker;
-
   @JsonCreator
   public StandaloneLoadConfig(@JsonProperty("master") String master,
                               @JsonProperty("location") String location,
                               @JsonProperty("fileMode") FileMode fileMode,
                               @JsonProperty("partNum") @JsonInclude(JsonInclude.Include.NON_NULL)
                               int partNum,
-                              @JsonProperty("splitter") String splitter,
-                              @JsonProperty("lineBreaker") String lineBreaker) {
+                              @JsonProperty("splitter") String splitter) {
     this.master = master;
     this.location = location;
     this.fileMode = fileMode;
     this.partNum = partNum;
     this.splitter = splitter;
-    this.lineBreaker = lineBreaker;
-  }
-
-  public String getLineBreaker() {
-    return lineBreaker;
   }
 
   public String getMaster() {

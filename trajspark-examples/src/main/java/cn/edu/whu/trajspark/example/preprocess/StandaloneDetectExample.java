@@ -3,6 +3,7 @@ package cn.edu.whu.trajspark.example.preprocess;
 import cn.edu.whu.trajspark.core.common.point.StayPoint;
 import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
+import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
 import cn.edu.whu.trajspark.core.util.IOUtils;
@@ -42,11 +43,13 @@ public class StandaloneDetectExample {
               exampleConfig.getDataConfig());
 
       // 从配置文件初始化预处理算子
+      ISegmenter mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
       IDetector myDector = IDetector.getDector(exampleConfig.getDetectorConfig());
 
       // 执行预处理
-      JavaRDD<List<StayPoint>> stayPointList = trajRDD.map(myDector::detectFunction);
-      JavaRDD<StayPoint> detectRDD = myDector.detect(trajRDD);
+      JavaRDD<Trajectory> segmentedTraj = mySegmenter.segment(trajRDD);
+      JavaRDD<List<StayPoint>> stayPointList = (JavaRDD<List<StayPoint>>) segmentedTraj.map(myDector::detectFunction);
+      JavaRDD<StayPoint> detectRDD = myDector.detect(segmentedTraj);
       // 存储
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());

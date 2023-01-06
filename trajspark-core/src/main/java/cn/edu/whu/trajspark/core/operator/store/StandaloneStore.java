@@ -25,14 +25,22 @@ public class StandaloneStore implements IStore {
   public void storePointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) {
     trajectoryJavaRDD.foreach(
         item -> {
-          String fileName =
-              String.format("%s/%s-%s%s",
-                  storeConfig.getLocation(),
-                  item.getObjectID(),
-                  item.getTrajectoryID(),
-                  storeConfig.getFilePostFix());
-          String outputString = TrajectoryConvertor.convert(item, storeConfig.getSplitter(),
-              storeConfig.getLineBreaker());
+          String fileName;
+          if (item.getObjectID().length() == 0) {
+            fileName =
+                String.format("%s/%s%s",
+                    storeConfig.getLocation(),
+                    item.getTrajectoryID(),
+                    storeConfig.getFilePostFix());
+          } else {
+            fileName =
+                String.format("%s/%s-%s%s",
+                    storeConfig.getLocation(),
+                    item.getObjectID(),
+                    item.getTrajectoryID(),
+                    storeConfig.getFilePostFix());
+          }
+          String outputString = TrajectoryConvertor.convert(item, storeConfig.getSplitter());
           IOUtils.writeStringToFile(fileName, outputString);
         }
     );
@@ -54,8 +62,7 @@ public class StandaloneStore implements IStore {
     stayPointJavaRDD.foreach(
         s -> {
           if (!s.isEmpty()) {
-            String outputString = StayPointConvertor.convertSPList(s, storeConfig.getSplitter(),
-                storeConfig.getLineBreaker());
+            String outputString = StayPointConvertor.convertSPList(s, storeConfig.getSplitter());
             String fileName =
                 String.format("%s/%s-splist%s",
                     storeConfig.getLocation(),
@@ -72,8 +79,7 @@ public class StandaloneStore implements IStore {
   public void storeStayPointASTraj(JavaRDD<StayPoint> stayPointJavaRDD) {
     stayPointJavaRDD.foreach(
         s -> {
-          String outputString = StayPointConvertor.convertSPAsTraj(s, storeConfig.getSplitter(),
-              storeConfig.getLineBreaker());
+          String outputString = StayPointConvertor.convertSPAsTraj(s, storeConfig.getSplitter());
           String fileName =
               String.format("%s/%s-splist%s",
                   storeConfig.getLocation(),
