@@ -1,6 +1,5 @@
 package cn.edu.whu.trajspark.database.meta;
 
-import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.index.IndexType;
 import java.util.Deque;
 import org.apache.hadoop.hbase.Cell;

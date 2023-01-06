@@ -19,6 +19,8 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
 import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
+import org.apache.hadoop.hbase.mapreduce.PutSortReducer;
+import org.apache.hadoop.hbase.mapreduce.SimpleTotalOrderPartitioner;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -63,10 +65,21 @@ public class TrajectoryDataDriver extends Configured {
     }
     FileOutputFormat.setOutputPath(job, outPath);
     TextMapper.setDataTable(dataTable);
+
+    //Configure Map related content
     job.setMapperClass(TextMapper.class);
     job.setMapOutputKeyClass(ImmutableBytesWritable.class);
     job.setMapOutputValueClass(Put.class);
     job.setNumReduceTasks(0);
+
+    //SimpleTotalOrderPartitioner是需要先对key进行整体排序，然后划分到每个reduce中，保证每一个reducer中的的key最小最大值区间范围，是不会有交集的。
+    job.setPartitionerClass(SimpleTotalOrderPartitioner.class);
+
+    //配置Reduce
+    //保证分区内部是有序的
+    //Value类型是KeyValue 或Put，对应的Sorter分别是KeyValueSortReducer或PutSortReducer
+    job.setReducerClass(PutSortReducer.class);
+
     RegionLocator locator = instance.getConnection().getRegionLocator(TableName.valueOf(tableName));
     try (Admin admin = instance.getAdmin(); Table table = instance.getTable(tableName)) {
       HFileOutputFormat2.configureIncrementalLoad(job, table, locator);

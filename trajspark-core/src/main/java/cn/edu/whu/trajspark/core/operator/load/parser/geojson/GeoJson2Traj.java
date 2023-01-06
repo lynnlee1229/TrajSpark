@@ -1,8 +1,8 @@
 package cn.edu.whu.trajspark.core.operator.load.parser.geojson;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.util.CheckUtils;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.util.CheckUtils;
 import cn.edu.whu.trajspark.core.util.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.ZoneId;

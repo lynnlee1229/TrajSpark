@@ -1,7 +1,8 @@
 package cn.edu.whu.trajspark.core.util;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.util.SerializerUtils;
 import junit.framework.TestCase;
 
 import java.io.IOException;

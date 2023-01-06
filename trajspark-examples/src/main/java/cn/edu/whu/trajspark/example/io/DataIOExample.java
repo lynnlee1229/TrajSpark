@@ -1,6 +1,9 @@
 package cn.edu.whu.trajspark.example.io;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.example.conf.ExampleConfig;
+import cn.edu.whu.trajspark.example.util.FileSystemUtils;
+import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.noisefilter.BasicFilter;
 import cn.edu.whu.trajspark.core.operator.process.noisefilter.IFilter;
@@ -8,9 +11,6 @@ import cn.edu.whu.trajspark.core.operator.process.segmenter.BasicSegmenter;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.BasicDector;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
-import cn.edu.whu.trajspark.example.conf.ExampleConfig;
-import cn.edu.whu.trajspark.example.util.FileSystemUtils;
-import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;

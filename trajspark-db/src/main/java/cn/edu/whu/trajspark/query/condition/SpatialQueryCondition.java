@@ -1,12 +1,8 @@
 package cn.edu.whu.trajspark.query.condition;
 
-import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
-
-import java.util.List;
 
 /**
  * 空间查询条件

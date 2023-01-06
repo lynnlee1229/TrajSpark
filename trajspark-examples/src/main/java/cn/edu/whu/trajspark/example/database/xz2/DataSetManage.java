@@ -1,18 +1,16 @@
 package cn.edu.whu.trajspark.example.database.xz2;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.DataTable;
+import cn.edu.whu.trajspark.example.database.ExampleDataUtils;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-
-import static cn.edu.whu.trajspark.example.database.ExampleDataUtils.parseFileToTrips;
 
 /**
  * @author Haocheng Wang
@@ -36,7 +34,7 @@ public class DataSetManage {
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
     // 3. insert data
-    List<Trajectory> trajectories =  parseFileToTrips();
+    List<Trajectory> trajectories =  ExampleDataUtils.parseFileToTrips();
     DataTable dataTable = instance.getDataTable(DATASET_NAME);
     for (Trajectory t : trajectories) {
       dataTable.put(t);

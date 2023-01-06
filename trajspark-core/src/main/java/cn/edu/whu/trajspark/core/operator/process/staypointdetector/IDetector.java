@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.core.operator.process.staypointdetector;
 
-import cn.edu.whu.trajspark.core.common.point.StayPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.point.StayPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.detector.BasicDetectorConfig;
 import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
 import java.io.Serializable;

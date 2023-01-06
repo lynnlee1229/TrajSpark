@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * This class is a wrapper around a byte array to ensure equals and hashcode

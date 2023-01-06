@@ -1,9 +1,9 @@
 package cn.edu.whu.trajspark.query;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.DataTable;
-import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.coprocessor.CoprocessorQuery;

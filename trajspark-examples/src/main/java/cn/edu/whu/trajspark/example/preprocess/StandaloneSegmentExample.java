@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.example.preprocess;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
@@ -49,6 +49,8 @@ public class StandaloneSegmentExample {
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
       iStore.storeTrajectory(segmentedRDD);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }

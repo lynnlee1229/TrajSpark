@@ -1,16 +1,14 @@
 package cn.edu.whu.trajspark.database.util;
 
-import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.util.SerializerUtils;
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.util.SerializerUtils;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -19,8 +17,8 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static cn.edu.whu.trajspark.base.trajectory.Trajectory.Schema.*;
 import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_CF;
-import static cn.edu.whu.trajspark.core.common.trajectory.Trajectory.Schema.*;
 
 /**
  * Utils helps serialize/deserialize trajectory objects to/from HBase Put/Result.

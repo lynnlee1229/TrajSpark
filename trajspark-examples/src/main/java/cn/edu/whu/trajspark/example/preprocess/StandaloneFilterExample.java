@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.example.preprocess;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.noisefilter.IFilter;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
@@ -19,7 +19,7 @@ import org.apache.spark.sql.SparkSession;
 
 public class StandaloneFilterExample {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     String fileStr;
     if (args.length != 0) {
       String confPath = args[0];

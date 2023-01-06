@@ -1,10 +1,10 @@
 package cn.edu.whu.trajspark.database.util;
 
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.DateTimeParse;
-import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.time.ZonedDateTime;

@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.core.common.point;
+package cn.edu.whu.trajspark.base.point;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;

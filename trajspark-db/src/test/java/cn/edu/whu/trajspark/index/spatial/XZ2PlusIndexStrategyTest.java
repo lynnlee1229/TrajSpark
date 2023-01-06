@@ -1,7 +1,6 @@
 package cn.edu.whu.trajspark.index.spatial;
 
-import cn.edu.whu.trajspark.coding.XZ2PCoding;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import junit.framework.TestCase;
 
 /**

@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.core.conf.data;
 
+import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.core.common.field.Field;
-import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.core.enums.BasicDataTypeEnum;
 import cn.edu.whu.trajspark.core.enums.DataTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;

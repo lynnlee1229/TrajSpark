@@ -2,11 +2,9 @@ package cn.edu.whu.trajspark.coding.sfc;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.LOG_FIVE;
 
-import cn.edu.whu.trajspark.coding.sfc.XZ2SFC.Bound;
-import cn.edu.whu.trajspark.coding.sfc.XZ2SFC.XElement;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeElement;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
+import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import java.io.Serializable;
 import java.time.Duration;

@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.core.util;
+package cn.edu.whu.trajspark.base.util;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;

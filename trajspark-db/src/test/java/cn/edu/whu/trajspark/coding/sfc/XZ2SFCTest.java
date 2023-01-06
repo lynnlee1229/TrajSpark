@@ -1,7 +1,9 @@
 package cn.edu.whu.trajspark.coding.sfc;
 
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZ2Coding;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.constant.CodingConstants;
+import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest;
 import junit.framework.TestCase;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -13,9 +15,6 @@ import org.locationtech.jts.io.WKTWriter;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_XZ2_PRECISION;
-import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
 
 /**
  * @author Haocheng Wang
@@ -32,7 +31,7 @@ public class XZ2SFCTest extends TestCase {
 
   public void testCode() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
-    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
     List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, false);
     // Polygon p = xz2SfcWhu.getRegion(5L);
     // System.out.println(wktWriter.write(p));
@@ -52,7 +51,7 @@ public class XZ2SFCTest extends TestCase {
 
   public void testSequenceCode() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
-    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
     List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, false);
     // Polygon p = xz2SfcWhu.getRegion(5L);
     // System.out.println(wktWriter.write(p));
@@ -64,7 +63,7 @@ public class XZ2SFCTest extends TestCase {
         List<Integer> quadSeq = xz2SfcWhu.getQuadrantSequence(code);
         long res = 0;
         for (int j = 0; j < quadSeq.size(); j++) {
-          res += quadSeq.get(j) * ((Math.pow(4, MAX_XZ2_PRECISION - j) - 1L) / 3L) + 1L;
+          res += quadSeq.get(j) * ((Math.pow(4, CodingConstants.MAX_XZ2_PRECISION - j) - 1L) / 3L) + 1L;
         }
         if (res != i) {
           System.out.printf("true code: {%s}, but got code: {%s}. \n", i, res);
@@ -75,19 +74,19 @@ public class XZ2SFCTest extends TestCase {
 
 
   public void testRevertToSequenceList() {
-    Trajectory t = getExampleTrajectory();
+    Trajectory t = XZ2IndexStrategyTest.getExampleTrajectory();
 
-    List<Integer> list = XZ2SFC.getInstance(MAX_XZ2_PRECISION).getQuadrantSequence(4854295219L);
+    List<Integer> list = XZ2SFC.getInstance(CodingConstants.MAX_XZ2_PRECISION).getQuadrantSequence(4854295219L);
     long v2 = 0L;
     for (int i = 0; i < list.size(); i++) {
-      v2 += 1L + list.get(i) *  ((long) Math.pow(4, MAX_XZ2_PRECISION - i) - 1L) / 3L;
+      v2 += 1L + list.get(i) *  ((long) Math.pow(4, CodingConstants.MAX_XZ2_PRECISION - i) - 1L) / 3L;
     }
     assert 4854295219L == v2;
   }
 
   public void testIntersectRanges() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
-    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
     List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, false);
     for (SFCRange sfcRange : ranges) {
       System.out.println(sfcRange);
@@ -97,7 +96,7 @@ public class XZ2SFCTest extends TestCase {
 
   public void testContainedRanges() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
-    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
     List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, true);
     for (SFCRange sfcRange : ranges) {
       System.out.println(sfcRange);
@@ -107,7 +106,7 @@ public class XZ2SFCTest extends TestCase {
 
   public void testContainedRangesWkt() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
-    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
     List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, true);
     List<MultiPolygon> multiPolygons = new LinkedList<>();
     for (SFCRange range : ranges) {
@@ -128,7 +127,7 @@ public class XZ2SFCTest extends TestCase {
 
   public void testContainedElementsWkt() throws ParseException {
     Envelope envelope = wktReader.read(QUERY_WKT).getEnvelopeInternal();
-    cn.edu.whu.trajspark.coding.sfc.XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
+    XZ2SFC xz2SfcWhu = new XZ2Coding().getXz2Sfc();
     List<SFCRange> ranges = xz2SfcWhu.ranges(envelope, true);
     List<MultiPolygon> multiPolygons = new LinkedList<>();
     List<Polygon> polygons = new LinkedList<>();
@@ -149,7 +148,7 @@ public class XZ2SFCTest extends TestCase {
 
   public void testGetEnlargedRegion() {
     WKTWriter wktWriter = new WKTWriter();
-    System.out.println(wktWriter.write(XZ2SFC.getInstance(MAX_XZ2_PRECISION).getEnlargedRegion(4854295659L)));
+    System.out.println(wktWriter.write(XZ2SFC.getInstance(CodingConstants.MAX_XZ2_PRECISION).getEnlargedRegion(4854295659L)));
   }
 
   public void testGetQuadRegion() {

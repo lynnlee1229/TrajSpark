@@ -1,10 +1,10 @@
 package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.coding.poscode.PosCode;
-import cn.edu.whu.trajspark.coding.poscode.QuadID;
-import cn.edu.whu.trajspark.coding.sfc.XZ2SFC;
-import cn.edu.whu.trajspark.coding.sfc.SFCRange;
 import cn.edu.whu.trajspark.coding.poscode.PosCodeRange;
+import cn.edu.whu.trajspark.coding.poscode.QuadID;
+import cn.edu.whu.trajspark.coding.sfc.SFCRange;
+import cn.edu.whu.trajspark.coding.sfc.XZ2SFC;
 import cn.edu.whu.trajspark.constant.CodingConstants;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;

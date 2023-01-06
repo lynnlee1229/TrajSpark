@@ -1,17 +1,17 @@
 package cn.edu.whu.trajspark.query.coprocessor;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.addCoprocessor;
 import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.deleteCoprocessor;
 
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZTCoding;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
+import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.DataTable;
-import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -56,7 +56,7 @@ class CoprocessorLoaderTest extends TestCase {
   @Test
   public void testAddCoprocessor() throws IOException {
     Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
+    String tableName = DATASET_NAME + DBConstants.DATA_TABLE_SUFFIX;
     String className = STQueryEndPoint.class.getCanonicalName();
     String jarPath = "hdfs://localhost:9000/coprocessor/trajspark-db-1.0-SNAPSHOT.jar";
     addCoprocessor(conf, tableName, className, jarPath);
@@ -65,7 +65,7 @@ class CoprocessorLoaderTest extends TestCase {
   @Test
   void TestDeleteCoprocessor() throws IOException {
     Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
+    String tableName = DATASET_NAME + DBConstants.DATA_TABLE_SUFFIX;
     deleteCoprocessor(conf, tableName);
   }
 

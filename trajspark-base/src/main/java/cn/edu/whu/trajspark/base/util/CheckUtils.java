@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.core.util;
+package cn.edu.whu.trajspark.base.util;
 
 import org.apache.commons.lang.NullArgumentException;
 

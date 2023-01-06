@@ -1,17 +1,15 @@
 package cn.edu.whu.trajspark.query;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
-import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
+import cn.edu.whu.trajspark.database.meta.IndexMeta;
+import cn.edu.whu.trajspark.database.table.DataTable;
+import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;

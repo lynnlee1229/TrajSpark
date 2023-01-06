@@ -1,8 +1,8 @@
-package cn.edu.whu.trajspark.core.common.point;
+package cn.edu.whu.trajspark.base.point;
 
-import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
-import cn.edu.whu.trajspark.core.util.CheckUtils;
-import cn.edu.whu.trajspark.core.util.GeoUtils;
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.base.util.CheckUtils;
+import cn.edu.whu.trajspark.base.util.GeoUtils;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

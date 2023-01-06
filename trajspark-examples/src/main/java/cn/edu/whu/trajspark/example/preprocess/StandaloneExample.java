@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.example.preprocess;
 
-import cn.edu.whu.trajspark.core.common.point.StayPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.point.StayPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.noisefilter.IFilter;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
@@ -21,7 +21,7 @@ import org.apache.spark.sql.SparkSession;
 
 public class StandaloneExample {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     String confPath =
         "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/ioconf/exampleStandaloneConfig.json";
     String fileStr = IOUtils.readFileToString(confPath);

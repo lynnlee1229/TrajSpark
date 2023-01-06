@@ -1,8 +1,8 @@
-package cn.edu.whu.trajspark.core.common.trajectory;
+package cn.edu.whu.trajspark.base.trajectory;
 
-import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.util.GeoUtils;
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.util.GeoUtils;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
  **/
 
 public class Trajectory implements Serializable {
+
   private String trajectoryID;
   private String objectID;
   private List<TrajPoint> pointList;
@@ -34,7 +35,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-                    TrajFeatures trajectoryFeatures) {
+      TrajFeatures trajectoryFeatures) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -43,7 +44,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-                    TrajFeatures trajectoryFeatures, Map<String, Object> extendedValues) {
+      TrajFeatures trajectoryFeatures, Map<String, Object> extendedValues) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -53,7 +54,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-                    Map<String, Object> extendedValues) {
+      Map<String, Object> extendedValues) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -67,13 +68,12 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-                    boolean genPid) {
+      boolean genPid) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
     if (genPid) {
       this.updatePointListId();
-      ;
     }
   }
 
@@ -172,8 +172,8 @@ public class Trajectory implements Serializable {
       return (int) (o1.getTimestamp().toEpochSecond() - o2.getTimestamp().toEpochSecond());
     });
     ZonedDateTime startTime = ((TrajPoint) this.pointList.get(0)).getTimestamp();
-    ZonedDateTime endTime =
-        ((TrajPoint) this.pointList.get(this.pointList.size() - 1)).getTimestamp();
+    ZonedDateTime endTime = ((TrajPoint) this.pointList.get(
+        this.pointList.size() - 1)).getTimestamp();
     double length = 0.0;
     double minLat = Double.MAX_VALUE;
     double minLng = Double.MAX_VALUE;
@@ -183,7 +183,7 @@ public class Trajectory implements Serializable {
     TrajPoint prePoint = null;
     TrajPoint p;
     for (Iterator iter = this.pointList.iterator(); iter.hasNext();
-         maxLng = Math.max(maxLng, p.getLng())) {
+        maxLng = Math.max(maxLng, p.getLng())) {
       p = (TrajPoint) iter.next();
       minLat = Math.min(minLat, p.getLat());
       minLng = Math.min(minLng, p.getLng());
@@ -199,10 +199,10 @@ public class Trajectory implements Serializable {
     MinimumBoundingBox mbr = new MinimumBoundingBox(minLng, minLat, maxLng, maxLat);
     double hour = (double) (endTime.toEpochSecond() - startTime.toEpochSecond()) / 60.0 / 60.0;
     double speed = length / hour;
-    this.trajectoryFeatures =
-        new TrajFeatures(startTime, endTime, (TrajPoint) this.pointList.get(0),
-            (TrajPoint) this.pointList.get(this.pointList.size() - 1), this.pointList.size(), mbr,
-            speed, length);
+    this.trajectoryFeatures = new TrajFeatures(startTime, endTime,
+        (TrajPoint) this.pointList.get(0),
+        (TrajPoint) this.pointList.get(this.pointList.size() - 1), this.pointList.size(), mbr,
+        speed, length);
   }
 
   private void updateLineString() {
@@ -211,8 +211,7 @@ public class Trajectory implements Serializable {
       this.lineString = new LineString(new CoordinateArraySequence(
           (Coordinate[]) ((List) this.pointList.stream().map((gpsPoint) -> {
             return new Coordinate(gpsPoint.getLng(), gpsPoint.getLat());
-          }).collect(
-              Collectors.toList())).toArray(new Coordinate[0])),
+          }).collect(Collectors.toList())).toArray(new Coordinate[0])),
           new GeometryFactory(new PrecisionModel(), srid));
       this.updateLineString = false;
     }
@@ -226,8 +225,8 @@ public class Trajectory implements Serializable {
 
   public boolean isIntersect(Trajectory otherTrajectory) {
     LineString otherLine = otherTrajectory.getLineString();
-    return otherLine != null && otherLine.getNumPoints() != 0
-        ? this.getLineString().intersects(otherLine) : false;
+    return otherLine != null && otherLine.getNumPoints() != 0 ? this.getLineString()
+        .intersects(otherLine) : false;
   }
 
   public boolean isPassPoint(Point point, double distance) {
@@ -255,14 +254,12 @@ public class Trajectory implements Serializable {
 
   @Override
   public String toString() {
-    return "Trajectory{" +
-        "trajectoryID='" + trajectoryID + '\'' +
-        ", objectID='" + objectID + '\'' +
-        ", trajectoryFeatures=" + trajectoryFeatures +
-        '}';
+    return "Trajectory{" + "trajectoryID='" + trajectoryID + '\'' + ", objectID='" + objectID + '\''
+        + ", trajectoryFeatures=" + trajectoryFeatures + '}';
   }
 
   public static class Schema {
+
     public static final String TRAJECTORY_ID = "trajectory_id";
     public static final String OBJECT_ID = "object_id";
     public static final String TRAJ_POINTS = "traj_points";

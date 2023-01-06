@@ -1,19 +1,18 @@
 package cn.edu.whu.trajspark.index;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
+import cn.edu.whu.trajspark.constant.IndexConstants;
+import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
-import static cn.edu.whu.trajspark.constant.IndexConstants.DEFAULT_SHARD_NUM;
 
 /**
  * 接收对象,输出row-key.
@@ -25,7 +24,7 @@ import static cn.edu.whu.trajspark.constant.IndexConstants.DEFAULT_SHARD_NUM;
  */
 public abstract class IndexStrategy implements Serializable {
 
-  protected short shardNum = DEFAULT_SHARD_NUM;
+  protected short shardNum = IndexConstants.DEFAULT_SHARD_NUM;
 
   protected IndexType indexType;
 
