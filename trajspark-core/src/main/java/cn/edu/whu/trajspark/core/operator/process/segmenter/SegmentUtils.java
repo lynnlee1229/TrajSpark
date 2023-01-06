@@ -1,9 +1,9 @@
 package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.util.GeoUtils;
 import cn.edu.whu.trajspark.core.common.constant.PreProcessDefaultConstant;
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.util.GeoUtils;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;

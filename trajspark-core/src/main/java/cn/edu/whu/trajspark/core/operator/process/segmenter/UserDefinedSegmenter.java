@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.UserDefinedSegmenterConfig;
 import java.util.ArrayList;
 import java.util.LinkedList;

@@ -13,7 +13,6 @@ import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

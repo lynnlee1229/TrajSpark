@@ -3,7 +3,6 @@ package cn.edu.whu.trajspark.coding.poscode;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZ2PCoding;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import junit.framework.TestCase;
 import org.locationtech.jts.io.WKTWriter;
 

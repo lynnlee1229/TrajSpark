@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.core.operator.load;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;

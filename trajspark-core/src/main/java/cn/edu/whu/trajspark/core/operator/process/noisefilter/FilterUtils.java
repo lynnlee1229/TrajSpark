@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
