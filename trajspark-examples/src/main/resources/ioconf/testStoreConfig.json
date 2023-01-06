@@ -1,0 +1,76 @@
+{
+  "loadConfig": {
+    "@type": "standalone",
+    "master": "local[*]",
+    "location": "F:\\github\\test\\TrajSpark\\trajspark-examples\\src\\main\\resources\\data",
+    "fileMode": "multi_file",
+    "partNum": 8,
+    "splitter": ",",
+    "lineBreaker": "/n"
+  },
+  "dataConfig": {
+    "@type": "trajectory",
+    "trajId": {
+      "sourceName": "traj_id",
+      "dataType": "String",
+      "index": 0
+    },
+    "objectId": {
+      "sourceName": "object_id",
+      "dataType": "String",
+      "index": 1
+    },
+    "trajPointConfig": {
+      "@type": "traj_point",
+      "pointId": {
+        "sourceName": "point_id",
+        "dataType": "String",
+        "index": 2
+      },
+      "lng": {
+        "sourceName": "lng",
+        "dataType": "Double",
+        "index": 4
+      },
+      "lat": {
+        "sourceName": "lat",
+        "dataType": "Double",
+        "index": 3
+      },
+      "time": {
+        "sourceName": "time",
+        "dataType": "Date",
+        "index": 5,
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "trajPointMetas": [
+        {
+          "sourceData": {
+            "sourceName": "bsid",
+            "dataType": "String",
+            "index": 6
+          },
+          "mappingName": "bsid",
+          "indexable": true
+        }
+      ]
+    }
+  },
+  "segmenterConfig": {
+    "@type": "STAYPOINTBASED_SEGMENTER",
+    "minTrajLength": 0.05,
+    "detectorConfig": {
+      "@type": "BASIC_DETECTOR",
+      "maxStayDistInMeter": 900,
+      "maxStayTimeInSecond": 900
+    }
+  },
+  "storeConfig": {
+    "@type": "standalone",
+    "location": "F:/武汉大学学习资料/轨迹大数据管理项目/测试数据",
+    "schema": "POINT_BASED_TRAJECTORY",
+    "splitter": ",",
+    "lineBreaker": "/n",
+    "filePostFix": ".csv"
+  }
+}
