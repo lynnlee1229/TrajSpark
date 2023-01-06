@@ -1,15 +1,15 @@
 package cn.edu.whu.trajspark.query;
 
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZTCoding;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
+import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.DataTable;
-import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import java.io.File;
@@ -23,9 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 
 
 /**

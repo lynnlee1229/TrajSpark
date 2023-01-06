@@ -10,8 +10,6 @@ import org.locationtech.jts.io.WKTReader;
 
 import java.io.IOException;
 
-import static cn.edu.whu.trajspark.example.database.xz2.DataSetManage.DATASET_NAME;
-
 /**
  * @author Haocheng Wang
  * Created on 2022/11/1
@@ -28,7 +26,7 @@ public class DataSetQuery {
     // 2. create SpatialQuery
     SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(wkt2Envelope(QUERY_WKT),
         SpatialQueryCondition.SpatialQueryType.INTERSECT);
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    DataTable dataTable = instance.getDataTable(DataSetManage.DATASET_NAME);
     SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialQueryCondition);
     // 3. execute query
     System.out.println(spatialQuery.executeQuery());

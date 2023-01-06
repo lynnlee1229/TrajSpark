@@ -13,6 +13,7 @@
         <module>trajspark-examples</module>
         <module>trajspark-core</module>
         <module>trajspark-db</module>
+        <module>trajspark-base</module>
     </modules>
 
     <properties>

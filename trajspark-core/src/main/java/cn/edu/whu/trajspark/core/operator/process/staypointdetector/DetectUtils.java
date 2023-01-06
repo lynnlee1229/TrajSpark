@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.core.operator.process.staypointdetector;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.util.GeoUtils;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.util.GeoUtils;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 

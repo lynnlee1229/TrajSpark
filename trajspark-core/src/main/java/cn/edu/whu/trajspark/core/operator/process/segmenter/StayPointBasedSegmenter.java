@@ -1,10 +1,10 @@
 package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
-import cn.edu.whu.trajspark.core.util.GeoUtils;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
+import cn.edu.whu.trajspark.base.util.GeoUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

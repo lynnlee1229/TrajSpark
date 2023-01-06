@@ -1,11 +1,12 @@
 package cn.edu.whu.trajspark.database.table;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
-import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.index.RowKeyRange;
+import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import org.apache.hadoop.hbase.client.*;
 
 import java.io.IOException;
@@ -13,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 
 /**
  * @author Haocheng Wang
@@ -28,7 +27,7 @@ public class DataTable {
 
   public DataTable(String dataSetName) throws IOException {
     this.dataSetMeta = Database.getInstance().getDataSetMeta(dataSetName);
-    this.table = Database.getInstance().getTable(dataSetName + DATA_TABLE_SUFFIX);
+    this.table = Database.getInstance().getTable(dataSetName + DBConstants.DATA_TABLE_SUFFIX);
   }
 
   public Table getTable() {

@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.core.operator.load.parser.basic;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import java.io.IOException;
 import java.util.ArrayList;

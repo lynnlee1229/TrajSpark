@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.example.preprocess;
 
-import cn.edu.whu.trajspark.core.common.point.StayPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.point.StayPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
 import cn.edu.whu.trajspark.core.operator.store.IStore;

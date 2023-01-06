@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.core.common.point;
+package cn.edu.whu.trajspark.base.point;
 
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;

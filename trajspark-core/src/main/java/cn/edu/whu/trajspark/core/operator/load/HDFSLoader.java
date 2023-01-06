@@ -1,13 +1,13 @@
 package cn.edu.whu.trajspark.core.operator.load;
 
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.core.operator.load.parser.basic.TrajPointParser;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.HDFSLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
-import cn.edu.whu.trajspark.core.operator.load.parser.basic.TrajPointParser;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;

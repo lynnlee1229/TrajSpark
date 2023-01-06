@@ -1,12 +1,8 @@
 package cn.edu.whu.trajspark.database.meta;
 
-import cn.edu.whu.trajspark.core.util.SerializerUtils;
+import cn.edu.whu.trajspark.base.util.SerializerUtils;
 import cn.edu.whu.trajspark.index.IndexStrategy;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;

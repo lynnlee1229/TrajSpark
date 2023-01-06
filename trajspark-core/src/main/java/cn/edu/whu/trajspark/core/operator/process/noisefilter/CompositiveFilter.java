@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.CompositiveFilterConfig;
 import org.apache.spark.api.java.JavaRDD;
 

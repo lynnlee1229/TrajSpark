@@ -1,8 +1,8 @@
-package cn.edu.whu.trajspark.core.util;
+package cn.edu.whu.trajspark.base.util;
 
-import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
-import cn.edu.whu.trajspark.core.common.point.BasePoint;
-import cn.edu.whu.trajspark.core.common.point.TrajPoint;
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.base.point.BasePoint;
+import cn.edu.whu.trajspark.base.point.TrajPoint;
 import java.io.Serializable;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;

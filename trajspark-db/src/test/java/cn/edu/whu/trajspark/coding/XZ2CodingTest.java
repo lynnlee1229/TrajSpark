@@ -1,12 +1,11 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import org.junit.Test;
 import org.locationtech.jts.io.WKTWriter;
-
-import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
 
 /**
  * @author Haocheng Wang
@@ -16,7 +15,7 @@ public class XZ2CodingTest {
 
   @Test
   public void testGetXZ2Region() {
-    Trajectory t = getExampleTrajectory();
+    Trajectory t = XZ2IndexStrategyTest.getExampleTrajectory();
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
     WKTWriter wktWriter = new WKTWriter();

@@ -1,8 +1,8 @@
-package cn.edu.whu.trajspark.core.common.mbr;
+package cn.edu.whu.trajspark.base.mbr;
 
-import cn.edu.whu.trajspark.core.common.point.BasePoint;
-import cn.edu.whu.trajspark.core.util.CheckUtils;
-import cn.edu.whu.trajspark.core.util.GeoUtils;
+import cn.edu.whu.trajspark.base.point.BasePoint;
+import cn.edu.whu.trajspark.base.util.CheckUtils;
+import cn.edu.whu.trajspark.base.util.GeoUtils;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 

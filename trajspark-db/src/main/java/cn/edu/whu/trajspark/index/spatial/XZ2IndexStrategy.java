@@ -1,18 +1,19 @@
 package cn.edu.whu.trajspark.index.spatial;
 
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.CodingRange;
-import cn.edu.whu.trajspark.coding.XZ2Coding;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.index.IndexStrategy;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
+import cn.edu.whu.trajspark.coding.XZ2Coding;
+import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
+import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

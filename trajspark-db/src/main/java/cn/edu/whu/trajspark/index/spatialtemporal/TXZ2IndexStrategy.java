@@ -1,13 +1,11 @@
 package cn.edu.whu.trajspark.index.spatialtemporal;
 
-import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
-
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.CodingRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.coding.XZ2Coding;
 import cn.edu.whu.trajspark.coding.XZTCoding;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;

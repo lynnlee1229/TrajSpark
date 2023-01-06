@@ -2,7 +2,7 @@ package cn.edu.whu.trajspark.database.load.mapper;
 
 import static cn.edu.whu.trajspark.database.util.ParseJsonToTrajectory.parseJsonToTrajectory;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.DataTable;

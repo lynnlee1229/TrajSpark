@@ -1,22 +1,17 @@
 package cn.edu.whu.trajspark.query;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.addCoprocessor;
 import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.deleteCoprocessor;
-import static org.junit.jupiter.api.Assertions.*;
 
-import cn.edu.whu.trajspark.coding.XZTCoding;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
-import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.index.RowKeyRange;
-import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
 import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
@@ -24,6 +19,9 @@ import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition.SpatialQueryType;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import cn.edu.whu.trajspark.database.meta.IndexMeta;
+import cn.edu.whu.trajspark.database.table.DataTable;
+import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.query.coprocessor.STQueryEndPoint;
 import java.io.File;
 import java.io.IOException;
@@ -127,7 +125,7 @@ class SpatialTemporalQueryTest extends TestCase {
   @Test
   public void testAddCoprocessor() throws IOException {
     Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
+    String tableName = DATASET_NAME + DBConstants.DATA_TABLE_SUFFIX;
     String className = STQueryEndPoint.class.getCanonicalName();
     String jarPath = "hdfs://localhost:9000/coprocessor/trajspark-db-1.0-SNAPSHOT.jar";
     addCoprocessor(conf, tableName, className, jarPath);
@@ -136,7 +134,7 @@ class SpatialTemporalQueryTest extends TestCase {
   @Test
   void TestDeleteCoprocessor() throws IOException {
     Configuration conf = HBaseConfiguration.create();
-    String tableName = DATASET_NAME + DATA_TABLE_SUFFIX;
+    String tableName = DATASET_NAME + DBConstants.DATA_TABLE_SUFFIX;
     deleteCoprocessor(conf, tableName);
   }
 

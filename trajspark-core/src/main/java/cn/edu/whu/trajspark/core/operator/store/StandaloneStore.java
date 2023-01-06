@@ -1,8 +1,11 @@
 package cn.edu.whu.trajspark.core.operator.store;
 
-import cn.edu.whu.trajspark.core.common.point.StayPoint;
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import static cn.edu.whu.trajspark.core.enums.StoreSchemaEnum.POINT_BASED_TRAJECTORY;
+
+import cn.edu.whu.trajspark.base.point.StayPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.StandaloneStoreConfig;
+import cn.edu.whu.trajspark.core.enums.StoreSchemaEnum;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.StayPointConvertor;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.TrajectoryConvertor;
 import cn.edu.whu.trajspark.core.util.IOUtils;

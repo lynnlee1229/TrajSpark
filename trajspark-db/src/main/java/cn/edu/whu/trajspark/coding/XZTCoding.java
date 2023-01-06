@@ -1,12 +1,12 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.coding.sfc.XZTSFC;
-import cn.edu.whu.trajspark.core.common.trajectory.TrajFeatures;
-import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
+import cn.edu.whu.trajspark.coding.sfc.XZTSFC;
+import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.coding.sfc.TimeIndexRange;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import java.nio.ByteBuffer;
@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.LineString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

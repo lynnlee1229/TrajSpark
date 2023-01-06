@@ -1,12 +1,12 @@
 package cn.edu.whu.trajspark.core.operator.load;
 
-import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
-import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.StandaloneLoadConfig;
 import cn.edu.whu.trajspark.core.operator.load.parser.basic.TrajectoryParser;
+import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
+import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import java.util.List;
 import java.util.Objects;
 import javax.ws.rs.NotSupportedException;
