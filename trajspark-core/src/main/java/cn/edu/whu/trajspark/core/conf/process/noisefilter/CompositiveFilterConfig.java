@@ -37,6 +37,6 @@ public class CompositiveFilterConfig implements IFilterConfig {
   }
   @Override
   public FilterEnum getFilterType() {
-    return FilterEnum.COMPOSITIVEFILTER_FILTER;
+    return FilterEnum.COMPOSITIVE_FILTER;
   }
 }

@@ -1,15 +1,13 @@
-package cn.edu.whu.trajspark.base.point;
+package cn.edu.whu.trajspark.core.common.point;
 
-import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
-import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.base.util.GeoUtils;
-import cn.edu.whu.trajspark.base.util.CheckUtils;
+import cn.edu.whu.trajspark.core.common.mbr.MinimumBoundingBox;
+import cn.edu.whu.trajspark.core.util.CheckUtils;
+import cn.edu.whu.trajspark.core.util.GeoUtils;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
-import org.locationtech.jts.geom.Point;
 
 /**
  * @author Lynn Lee
@@ -43,10 +41,10 @@ public class StayPoint implements Serializable {
         tmpP = (TrajPoint) iter.next();
         lngSum += tmpP.getLng();
       }
-      Point centroid = new Trajectory("", "", plist).getLineString().convexHull().getCentroid();
-      this.centerPoint = new BasePoint(centroid.getX(), centroid.getY());
-//      this.centerPoint =
-//          new BasePoint(lngSum / (double) plist.size(), latSum / (double) plist.size());
+//      Point centroid = new Trajectory("", "", plist).getLineString().convexHull().getCentroid();
+//      this.centerPoint = new BasePoint(centroid.getX(), centroid.getY());
+      this.centerPoint =
+          new BasePoint(lngSum / (double) plist.size(), latSum / (double) plist.size());
     }
   }
 
@@ -88,14 +86,14 @@ public class StayPoint implements Serializable {
 
   @Override
   public String toString() {
-    return "StayPoint{" +
-        "sid='" + sid + '\'' +
-        ", oid='" + oid + '\'' +
-        ", startTime=" + startTime +
-        ", endTime=" + endTime +
-        ", mbr=" + mbr +
-        ", plist=" + plist +
-        ", centerPoint=" + centerPoint +
-        '}';
+    return "StayPoint{"
+        + "sid='" + sid + '\''
+        + ", oid='" + oid + '\''
+        + ", startTime=" + startTime
+        + ", endTime=" + endTime
+        + ", mbr=" + mbr
+        + ", plist=" + plist
+        + ", centerPoint=" + centerPoint
+        + '}';
   }
 }

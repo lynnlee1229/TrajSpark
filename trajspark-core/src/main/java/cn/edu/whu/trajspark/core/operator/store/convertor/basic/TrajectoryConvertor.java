@@ -13,8 +13,7 @@ import java.util.Map;
  **/
 public class TrajectoryConvertor implements Serializable {
   public static String convert(Trajectory trajectory,
-                               String splitter,
-                               String lineBreaker) {
+                               String splitter) {
     if (trajectory.getPointList() == null) {
       return null;
     }
@@ -30,7 +29,7 @@ public class TrajectoryConvertor implements Serializable {
           record.append(stringObjectEntry.getValue()).append(splitter);
         }
         record.deleteCharAt(record.lastIndexOf(splitter));
-        records.append(record).append(lineBreaker);
+        records.append(record).append(System.lineSeparator());
       }
     } else {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -47,7 +46,7 @@ public class TrajectoryConvertor implements Serializable {
             record.append(splitter).append(set.getValue());
           }
         }
-        records.append(record).append(lineBreaker);
+        records.append(record).append(System.lineSeparator());
       }
     }
 

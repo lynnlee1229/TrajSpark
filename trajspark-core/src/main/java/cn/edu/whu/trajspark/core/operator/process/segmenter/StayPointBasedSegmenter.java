@@ -1,10 +1,9 @@
 package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
-import cn.edu.whu.trajspark.base.point.TrajPoint;
-import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
+import cn.edu.whu.trajspark.core.common.point.TrajPoint;
+import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
-import cn.edu.whu.trajspark.base.util.GeoUtils;
+import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,16 +52,15 @@ public class StayPointBasedSegmenter implements ISegmenter {
     List<TrajPoint> ptList = tagedTrajectory.getPointList();
     if (ptList != null && !ptList.isEmpty()) {
       if (!(ptList instanceof ArrayList)) {
-        ptList = new ArrayList(ptList);
+        ptList = new ArrayList<>(ptList);
       }
-      List<Trajectory> movingTrajList = new ArrayList();
+      List<Trajectory> movingTrajList = new ArrayList<>();
       Trajectory movingTraj;
       List<TrajPoint> tmpPts;
       boolean newSpFlag = true;
       int spStartIdx = Integer.MIN_VALUE;
       int spEndIdx = Integer.MIN_VALUE;
       int trajIdx = 0;
-      int order = 0;
       String stayPointTagName = detector.getStayPointTagName();
       for (int i = 0; i < ptList.size() - 1; ++i) {
         int j = i;
@@ -79,15 +77,20 @@ public class StayPointBasedSegmenter implements ISegmenter {
           spEndIdx = j - 1;
         }
         // 根据Tag生成停留点
+        // 从trajIdx到最近停留点的前一点
         if (!newSpFlag && i == spEndIdx) {
           tmpPts = new ArrayList<>(ptList.subList(trajIdx, spStartIdx));
-          if (GeoUtils.getTrajListLen(tmpPts) >= minTrajLength) {
-            movingTraj = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + order++,
-                rawTrajectory.getObjectID(), tmpPts, rawTrajectory.getExtendedValues());
+          movingTraj = SegmentUtils.genNewTrajectory(
+              rawTrajectory.getTrajectoryID(),
+              rawTrajectory.getObjectID(),
+              tmpPts,
+              rawTrajectory.getExtendedValues(),
+              minTrajLength);
+          if (movingTraj != null) {
             movingTrajList.add(movingTraj);
           }
           // 跳过停留点，并继续发现停留点
-          trajIdx = i + 1;
+          trajIdx = spEndIdx + 1;
           newSpFlag = true;
         }
       }
@@ -95,9 +98,13 @@ public class StayPointBasedSegmenter implements ISegmenter {
       // 若未发现停留点，则轨迹归为一段
       if (newSpFlag) {
         tmpPts = new ArrayList<>(ptList.subList(trajIdx, ptList.size()));
-        if (GeoUtils.getTrajListLen(tmpPts) >= minTrajLength) {
-          movingTraj = new Trajectory(rawTrajectory.getTrajectoryID() + "-" + order,
-              rawTrajectory.getObjectID(), tmpPts, rawTrajectory.getExtendedValues());
+        movingTraj = SegmentUtils.genNewTrajectory(
+            rawTrajectory.getTrajectoryID(),
+            rawTrajectory.getObjectID(),
+            tmpPts,
+            rawTrajectory.getExtendedValues(),
+            minTrajLength);
+        if (movingTraj != null) {
           movingTrajList.add(movingTraj);
         }
       }

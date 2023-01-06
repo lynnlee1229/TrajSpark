@@ -11,7 +11,8 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = BasicSegmenterConfig.class, name = "BASIC_SEGMENTER"),
-    @JsonSubTypes.Type(value = StayPointBasedSegmenterConfig.class, name = "STAYPOINTBASED_SEGMENTER")
+    @JsonSubTypes.Type(value = StayPointBasedSegmenterConfig.class, name = "STAYPOINTBASED_SEGMENTER"),
+    @JsonSubTypes.Type(value = UserDefinedSegmenterConfig.class, name = "USERDEFINED_SEGMENTER")
 })
 public interface ISegmenterConfig extends Serializable {
   SegmenterEnum getSegmenterType();

@@ -135,7 +135,7 @@ public class GeoUtils implements Serializable {
   }
 
   public static double getSpeed(TrajPoint p1, TrajPoint p2) {
-    long timeSpanInSec = ChronoUnit.SECONDS.between(p1.getTimestamp(), p2.getTimestamp());
+    long timeSpanInSec = Math.abs(ChronoUnit.SECONDS.between(p1.getTimestamp(), p2.getTimestamp()));
     if (timeSpanInSec == 0L) {
       return 0.0;
     } else {
@@ -145,13 +145,25 @@ public class GeoUtils implements Serializable {
   }
 
   public static double getSpeed(TrajPoint p1, TrajPoint p2, TrajPoint p3) {
-    long timeSpanInSec = ChronoUnit.SECONDS.between(p1.getTimestamp(), p3.getTimestamp());
+    long timeSpanInSec = Math.abs(ChronoUnit.SECONDS.between(p1.getTimestamp(), p3.getTimestamp()));
     if (timeSpanInSec == 0L) {
       return 0.0;
     } else {
       double distanceInM = getEuclideanDistanceM(p1, p2) + getEuclideanDistanceM(p2, p3);
       return distanceInM / (double) timeSpanInSec * 3.6;
     }
+  }
+
+  public static double getDeltaV(TrajPoint p1, TrajPoint p2, TrajPoint p3) {
+    long timeSpanInSec2 = Math.abs(ChronoUnit.SECONDS.between(p2.getTimestamp(), p3.getTimestamp()));
+    if (timeSpanInSec2 == 0) {
+      return 0.0;
+    }
+    long timeSpanInSec1 = Math.abs(ChronoUnit.SECONDS.between(p1.getTimestamp(), p3.getTimestamp()));
+    double v1 = timeSpanInSec1 == 0 ? 0.0 : getEuclideanDistanceM(p1, p2) / (double) timeSpanInSec1;
+    double v2 = getEuclideanDistanceM(p2, p3) / (double) timeSpanInSec2;
+    double deltaV = (v2 - v1) / timeSpanInSec2;
+    return (v2 - v1) / timeSpanInSec2;
   }
 
   public static MinimumBoundingBox calMinimumBoundingBox(List geoList) {
@@ -177,14 +189,32 @@ public class GeoUtils implements Serializable {
     }
   }
 
+  public static double getEuclideanDistance(TrajPoint p0, TrajPoint p1) {
+    double dx = p1.getX() - p0.getX();
+    double dy = p1.getY() - p0.getY();
+    return Math.sqrt((dx * dx + dy * dy));
+  }
+
   public static double getAngle(TrajPoint p0, TrajPoint p1, TrajPoint p2) {
-    double d1 = getEuclideanDistanceM(p0, p1);
-    double d2 = getEuclideanDistanceM(p1, p2);
-    double d3 = getEuclideanDistanceM(p0, p2);
+    double d1 = getEuclideanDistance(p0, p1);
+    double d2 = getEuclideanDistance(p1, p2);
+    // 三点中至少有1静止点，返回180度
     if (d1 * d2 == 0) {
       return 180.0;
     }
-    return Math.toDegrees(Math.acos((d1 * d1 + d2 * d2 - d3 * d3) / (2 * d1 * d2)));
+    double x1 = p1.getX() - p0.getX();
+    double y1 = p1.getY() - p0.getY();
+    double x2 = p2.getX() - p1.getX();
+    double y2 = p2.getY() - p1.getY();
+    double delta = (x1 * x2 + y1 * y2) / (d1 * d2);
+    // 边界值问题处理
+    if (Math.abs(delta - 1.0) < 1e-10) {
+      delta = 1.0;
+    }
+    if (Math.abs(delta + 1.0) < 1e-10) {
+      delta = -1.0;
+    }
+    return Math.toDegrees(Math.acos(delta));
   }
 
   public static double getRatio(TrajPoint p0, TrajPoint p1, TrajPoint p2) {
@@ -192,5 +222,19 @@ public class GeoUtils implements Serializable {
     double d2 = getEuclideanDistanceM(p1, p2);
     double d3 = getEuclideanDistanceM(p0, p2);
     return (d1 + d2) / d3;
+  }
+
+  public static TrajPoint fixPos(TrajPoint preP, TrajPoint curP, TrajPoint nextP) {
+    double tSum = Math.abs(ChronoUnit.SECONDS.between(preP.getTimestamp(), nextP.getTimestamp()));
+    double t = Math.abs(ChronoUnit.SECONDS.between(preP.getTimestamp(), curP.getTimestamp()));
+    if (t != 0) {
+      curP.setLng(preP.getLng() + (nextP.getLng() - preP.getLng()) * t / tSum);
+      curP.setLat(preP.getLat() + (nextP.getLat() - preP.getLat()) * t / tSum);
+
+    } else {
+      curP.setLng(preP.getLng());
+      curP.setLat(preP.getLat());
+    }
+    return curP;
   }
 }

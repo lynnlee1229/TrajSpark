@@ -1,12 +1,13 @@
 package cn.edu.whu.trajspark.core.operator.load;
 
-import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.core.common.trajectory.Trajectory;
+import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
+import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.StandaloneLoadConfig;
 import cn.edu.whu.trajspark.core.operator.load.parser.basic.TrajectoryParser;
-import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
-import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 import javax.ws.rs.NotSupportedException;
@@ -59,8 +60,14 @@ public class StandaloneLoader implements ILoader {
         })
         .map((s) -> {
           // 解析、映射为Trajectory
-          return TrajectoryParser.multifileParse(s._2(), trajectoryConfig,
-              standaloneLoadConfig.getSplitter(), standaloneLoadConfig.getLineBreaker());
+          Trajectory trajectory = TrajectoryParser.multifileParse(s._2(), trajectoryConfig,
+              standaloneLoadConfig.getSplitter());
+          if (trajectory != null && trajectoryConfig.getTrajId().getIndex() < 0) {
+            File file = new File(s._1());
+            String fileNameFull = file.getName();
+            trajectory.setTrajectoryID(fileNameFull.substring(0, fileNameFull.lastIndexOf(".")));
+          }
+          return trajectory;
         })
         .filter(Objects::nonNull);
   }
@@ -75,7 +82,7 @@ public class StandaloneLoader implements ILoader {
         .flatMap(
             s -> {
               return TrajectoryParser.singlefileParse(s, trajectoryConfig,
-                      standaloneLoadConfig.getSplitter(), standaloneLoadConfig.getLineBreaker())
+                      standaloneLoadConfig.getSplitter())
                   .iterator();
             }
         ).filter(Objects::nonNull);
