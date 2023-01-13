@@ -20,6 +20,10 @@ import java.io.Serializable;
     @JsonSubTypes.Type(
         value = StandaloneLoadConfig.class,
         name = "standalone"
+    ),
+    @JsonSubTypes.Type(
+        value = HBaseLoadConfig.class,
+        name = "hbase"
     )
 })
 
