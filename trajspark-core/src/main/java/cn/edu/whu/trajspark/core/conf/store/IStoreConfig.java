@@ -21,6 +21,10 @@ import java.io.Serializable;
     @JsonSubTypes.Type(
         value = StandaloneStoreConfig.class,
         name = "standalone"
+    ),
+    @JsonSubTypes.Type(
+        value = HBaseStoreConfig.class,
+        name = "hbase"
     )
 })
 //, @JsonSubTypes.Type(

@@ -2,23 +2,22 @@
   "loadConfig": {
     "@type": "standalone",
     "master": "local[*]",
-    "location": "F:\\github\\test\\TrajSpark\\trajspark-examples\\src\\main\\resources\\data",
+    "location": "F:/github/test/TrajSpark/trajspark-examples/src/main/resources/data/geolife",
     "fileMode": "multi_file",
     "partNum": 8,
-    "splitter": ",",
-    "lineBreaker": "/n"
+    "splitter": ","
   },
   "dataConfig": {
     "@type": "trajectory",
     "trajId": {
       "sourceName": "traj_id",
       "dataType": "String",
-      "index": 0
+      "index": 1
     },
     "objectId": {
       "sourceName": "object_id",
       "dataType": "String",
-      "index": 1
+      "index": 0
     },
     "trajPointConfig": {
       "@type": "traj_point",
@@ -42,18 +41,7 @@
         "dataType": "Date",
         "index": 5,
         "format": "yyyy-MM-dd HH:mm:ss"
-      },
-      "trajPointMetas": [
-        {
-          "sourceData": {
-            "sourceName": "bsid",
-            "dataType": "String",
-            "index": 6
-          },
-          "mappingName": "bsid",
-          "indexable": true
-        }
-      ]
+      }
     }
   },
   "segmenterConfig": {
@@ -66,11 +54,11 @@
     }
   },
   "storeConfig": {
-    "@type": "standalone",
-    "location": "F:/武汉大学学习资料/轨迹大数据管理项目/测试数据",
+    "@type": "hbase",
+    "location": "hdfs://localhost:9000/store/",
     "schema": "POINT_BASED_TRAJECTORY",
-    "splitter": ",",
-    "lineBreaker": "/n",
-    "filePostFix": ".csv"
+    "dataSetName": "TRAJECTORY_TEST",
+    "mainIndex": "OBJECT_ID_T",
+    "otherIndex": "XZ2,TXZ2"
   }
 }
