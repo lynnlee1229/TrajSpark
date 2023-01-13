@@ -11,6 +11,7 @@ import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
 import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -37,7 +38,7 @@ public class HBaseStoreConfig implements IStoreConfig {
       @JsonProperty("dataSetName") String dataSetName,
       @JsonProperty("schema") StoreSchemaEnum schema,
       @JsonProperty("mainIndex") IndexType mainIndex,
-      @JsonProperty("otherIndex") String otherIndex) {
+      @JsonProperty("otherIndex") @JsonInclude(JsonInclude.Include.NON_NULL) String otherIndex) {
     this.location = location;
     this.dataSetName = dataSetName;
     this.schema = schema;
@@ -84,8 +85,10 @@ public class HBaseStoreConfig implements IStoreConfig {
     List<IndexMeta> indexMetaList = new LinkedList<>();
     IndexMeta mainIndexMeta = createIndexMeta(mainIndex, true);
     indexMetaList.add(mainIndexMeta);
-    List<IndexMeta> otherIndexMeta = createOtherIndex(otherIndex, TextSplitType.CSV);
-    indexMetaList.addAll(otherIndexMeta);
+    if (otherIndex != null) {
+      List<IndexMeta> otherIndexMeta = createOtherIndex(otherIndex, TextSplitType.CSV);
+      indexMetaList.addAll(otherIndexMeta);
+    }
     return indexMetaList;
   }
 

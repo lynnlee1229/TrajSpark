@@ -12,10 +12,17 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Mutation;
@@ -40,7 +47,7 @@ import scala.Tuple2;
 public class HBaseStore extends Configured implements IStore {
 
   private static final Logger LOGGER = Logger.getLogger(HBaseStore.class);
-  static Database instance;
+  private static Database instance;
 
   private HBaseStoreConfig storeConfig;
 
@@ -80,10 +87,28 @@ public class HBaseStore extends Configured implements IStore {
       List<Put> puts = TrajectoryDataMapper.mapTrajectoryToRow(trajectory, indexMetaList);
       return puts.iterator();
     }));
-    JavaPairRDD<ImmutableBytesWritable, Put> putJavaPairRDD = putJavaRDD.mapToPair(
-        put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put)).sortByKey();
-    putJavaPairRDD.saveAsNewAPIHadoopFile(storeConfig.getLocation(), ImmutableBytesWritable.class,
+    JavaPairRDD<ImmutableBytesWritable, KeyValue> putJavaPairRDD = putJavaRDD
+        .mapToPair(
+            put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put))
+        .reduceByKey((key, value) -> value)
+        .flatMapToPair(putpair -> TrajectoryDataMapper.mapPutToKeyValue(putpair._2).iterator())
+        .sortByKey(true)
+        .mapToPair(cell -> new Tuple2<>(new ImmutableBytesWritable(cell._1.getRowKey()), cell._2));
+//    for (Tuple2<ImmutableBytesWritable, KeyValue> tuple2 : putJavaPairRDD.collect()) {
+//      String string = Bytes.toString(tuple2._2.getQualifierArray());
+//      System.out.println(string);
+//    }
+    putJavaPairRDD.saveAsNewAPIHadoopFile(storeConfig.getLocation(),
+        ImmutableBytesWritable.class,
         KeyValue.class, HFileOutputFormat2.class);
+//    // 修改权限：否则可能会卡住
+//    FsShell shell = new FsShell(getConf());
+//    int setPermissionfalg = -1;
+//    setPermissionfalg = shell.run(new String[]{"-chmod", "-R", "777", storeConfig.getLocation()});
+//    if (setPermissionfalg != 0) {
+//      System.out.println("Set Permission failed");
+//      return;
+//    }
     LOGGER.info("Successfully generated HFile");
     LoadIncrementalHFiles loader = new LoadIncrementalHFiles(getConf());
     loader.doBulkLoad(new Path(storeConfig.getLocation()), instance.getAdmin(), table, locator);
