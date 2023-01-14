@@ -126,12 +126,12 @@ public class GeoUtils implements Serializable {
     return Math.min(lat, MAX_LAT);
   }
 
-  public static double getKmFromDegree(double km) {
-    return km * DistanceUtils.KM_TO_DEG;
+  public static double getKmFromDegree(double degree) {
+    return degree * DistanceUtils.DEG_TO_KM;
   }
 
-  public static double getDegreeFromKm(double degree) {
-    return degree * DistanceUtils.DEG_TO_KM;
+  public static double getDegreeFromKm(double km) {
+    return km * DistanceUtils.KM_TO_DEG;
   }
 
   public static double getSpeed(TrajPoint p1, TrajPoint p2) {
@@ -155,11 +155,13 @@ public class GeoUtils implements Serializable {
   }
 
   public static double getDeltaV(TrajPoint p1, TrajPoint p2, TrajPoint p3) {
-    long timeSpanInSec2 = Math.abs(ChronoUnit.SECONDS.between(p2.getTimestamp(), p3.getTimestamp()));
+    long timeSpanInSec2 =
+        Math.abs(ChronoUnit.SECONDS.between(p2.getTimestamp(), p3.getTimestamp()));
     if (timeSpanInSec2 == 0) {
       return 0.0;
     }
-    long timeSpanInSec1 = Math.abs(ChronoUnit.SECONDS.between(p1.getTimestamp(), p3.getTimestamp()));
+    long timeSpanInSec1 =
+        Math.abs(ChronoUnit.SECONDS.between(p1.getTimestamp(), p3.getTimestamp()));
     double v1 = timeSpanInSec1 == 0 ? 0.0 : getEuclideanDistanceM(p1, p2) / (double) timeSpanInSec1;
     double v2 = getEuclideanDistanceM(p2, p3) / (double) timeSpanInSec2;
     double deltaV = (v2 - v1) / timeSpanInSec2;
@@ -189,9 +191,15 @@ public class GeoUtils implements Serializable {
     }
   }
 
-  public static double getEuclideanDistance(TrajPoint p0, TrajPoint p1) {
+  public static double getEuclideanDistance(BasePoint p0, BasePoint p1) {
     double dx = p1.getX() - p0.getX();
     double dy = p1.getY() - p0.getY();
+    return Math.sqrt((dx * dx + dy * dy));
+  }
+
+  public static double getEuclideanDistance(double x0, double y0, double x1, double y1) {
+    double dx = x1 - x0;
+    double dy = y1 - y0;
     return Math.sqrt((dx * dx + dy * dy));
   }
 

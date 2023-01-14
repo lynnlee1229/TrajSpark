@@ -77,11 +77,11 @@ public class StandaloneLoader implements ILoader {
                                                            TrajectoryConfig trajectoryConfig) {
     TrajPointConfig trajPointConfig = trajectoryConfig.getTrajPointConfig();
     int partNum = standaloneLoadConfig.getPartNum();
-    return sparkSession.sparkContext().textFile(standaloneLoadConfig.getLocation(), partNum)
+    return sparkSession.sparkContext().wholeTextFiles(standaloneLoadConfig.getLocation(), partNum)
         .toJavaRDD()
         .flatMap(
             s -> {
-              return TrajectoryParser.singlefileParse(s, trajectoryConfig,
+              return TrajectoryParser.singlefileParse(s._2, trajectoryConfig,
                       standaloneLoadConfig.getSplitter())
                   .iterator();
             }

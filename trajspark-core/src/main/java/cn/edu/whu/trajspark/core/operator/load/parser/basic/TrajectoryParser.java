@@ -60,8 +60,7 @@ public class TrajectoryParser {
     Map<String, List<String>> groupList = Arrays.stream(points).collect(
         Collectors.groupingBy(item -> getGroupKey(item, splitter, trajIdIndex, objectIdIndex)));
     // 映射
-    return groupList.entrySet().stream()
-        .map(Map.Entry::getValue)
+    return groupList.values().stream()
         .map(item -> {
           try {
             return mapToTraj(item, splitter, trajIdIndex, objectIdIndex, trajectoryConfig);
