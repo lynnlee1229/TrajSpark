@@ -101,14 +101,14 @@ public class HBaseStore extends Configured implements IStore {
     putJavaPairRDD.saveAsNewAPIHadoopFile(storeConfig.getLocation(),
         ImmutableBytesWritable.class,
         KeyValue.class, HFileOutputFormat2.class);
-//    // 修改权限：否则可能会卡住
-//    FsShell shell = new FsShell(getConf());
-//    int setPermissionfalg = -1;
-//    setPermissionfalg = shell.run(new String[]{"-chmod", "-R", "777", storeConfig.getLocation()});
-//    if (setPermissionfalg != 0) {
-//      System.out.println("Set Permission failed");
-//      return;
-//    }
+//  修改权限：否则可能会卡住
+    FsShell shell = new FsShell(getConf());
+    int setPermissionfalg = -1;
+    setPermissionfalg = shell.run(new String[]{"-chmod", "-R", "777", storeConfig.getLocation()});
+    if (setPermissionfalg != 0) {
+      System.out.println("Set Permission failed");
+      return;
+    }
     LOGGER.info("Successfully generated HFile");
     LoadIncrementalHFiles loader = new LoadIncrementalHFiles(getConf());
     loader.doBulkLoad(new Path(storeConfig.getLocation()), instance.getAdmin(), table, locator);

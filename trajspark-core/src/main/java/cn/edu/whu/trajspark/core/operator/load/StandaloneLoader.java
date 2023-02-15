@@ -13,6 +13,7 @@ import java.util.Objects;
 import javax.ws.rs.NotSupportedException;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
+import scala.NotImplementedError;
 
 /**
  * @author Lynn Lee
@@ -45,6 +46,11 @@ public class StandaloneLoader implements ILoader {
       throw new RuntimeException(
           "loadConfig is not a StandAloneLoadConfig or dataConfig is not a TrajectoryConfig in configuration json file");
     }
+  }
+
+  @Override
+  public JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig) {
+    throw new NotImplementedError();
   }
 
   private JavaRDD<Trajectory> loadTrajectoryFromMultiFile(SparkSession sparkSession,
