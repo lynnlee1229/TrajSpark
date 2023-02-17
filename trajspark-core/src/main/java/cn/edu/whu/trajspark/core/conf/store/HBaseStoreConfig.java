@@ -24,13 +24,13 @@ import scala.NotImplementedError;
  */
 public class HBaseStoreConfig implements IStoreConfig {
 
-  private String location;
-  private String dataSetName;
-  private IndexType mainIndex;
+  private final String location;
+  private final String dataSetName;
+  private final IndexType mainIndex;
   private String otherIndex;
-  private StoreSchemaEnum schema;
-  private List<IndexMeta> indexList;
-  private DataSetMeta dataSetMeta;
+  private final StoreSchemaEnum schema;
+  private final List<IndexMeta> indexList;
+  private final DataSetMeta dataSetMeta;
 
   @JsonCreator
   public HBaseStoreConfig(
@@ -79,6 +79,10 @@ public class HBaseStoreConfig implements IStoreConfig {
 
   public DataSetMeta getDataSetMeta() {
     return dataSetMeta;
+  }
+
+  public void setOtherIndex(String otherIndex) {
+    this.otherIndex = otherIndex;
   }
 
   private List<IndexMeta> createIndexList() {

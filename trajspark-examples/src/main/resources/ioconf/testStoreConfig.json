@@ -2,7 +2,7 @@
   "loadConfig": {
     "@type": "standalone",
     "master": "local[*]",
-    "location": "F:/github/test/TrajSpark/trajspark-examples/src/main/resources/data/geolife",
+    "location": "D:/gitRepo/TrajSpark/trajspark-examples/src/main/resources/data/geolife",
     "fileMode": "multi_file",
     "partNum": 8,
     "splitter": ","

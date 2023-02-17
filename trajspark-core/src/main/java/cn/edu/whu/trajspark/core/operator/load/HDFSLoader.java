@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
+import scala.NotImplementedError;
 import scala.Tuple2;
 
 import javax.ws.rs.NotSupportedException;
@@ -44,6 +45,11 @@ public class HDFSLoader implements ILoader {
       throw new RuntimeException(
           "loadConfig is not a HDFSLoadConfig or dataConfig is not a TrajectoryConfig in configuration json file");
     }
+  }
+
+  @Override
+  public JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig) {
+    throw new NotImplementedError();
   }
 
   private JavaRDD<Trajectory> loadTrajectoryFromMultiFile(SparkSession sparkSession,

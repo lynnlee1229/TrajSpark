@@ -35,6 +35,7 @@ public class SparkSessionUtils {
     switch (loadConfig.getInputType()) {
       case STANDALONE:
       case HDFS:
+      case HBASE:
       case GEOMESA:
         return SparkSession
             .builder()

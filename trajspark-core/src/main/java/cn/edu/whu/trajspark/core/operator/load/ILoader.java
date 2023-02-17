@@ -20,6 +20,7 @@ import java.io.Serializable;
  **/
 public interface ILoader extends Serializable {
   JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig, IDataConfig dataConfig);
+  JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig);
 
   static ILoader getLoader(ILoadConfig loadConfig) {
     switch (loadConfig.getInputType()) {
