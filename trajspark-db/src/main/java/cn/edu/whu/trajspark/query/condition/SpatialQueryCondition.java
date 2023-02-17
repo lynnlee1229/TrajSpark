@@ -10,7 +10,7 @@ import org.locationtech.jts.io.WKTWriter;
  * @author Haocheng Wang
  * Created on 2022/9/27
  */
-public class SpatialQueryCondition {
+public class SpatialQueryCondition extends AbstractQueryCondition{
   /**
    * Spatial query window geometry, may be geometry collection
    */
@@ -48,6 +48,13 @@ public class SpatialQueryCondition {
     this.queryType = queryType;
   }
 
+  @Override
+  public String getConditionInfo() {
+     return "SpatialQueryCondition{" +
+        "queryWindow=" + queryWindow +
+        ", queryType=" + queryType +
+        '}';
+  }
 
   /**
    * @author Haocheng Wang

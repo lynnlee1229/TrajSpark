@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * row key: shard(short) + index type(int) + XZPCode + [oid(string) + tid(string)]
+ * row key: shard(short) + XZPCode + [oid(string) + tid(string)]
  *
  * @author Haocheng Wang Created on 2022/11/1
  */
@@ -31,7 +31,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
 
   private XZ2PCoding xz2PCoding;
 
-  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + XZ2PCoding.BYTES;
+  private static final int KEY_BYTE_LEN = Short.BYTES + XZ2PCoding.BYTES;
 
   public XZ2PlusIndexStrategy() {
     indexType = IndexType.XZ2Plus;
@@ -43,8 +43,6 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     List<byte[]> elements = new LinkedList<>();
     // 1. shard
     elements.add(Bytes.toBytes((short) (Math.random() * shardNum)));
-    // 2. index type
-    elements.add(Bytes.toBytes(getIndexType().getId()));
     // 3. xz2p code
     elements.add(xz2PCoding.code(trajectory.getLineString()).getBytes());
     // 4. oid
@@ -67,14 +65,11 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     List<CodingRange> codeRanges = xz2PCoding.ranges(spatialQueryCondition);
     List<CodingRange> keyScanRange = getKeyScanRange(codeRanges);
 
-    // 2. concat shard index and index type.
+    // 2. concat shard and xz2p coding.
     for (CodingRange xz2PCode : keyScanRange) {
       for (short shard = 0; shard < shardNum; shard++) {
-        result.add(new RowKeyRange(new ByteArray(
-            Arrays.asList(Bytes.toBytes(shard), Bytes.toBytes(indexType.getId()),
-                xz2PCode.getLower().getBytes())), new ByteArray(
-            Arrays.asList(Bytes.toBytes(shard), Bytes.toBytes(indexType.getId()),
-                xz2PCode.getUpper().getBytes())), xz2PCode.isContained()));
+        result.add(new RowKeyRange(new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PCode.getLower().getBytes())),
+            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PCode.getUpper().getBytes())), xz2PCode.isContained()));
       }
     }
     return result;
@@ -118,7 +113,6 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
     return new ByteArray(codingByteArray);
@@ -152,7 +146,6 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
     int objTIDArrayLen = allLen - Short.BYTES - Long.BYTES - XZ2PCoding.BYTES;
@@ -166,6 +159,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     for (CodingRange codingRange : codingRanges) {
       ByteArray lower = codingRange.getLower();
       ByteArray upper = codingRange.getUpper();
+      // 被包含的索引区间，只精确到xz2编码即可
       if (codingRange.isContained()) {
         ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES);
         ByteBuffer byteBuffer = upper.toByteBuffer();
@@ -174,11 +168,13 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
         byteBufferTemp.putLong(xz2Coding);
         ByteArray newUpper = new ByteArray(byteBufferTemp);
         codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
-      } else {
+      } else { // 待精过滤的索引区间，xz2编码后还需要添加posCode。
         ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES + Byte.BYTES);
         ByteBuffer byteBuffer = upper.toByteBuffer();
         byteBuffer.flip();
         long xz2Coding = byteBuffer.getLong();
+        // TODO： bug， poscode = 15时，会越出范围，变为0。
+        // TODO： 下面的这种情况，应该将xz2Coding增大1，posCode为0。
         byte posCode = (byte) (byteBuffer.get() + 1);
         byteBufferTemp.putLong(xz2Coding);
         byteBufferTemp.put(posCode);

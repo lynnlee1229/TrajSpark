@@ -3,12 +3,13 @@ package cn.edu.whu.trajspark.database.load.driver;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
-import java.util.LinkedList;
-import java.util.List;
 import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Xu Qi
@@ -26,8 +27,8 @@ class TrajectoryDataDriverTest extends TestCase {
     list.add(new IndexMeta(
         true,
         new XZ2IndexStrategy(),
-        database_name
-    ));
+        database_name,
+        "defaule_index_name"));
     DataSetMeta dataSetMeta = new DataSetMeta(database_name, list);
     TrajectoryDataDriver trajectoryDataDriver = new TrajectoryDataDriver();
     trajectoryDataDriver.setConf(conf);

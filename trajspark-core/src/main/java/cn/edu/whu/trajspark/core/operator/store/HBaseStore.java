@@ -1,7 +1,5 @@
 package cn.edu.whu.trajspark.core.operator.store;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
-
 import cn.edu.whu.trajspark.base.point.StayPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.HBaseStoreConfig;
@@ -9,36 +7,29 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
-import cn.edu.whu.trajspark.datatypes.ByteArray;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.RegionLocator;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
 import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.NotImplementedError;
 import scala.Tuple2;
+
+import java.io.IOException;
+import java.util.List;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 
 /**
  * @author Xu Qi
@@ -46,7 +37,7 @@ import scala.Tuple2;
  */
 public class HBaseStore extends Configured implements IStore {
 
-  private static final Logger LOGGER = Logger.getLogger(HBaseStore.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HBaseStore.class);
   private static Database instance;
 
   private HBaseStoreConfig storeConfig;
@@ -58,7 +49,6 @@ public class HBaseStore extends Configured implements IStore {
 
   public void initDataSetTest(DataSetMeta dataSetMeta) throws IOException {
     instance = Database.getInstance();
-    instance.openConnection();
     instance.createDataSet(dataSetMeta);
   }
 

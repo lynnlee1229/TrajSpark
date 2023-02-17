@@ -1,20 +1,24 @@
 package cn.edu.whu.trajspark.database.load.mapper;
 
-import static cn.edu.whu.trajspark.database.util.ParseJsonToTrajectory.parseJsonToTrajectory;
-
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
+import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import java.io.IOException;
-import java.util.List;
+import cn.edu.whu.trajspark.index.IndexType;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static cn.edu.whu.trajspark.database.util.ParseJsonToTrajectory.parseJsonToTrajectory;
 
 /**
  * @author Xu Qi
@@ -22,11 +26,11 @@ import org.apache.hadoop.mapreduce.Mapper;
  */
 public class TextMapper extends Mapper<LongWritable, Text, ImmutableBytesWritable, Put> {
 
-  private static DataTable dataTable;
+  private static IndexTable indexTable;
   private byte[] mainIndexKey;
 
-  public static void setDataTable(DataTable dataTable) {
-    TextMapper.dataTable = dataTable;
+  public static void setDataTable(IndexTable indexTable) {
+    TextMapper.indexTable = indexTable;
   }
 
   private byte[] getMapRowKey(Trajectory trajectory, IndexMeta indexMeta) {
@@ -59,16 +63,19 @@ public class TextMapper extends Mapper<LongWritable, Text, ImmutableBytesWritabl
     String lineValue = value.toString();
     System.out.println(lineValue);
     Trajectory trajectory = parseJsonToTrajectory(lineValue);
-    DataSetMeta dataSetMeta = dataTable.getDataSetMeta();
-    List<IndexMeta> indexMetaList = dataSetMeta.getIndexMetaList();
-    for (IndexMeta indexMeta : indexMetaList) {
-      final byte[] rowKey = getMapRowKey(trajectory, indexMeta);
-      Put put = getMapPut(trajectory, indexMeta);
-      if (rowKey == null || rowKey.length <= 0) {
-        System.out.printf("Skipping record %d", key.get());
-        context.getCounter("ImportText", "import.bad.line").increment(1);
-      } else {
-        context.write(new ImmutableBytesWritable(rowKey), put);
+    DataSetMeta dataSetMeta = Database.getInstance().getDataSetMeta(indexTable.getIndexMeta().getDataSetName());
+    Map<IndexType, List<IndexMeta>> map = dataSetMeta.getAvailableIndexes();
+    for (IndexType indexType : map.keySet()) {
+      List<IndexMeta> indexMetas = map.get(indexType);
+      for (IndexMeta indexMeta : indexMetas) {
+        final byte[] rowKey = getMapRowKey(trajectory, indexMeta);
+        Put put = getMapPut(trajectory, indexMeta);
+        if (rowKey == null || rowKey.length <= 0) {
+          System.out.printf("Skipping record %d", key.get());
+          context.getCounter("ImportText", "import.bad.line").increment(1);
+        } else {
+          context.write(new ImmutableBytesWritable(rowKey), put);
+        }
       }
     }
   }

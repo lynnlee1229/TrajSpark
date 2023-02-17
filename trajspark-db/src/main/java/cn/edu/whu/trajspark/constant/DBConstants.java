@@ -8,12 +8,15 @@ public class DBConstants {
   // Tables
   public static final String META_TABLE_NAME = "trajspark_db_meta";
   public static final String META_TABLE_COLUMN_FAMILY = "meta";
+  public static final String META_TABLE_INDEX_META_QUALIFIER = "index_meta";
+  public static final String META_TABLE_MAIN_TABLE_META_QUALIFIER = "main_table_index_meta";
+  public static final String META_TABLE_DESC_QUALIFIER = "desc";
 
-  // DATA TABLE
+  // INDEX TABLE
   public static final String DATA_TABLE_SUFFIX = "_data";
-  public static String DATA_TABLE_CF = "data";
+  public static String INDEX_TABLE_CF = "cf0";
 
-  // DATA TABLE COLUMNS
+  // INDEX TABLE COLUMNS
   public static String BOUNDING_BOX = "BB";
   public static String ORIGIN_INFO = "OI";
   public static String DESTINATION_INFO = "DI";

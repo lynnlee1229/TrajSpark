@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.datatypes;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -53,6 +54,22 @@ public class TimeLine {
     this.timeEnd = timeEnd;
   }
 
+  public boolean contain(TimeLine timeLine) {
+    return lessOrEqualTo(timeStart, timeLine.timeStart) && lessOrEqualTo(timeLine.timeEnd, timeEnd);
+  }
+
+  public boolean intersect(TimeLine other) {
+    return (lessOrEqualTo(other.timeStart, timeStart) && lessOrEqualTo(timeStart, other.timeEnd))
+        || (lessOrEqualTo(timeEnd, other.timeEnd) && lessOrEqualTo(other.timeStart, timeEnd))
+        || this.contain(other);
+  }
+
+  private boolean lessOrEqualTo(ZonedDateTime t1, ZonedDateTime t2) {
+    LocalDateTime ldt1 = t1.toLocalDateTime();
+    LocalDateTime ldt2 = t2.toLocalDateTime();
+    return ldt1.isBefore(ldt2) || ldt1.isEqual(ldt2);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -72,7 +89,7 @@ public class TimeLine {
 
   @Override
   public String toString() {
-    return "TimeLine{" + "timeStart=" + timeStart + ", timeEnd=" + timeEnd + '}';
+    return "TimeLine{" + "timeStart=" + timeStart.toLocalDateTime() + ", timeEnd=" + timeEnd.toLocalDateTime() + '}';
   }
   public String toReString() {
     return "TimeLine{" + "timeStart=" + reTimeStart + ", timeEnd=" + reTimeEnd + '}';

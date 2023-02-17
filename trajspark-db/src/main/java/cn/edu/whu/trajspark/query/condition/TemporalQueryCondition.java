@@ -2,20 +2,21 @@ package cn.edu.whu.trajspark.query.condition;
 
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
+
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Haocheng Wang Created on 2022/9/28
  */
-public class TemporalQueryCondition {
+public class TemporalQueryCondition extends AbstractQueryCondition{
 
-  private TimeLine queryWindow;
   private List<TimeLine> queryWindows;
   private final TemporalQueryType temporalQueryType;
 
   public TemporalQueryCondition(TimeLine queryWindow,
       TemporalQueryType temporalQueryType) {
-    this.queryWindow = queryWindow;
+    this.queryWindows = Collections.singletonList(queryWindow);
     this.temporalQueryType = temporalQueryType;
   }
 
@@ -25,15 +26,29 @@ public class TemporalQueryCondition {
     this.temporalQueryType = temporalQueryType;
   }
 
-  public TimeLine getQueryWindow() {
-    return queryWindow;
-  }
-
   public TemporalQueryType getTemporalQueryType() {
     return temporalQueryType;
   }
 
   public List<TimeLine> getQueryWindows() {
     return queryWindows;
+  }
+
+  public boolean validate(TimeLine timeLine) {
+    for (TimeLine queryWindow : queryWindows) {
+      if (temporalQueryType == TemporalQueryType.CONTAIN ?
+          queryWindow.contain(timeLine) : queryWindow.intersect(timeLine)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public String getConditionInfo() {
+    return "TemporalQueryCondition{" +
+        "queryWindows=" + queryWindows +
+        ", temporalQueryType=" + temporalQueryType +
+        '}';
   }
 }

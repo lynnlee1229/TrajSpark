@@ -1,12 +1,9 @@
 package cn.edu.whu.trajspark.database.load.driver;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
-
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.mapper.TextMapper;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
-import java.io.IOException;
+import cn.edu.whu.trajspark.database.table.IndexTable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -24,6 +21,10 @@ import org.apache.hadoop.hbase.mapreduce.SimpleTotalOrderPartitioner;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+import java.io.IOException;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 
 /**
  * @author Xu Qi
@@ -47,12 +48,12 @@ public class TrajectoryDataDriver extends Configured {
   /**
    *  Configure MapReduce for bulkLoad
    * @param conf hbase conf
-   * @param dataTable Target table for storing data
+   * @param indexTable Target table for storing data
    * @return running state
    * @throws IOException ..
    */
 
-  private int doBulkLoad(Configuration conf, DataTable dataTable) throws IOException {
+  private int doBulkLoad(Configuration conf, IndexTable indexTable) throws IOException {
     Path inPath = new Path(conf.get(PROCESS_INPUT_CONF_KEY));
     Path outPath = new Path(conf.get(FILE_OUTPUT_CONF_KEY));
     String tableName = conf.get(TABLE_NAME_CONF_KEY);
@@ -64,7 +65,7 @@ public class TrajectoryDataDriver extends Configured {
       fs.delete(outPath, true);
     }
     FileOutputFormat.setOutputPath(job, outPath);
-    TextMapper.setDataTable(dataTable);
+    TextMapper.setDataTable(indexTable);
 
     //Configure Map related content
     job.setMapperClass(TextMapper.class);
@@ -101,17 +102,16 @@ public class TrajectoryDataDriver extends Configured {
    */
   public void initDataSetTest(DataSetMeta dataSetMeta) throws IOException {
     instance = Database.getInstance();
-    instance.openConnection();
     instance.createDataSet(dataSetMeta);
   }
 
   public int bulkLoad(String inPath, String outPath, DataSetMeta dataSetMeta) throws Exception {
     initDataSetTest(dataSetMeta);
     String tableName = dataSetMeta.getDataSetName() + DATA_TABLE_SUFFIX;
-    DataTable dataTable = instance.getDataTable(dataSetMeta.getDataSetName());
+    IndexTable indexTable = instance.getDataSet(dataSetMeta.getDataSetName()).getCoreIndexTable();
     setUpConfiguration(inPath, outPath, tableName);
     long startLoadTime = System.currentTimeMillis();
-    int status = doBulkLoad(getConf(), dataTable);
+    int status = doBulkLoad(getConf(), indexTable);
     long endLoadTime = System.currentTimeMillis();
     long bulkLoadTime = endLoadTime - startLoadTime;
     System.out.println("Load data table time:" + bulkLoadTime / 1000 + "s");

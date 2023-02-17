@@ -1,46 +1,46 @@
 package cn.edu.whu.trajspark.index.time;
 
-import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
-import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
-
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.CodingRange;
-import cn.edu.whu.trajspark.coding.XZTCoding;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.index.RowKeyRange;
-import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
+import cn.edu.whu.trajspark.coding.XZTCoding;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
+import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
+import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import scala.Tuple2;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import scala.Tuple2;
+
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
 
 /**
- * row key: shard(short) + index type(int) + oid(string) + XZTCoding(short + long) + tid(string)
+ * row key: shard(short) + oid(string) + XZTCoding(short + long) + tid(string)
  *
  * @author Xu Qi
  * @since 2022/10/7
  */
-public class TimeIndexStrategy extends IndexStrategy {
+public class IDTIndexStrategy extends IndexStrategy {
 
   private final XZTCoding timeCoding;
-  private static final int KEY_BYTE_LEN =
-      Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + XZTCoding.BYTES;
+  private static final int KEY_BYTE_LEN = Short.BYTES + MAX_OID_LENGTH + XZTCoding.BYTES;
 
-  public TimeIndexStrategy(XZTCoding timeCoding) {
+  public IDTIndexStrategy(XZTCoding timeCoding) {
     indexType = IndexType.OBJECT_ID_T;
     this.timeCoding = timeCoding;
   }
-  public TimeIndexStrategy() {
+  public IDTIndexStrategy() {
     indexType = IndexType.OBJECT_ID_T;
     this.timeCoding = new XZTCoding();
   }
@@ -164,7 +164,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     for (int i = 0; i < MAX_OID_LENGTH; i++) {
       buffer.get();
     }
@@ -176,7 +175,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     for (int i = 0; i < MAX_OID_LENGTH; i++) {
       buffer.get();
     }
@@ -199,7 +197,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     byte[] stringBytes = new byte[MAX_OID_LENGTH];
     buffer.get(stringBytes);
     return new String(stringBytes, StandardCharsets.ISO_8859_1);
@@ -213,7 +210,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     ByteBuffer byteBuffer = ByteBuffer.allocate(
         Short.BYTES + Integer.BYTES + MAX_OID_LENGTH + Short.BYTES + Long.BYTES + MAX_TID_LENGTH);
     byteBuffer.putShort(shard);
-    byteBuffer.putInt(indexType.getId());
     byteBuffer.put(oidBytesPadding);
     byteBuffer.putShort(bin);
     byteBuffer.putLong(timeCode);
@@ -226,7 +222,6 @@ public class TimeIndexStrategy extends IndexStrategy {
     byte[] oidBytesPadding = bytePadding(oidBytes, MAX_OID_LENGTH);
     ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
     byteBuffer.putShort(shard);
-    byteBuffer.putInt(indexType.getId());
     byteBuffer.put(oidBytesPadding);
     if (flag) {
       Tuple2<Short, Long> extractTimeKeyBytes = timeCoding.getExtractTimeKeyBytes(timeBytes);

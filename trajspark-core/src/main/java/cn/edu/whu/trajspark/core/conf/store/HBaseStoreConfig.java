@@ -9,14 +9,15 @@ import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatial.XZ2PlusIndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
-import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
+import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import scala.NotImplementedError;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import scala.NotImplementedError;
 
 /**
  * @author Xu Qi
@@ -99,15 +100,15 @@ public class HBaseStoreConfig implements IStoreConfig {
   private IndexMeta createIndexMeta(IndexType indexType, Boolean isMainIndex) {
     switch (indexType) {
       case XZ2:
-        return new IndexMeta(isMainIndex, new XZ2IndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new XZ2IndexStrategy(), dataSetName, "default");
       case XZ2Plus:
-        return new IndexMeta(isMainIndex, new XZ2PlusIndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new XZ2PlusIndexStrategy(), dataSetName, "default");
       case TXZ2:
-        return new IndexMeta(isMainIndex, new TXZ2IndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new TXZ2IndexStrategy(), dataSetName, "default");
       case XZ2T:
-        return new IndexMeta(isMainIndex, new XZ2TIndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new XZ2TIndexStrategy(), dataSetName, "default");
       case OBJECT_ID_T:
-        return new IndexMeta(isMainIndex, new TimeIndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new IDTIndexStrategy(), dataSetName, "default");
       default:
         throw new NotImplementedError();
     }

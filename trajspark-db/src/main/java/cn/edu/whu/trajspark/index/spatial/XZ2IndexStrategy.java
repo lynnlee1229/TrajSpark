@@ -13,15 +13,15 @@ import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.hadoop.hbase.util.Bytes;
 
 /**
- * row key: shard(short) + index type(int) + xz2(long) + oid(string) + tid(string)
+ * row key: shard(short) + xz2(long) + oid(string) + tid(string)
  *
  * @author Haocheng Wang Created on 2022/10/4
  */
@@ -29,8 +29,8 @@ public class XZ2IndexStrategy extends IndexStrategy {
 
   private XZ2Coding xz2Coding;
 
-  // shard(short) + index type(int) + xz2(long)
-  private static final int KEY_BYTE_LEN = Short.BYTES + Integer.BYTES + XZ2Coding.BYTES;
+  // shard(short) + xz2(long)
+  private static final int KEY_BYTE_LEN = Short.BYTES + XZ2Coding.BYTES;
 
   public XZ2IndexStrategy() {
     indexType = IndexType.XZ2;
@@ -109,8 +109,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
-    byte[] bytes = new byte[Long.BYTES];
+    byte[] bytes = new byte[XZ2Coding.BYTES];
     buffer.get(bytes);
     return new ByteArray(bytes);
   }
@@ -142,7 +141,6 @@ public class XZ2IndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     buffer.getLong();
     byte[] stringBytes = new byte[buffer.capacity() - KEY_BYTE_LEN];
     buffer.get(stringBytes);
@@ -153,7 +151,6 @@ public class XZ2IndexStrategy extends IndexStrategy {
     byte[] oidAndTidBytes = oidAndTid.getBytes();
     ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + oidAndTidBytes.length);
     byteBuffer.putShort(shard);
-    byteBuffer.putInt(indexType.getId());
     byteBuffer.put(xz2coding.getBytes());
     byteBuffer.put(oidAndTidBytes);
     return new ByteArray(byteBuffer);
@@ -162,7 +159,6 @@ public class XZ2IndexStrategy extends IndexStrategy {
   private ByteArray toIndex(short shard, ByteArray xz2coding, Boolean isEndCoding) {
     ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
     byteBuffer.putShort(shard);
-    byteBuffer.putInt(indexType.getId());
     if (isEndCoding) {
       long xz2code = Bytes.toLong(xz2coding.getBytes()) + 1;
       byteBuffer.putLong(xz2code);

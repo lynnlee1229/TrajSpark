@@ -3,24 +3,25 @@ package cn.edu.whu.trajspark.example.preprocess;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
-import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
-import java.io.IOException;
-import java.util.Objects;
-import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author Xu Qi
  * @since 2022/12/30
  */
 public class HBaseStoreExample {
-  private static final Logger LOGGER = Logger.getLogger(HBaseStoreExample.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HBaseStoreExample.class);
 
   public static void main(String[] args) throws IOException {
     String inPath = Objects.requireNonNull(
@@ -52,7 +53,6 @@ public class HBaseStoreExample {
   @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     instance.deleteDataSet("TRAJECTORY_TEST");
   }
 }
