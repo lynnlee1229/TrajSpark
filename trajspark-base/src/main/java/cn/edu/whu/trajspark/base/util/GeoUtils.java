@@ -245,4 +245,37 @@ public class GeoUtils implements Serializable {
     }
     return curP;
   }
+
+  public static double getEuclideanDistanceM(MinimumBoundingBox rMbr, MinimumBoundingBox mbr) {
+    if (rMbr.isIntersects(mbr)) {
+      return 0.0;
+    } else {
+      BasePoint var2 = rMbr.getLowerLeft();
+      BasePoint var14 = rMbr.getUpperRight();
+      BasePoint var3 = mbr.getLowerLeft();
+      BasePoint var15 = mbr.getUpperRight();
+      double var6 = var2.getLat();
+      double var8 = var2.getLng();
+      double var10 = var3.getLat();
+      double var12 = var3.getLng();
+      if (var14.getLng() < var3.getLng()) {
+        var8 = var14.getLng();
+      } else if (var15.getLng() < var2.getLng()) {
+        var12 = var15.getLng();
+      } else {
+        var12 = var2.getLng();
+      }
+
+      if (var14.getLat() < var3.getLat()) {
+        var6 = var14.getLat();
+      } else if (var2.getLat() < var15.getLat()) {
+        var10 = var2.getLat();
+      } else {
+        var10 = var15.getLat();
+      }
+
+      return getEuclideanDistanceM(
+          new BasePoint(var8, var6), new BasePoint(var12, var10));
+    }
+  }
 }
