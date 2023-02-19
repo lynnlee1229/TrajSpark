@@ -5,7 +5,6 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import junit.framework.TestCase;
 import org.apache.hadoop.hbase.client.Result;
@@ -17,6 +16,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.*;
+import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.mainRowToTrajectory;
 
 /**
  * @author Haocheng Wang
@@ -63,16 +65,16 @@ public class DataTableTest extends TestCase {
 
   public void testGetTrajectory() throws IOException {
     Scan scan = new Scan();
-    scan.addColumn(TrajectorySerdeUtils.COLUMN_FAMILY, TrajectorySerdeUtils.MBR_QUALIFIER);
-    scan.addColumn(TrajectorySerdeUtils.COLUMN_FAMILY, TrajectorySerdeUtils.OBJECT_ID_QUALIFIER);
-    scan.addColumn(TrajectorySerdeUtils.COLUMN_FAMILY, TrajectorySerdeUtils.SIGNATURE_QUALIFIER);
-    scan.addColumn(TrajectorySerdeUtils.COLUMN_FAMILY, TrajectorySerdeUtils.TRAJ_POINTS_QUALIFIER);
-    scan.addColumn(TrajectorySerdeUtils.COLUMN_FAMILY, TrajectorySerdeUtils.PTR_QUALIFIER);
+    scan.addColumn(COLUMN_FAMILY, MBR_QUALIFIER);
+    scan.addColumn(COLUMN_FAMILY, OBJECT_ID_QUALIFIER);
+    scan.addColumn(COLUMN_FAMILY, SIGNATURE_QUALIFIER);
+    scan.addColumn(COLUMN_FAMILY, TRAJ_POINTS_QUALIFIER);
+    scan.addColumn(COLUMN_FAMILY, PTR_QUALIFIER);
 
     ResultScanner resultScanner = INDEX_TABLE.getTable().getScanner(scan);
     Result result;
     while ((result = resultScanner.next()) != null) {
-      Trajectory trajectory = TrajectorySerdeUtils.mainRowToTrajectory(result);
+      Trajectory trajectory = mainRowToTrajectory(result);
       System.out.println(trajectory);
     }
   }

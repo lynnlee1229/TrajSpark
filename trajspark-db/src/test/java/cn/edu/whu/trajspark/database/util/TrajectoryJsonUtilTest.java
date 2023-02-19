@@ -5,15 +5,16 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import java.util.Objects;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
+
+import java.util.Objects;
 
 /**
  * @author Xu Qi
  * @since 2022/11/2
  */
-class ParseJsonToTrajectoryTest extends TestCase {
+class TrajectoryJsonUtilTest extends TestCase {
 
   @Test
   public void testParseTraFeatures() {
@@ -24,7 +25,7 @@ class ParseJsonToTrajectoryTest extends TestCase {
     JSONArray jsonObject = feature.getJSONArray("features");
     JSONObject object = jsonObject.getJSONObject(0);
     JSONObject properties = object.getJSONObject("properties");
-    TrajFeatures trajFeatures = ParseJsonToTrajectory.parseTraFeatures(properties);
+    TrajFeatures trajFeatures = TrajectoryJsonUtil.parseTraFeatures(properties);
     System.out.println(trajFeatures);
   }
   @Test
@@ -35,7 +36,7 @@ class ParseJsonToTrajectoryTest extends TestCase {
     JSONObject feature = JSONObject.parseObject(text);
     JSONArray jsonObject = feature.getJSONArray("features");
     JSONObject object = jsonObject.getJSONObject(0);
-    Trajectory trajectory = ParseJsonToTrajectory.parseJsonToTrajectory(object.toString());
+    Trajectory trajectory = TrajectoryJsonUtil.parseJsonToTrajectory(object.toString());
     System.out.println(trajectory);
   }
 }

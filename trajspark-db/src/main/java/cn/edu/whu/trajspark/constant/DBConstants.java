@@ -1,5 +1,9 @@
 package cn.edu.whu.trajspark.constant;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
+import static cn.edu.whu.trajspark.base.trajectory.Trajectory.Schema.*;
+
 /**
  * @author Haocheng Wang
  * Created on 2022/10/23
@@ -12,21 +16,18 @@ public class DBConstants {
   public static final String META_TABLE_MAIN_TABLE_META_QUALIFIER = "main_table_index_meta";
   public static final String META_TABLE_DESC_QUALIFIER = "desc";
 
-  // INDEX TABLE
+  // INDEX TABLE COLUMNS
   public static final String DATA_TABLE_SUFFIX = "_data";
   public static String INDEX_TABLE_CF = "cf0";
-
-  // INDEX TABLE COLUMNS
-  public static String BOUNDING_BOX = "BB";
-  public static String ORIGIN_INFO = "OI";
-  public static String DESTINATION_INFO = "DI";
-  public static String SPEED = "SPD";
-  public static String DIRECTION = "DIR";
-  public static String DISTANCE_LENGTH = "DIST_LEN";
-  public static String TIME_LENGTH = "TIME_LEN";
-  public static String POINT_LIST = "POINT_LIST";
-  public static String EXTRA_INFO = "EXTRA_INFO";
-  public static String POINTER = "PTR";
+  public static final byte[] COLUMN_FAMILY = Bytes.toBytes(INDEX_TABLE_CF);
+  public static final byte[] TRAJECTORY_ID_QUALIFIER = Bytes.toBytes(TRAJECTORY_ID);
+  public static final byte[] OBJECT_ID_QUALIFIER = Bytes.toBytes(OBJECT_ID);
+  public static final byte[] MBR_QUALIFIER = Bytes.toBytes(MBR);
+  public static final byte[] START_POINT_QUALIFIER = Bytes.toBytes(START_POSITION);
+  public static final byte[] END_POINT_QUALIFIER = Bytes.toBytes(END_POSITION);
+  public static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
+  public static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
+  public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
 
   // Connection
   public static final String OPEN_CONNECTION_FAILED = "Cannot connect to data base.";

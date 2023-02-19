@@ -32,6 +32,7 @@ import java.util.List;
 import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 
 /**
+ * TODO: 索引单表拆分为多表后，这里的代码逻辑需要更新
  * @author Xu Qi
  * @since 2023/1/3
  */

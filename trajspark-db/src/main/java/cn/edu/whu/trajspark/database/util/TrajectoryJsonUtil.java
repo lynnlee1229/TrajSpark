@@ -7,6 +7,7 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.DateTimeParse;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import java.util.List;
  * @author Xu Qi
  * @since 2022/11/2
  */
-public class ParseJsonToTrajectory {
+public class TrajectoryJsonUtil {
 
   /**
    * Turning GeoJson data into a memory Trajectory object

@@ -28,8 +28,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static cn.edu.whu.trajspark.base.trajectory.Trajectory.Schema.*;
-import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.COLUMN_FAMILY;
-import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.PTR_QUALIFIER;
+import static cn.edu.whu.trajspark.constant.DBConstants.COLUMN_FAMILY;
+import static cn.edu.whu.trajspark.constant.DBConstants.PTR_QUALIFIER;
 
 /**
  * @author Xu Qi

@@ -1,18 +1,12 @@
 package cn.edu.whu.trajspark.core.operator.load;
 
-import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.COLUMN_FAMILY;
-import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.PTR_QUALIFIER;
-
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.load.HBaseLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
-
 import java.io.IOException;
-
-import jdk.nashorn.internal.runtime.ConsString;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.hbase.client.Result;
@@ -22,6 +16,9 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 import scala.Tuple2;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.COLUMN_FAMILY;
+import static cn.edu.whu.trajspark.constant.DBConstants.PTR_QUALIFIER;
 
 /**
  * @author Xu Qi
