@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.Cell;
@@ -113,7 +114,16 @@ public class HBaseStore extends Configured implements IStore {
     LoadIncrementalHFiles loader = new LoadIncrementalHFiles(getConf());
     loader.doBulkLoad(new Path(storeConfig.getLocation()), instance.getAdmin(), table, locator);
     LOGGER.info("Successfully bulkLoad to HBase");
+    deleteHFile(storeConfig.getLocation());
     instance.closeConnection();
+  }
+
+  public void deleteHFile(String path) throws IOException {
+    Configuration conf= getConf();
+    conf.set("fs.defaultFS","hdfs://localhost:9000");
+    FileSystem fs = FileSystem.get(conf);
+    fs.delete(new Path(path),true);
+    fs.close();
   }
 
   @Override
