@@ -10,6 +10,7 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
 import cn.edu.whu.trajspark.index.RowKeyRange;
+import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
@@ -20,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
+
 /**
  * row key: shard(short) + xz2(long) + oid(string) + tid(string)
  *
@@ -29,8 +33,10 @@ public class XZ2IndexStrategy extends IndexStrategy {
 
   private XZ2Coding xz2Coding;
 
-  // shard(short) + xz2(long)
-  private static final int KEY_BYTE_LEN = Short.BYTES + XZ2Coding.BYTES;
+  /**
+   * 作为行键时的字节数，不包含oid与tid。
+   */
+  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + XZ2Coding.BYTES + MAX_OID_LENGTH + MAX_TID_LENGTH;;
 
   public XZ2IndexStrategy() {
     indexType = IndexType.XZ2;
@@ -38,12 +44,15 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public ByteArray index(Trajectory trajectory) {
-    short shard = (short) (Math.random() * shardNum);
+  protected ByteArray logicalIndex(Trajectory trajectory) {
     ByteArray spatialCoding = xz2Coding.code(trajectory.getLineString());
     String oid = trajectory.getObjectID();
     String tid = trajectory.getTrajectoryID();
-    return toIndex(shard, spatialCoding, oid + tid);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(PHYSICAL_KEY_BYTE_LEN - Short.BYTES);
+    byteBuffer.put(spatialCoding.getBytes());
+    byteBuffer.put(IDTIndexStrategy.bytePadding(oid.getBytes(StandardCharsets.UTF_8), MAX_OID_LENGTH));
+    byteBuffer.put(IDTIndexStrategy.bytePadding(tid.getBytes(StandardCharsets.UTF_8), MAX_TID_LENGTH));
+    return new ByteArray(byteBuffer);
   }
 
   @Override
@@ -65,8 +74,8 @@ public class XZ2IndexStrategy extends IndexStrategy {
     // 2. concat shard index
     for (CodingRange xz2Coding : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
-        result.add(new RowKeyRange(toIndex(shard, xz2Coding.getLower(), false),
-            toIndex(shard, xz2Coding.getUpper(), true), xz2Coding.isContained()));
+        result.add(new RowKeyRange(toRowKeyRangeBoundary(shard, xz2Coding.getLower(), false),
+            toRowKeyRangeBoundary(shard, xz2Coding.getUpper(), true), xz2Coding.isContained()));
       }
     }
     return result;
@@ -94,7 +103,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public String parseIndex2String(ByteArray byteArray) {
+  public String parsePhysicalIndex2String(ByteArray byteArray) {
     return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", xz2="
         + extractSpatialCode(byteArray) + ", tid=" + getObjectTrajId(byteArray) + '}';
   }
@@ -142,22 +151,13 @@ public class XZ2IndexStrategy extends IndexStrategy {
     buffer.flip();
     buffer.getShort();
     buffer.getLong();
-    byte[] stringBytes = new byte[buffer.capacity() - KEY_BYTE_LEN];
+    byte[] stringBytes = new byte[MAX_OID_LENGTH + MAX_TID_LENGTH];
     buffer.get(stringBytes);
     return new String(stringBytes, StandardCharsets.UTF_8);
   }
 
-  private ByteArray toIndex(short shard, ByteArray xz2coding, String oidAndTid) {
-    byte[] oidAndTidBytes = oidAndTid.getBytes();
-    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + oidAndTidBytes.length);
-    byteBuffer.putShort(shard);
-    byteBuffer.put(xz2coding.getBytes());
-    byteBuffer.put(oidAndTidBytes);
-    return new ByteArray(byteBuffer);
-  }
-
-  private ByteArray toIndex(short shard, ByteArray xz2coding, Boolean isEndCoding) {
-    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
+  private ByteArray toRowKeyRangeBoundary(short shard, ByteArray xz2coding, Boolean isEndCoding) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(PHYSICAL_KEY_BYTE_LEN - MAX_OID_LENGTH - MAX_TID_LENGTH);
     byteBuffer.putShort(shard);
     if (isEndCoding) {
       long xz2code = Bytes.toLong(xz2coding.getBytes()) + 1;

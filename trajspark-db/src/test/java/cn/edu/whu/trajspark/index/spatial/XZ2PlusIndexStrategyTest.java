@@ -13,7 +13,7 @@ public class XZ2PlusIndexStrategyTest extends TestCase {
 
   public void testIndex() {
     Trajectory trajectory = XZ2IndexStrategyTest.getExampleTrajectory();
-    assertTrue(xz2PIS.parseIndex2String(xz2PIS.index(trajectory)).contains("indexId=XZ2Plus, xz2P=000000012156aab30d, oidTid=001Trajectory"));
+    assertTrue(xz2PIS.parsePhysicalIndex2String(xz2PIS.index(trajectory)).contains("indexId=XZ2Plus, xz2P=000000012156aab30d, oidTid=001Trajectory"));
   }
 
   public void testGetScanRanges() {

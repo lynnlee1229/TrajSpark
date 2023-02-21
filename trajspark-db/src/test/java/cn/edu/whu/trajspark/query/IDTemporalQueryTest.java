@@ -87,8 +87,8 @@ public class IDTemporalQueryTest {
     System.out.println("Multi InnerBin ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + IDTIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
-              + IDTIndexStrategy.parseIndex2String(scanRange.getEndKey()) + "isContained "
+          "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
+              + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + "isContained "
               + scanRange.isContained());
     }
   }

@@ -140,7 +140,7 @@ public class XZTCoding implements TimeCoding {
     return timePeriod;
   }
 
-  public Tuple2<Short, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
+  public static Tuple2<Short, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
     ByteBuffer byteBuffer1 = timeBytes.toByteBuffer();
     byteBuffer1.flip();
     short bin = byteBuffer1.getShort();

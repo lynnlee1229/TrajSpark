@@ -78,7 +78,7 @@ public class SpatialQueryTest extends TestCase {
     System.out.println(results.size());
     for (Trajectory result : results) {
       ByteArray index = indexTable.getIndexMeta().getIndexStrategy().index(result);
-      System.out.println(indexTable.getIndexMeta().getIndexStrategy().parseIndex2String(index));
+      System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
       ZonedDateTime startTime = result.getTrajectoryFeatures().getStartTime();
       ZonedDateTime endTime = result.getTrajectoryFeatures().getEndTime();
       System.out.println(new TimeLine(startTime, endTime));

@@ -122,8 +122,8 @@ class SpatialTemporalQueryTest extends TestCase {
     System.out.println("ST_Query Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + xz2TIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
-              + xz2TIndexStrategy.parseIndex2String(scanRange.getEndKey()) + "isContained "
+          "start : " + xz2TIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
+              + xz2TIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + "isContained "
               + scanRange.isContained());
     }
   }

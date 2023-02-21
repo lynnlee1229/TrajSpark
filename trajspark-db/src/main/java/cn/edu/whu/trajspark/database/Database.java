@@ -95,7 +95,7 @@ public final class Database {
     Map<IndexType, List<IndexMeta>> indexMetaMap = dataSetMeta.getAvailableIndexes();
     for (IndexType indexType : indexMetaMap.keySet()) {
       for (IndexMeta indexMeta : indexMetaMap.get(indexType)) {
-        createTable(indexMeta.getIndexTableName(), INDEX_TABLE_CF);
+        createTable(indexMeta.getIndexTableName(), INDEX_TABLE_CF, indexMeta.getSplits());
       }
     }
     logger.info("Dataset {} created.", dataSetName);
@@ -111,7 +111,7 @@ public final class Database {
       // put data into dataset meta table
       getMetaTable().putDataSet(dataSet.getDataSetMeta());
       // create index table for the new index meta.
-      createTable(newIndexMeta.getIndexTableName(), INDEX_TABLE_CF);
+      createTable(newIndexMeta.getIndexTableName(), INDEX_TABLE_CF, newIndexMeta.getSplits());
       logger.info("Created index table {} for data set {}.", newIndexMeta.getIndexTableName(), dataSetName);
     } catch (Exception e) {
       logger.error("Failed index table {} for data set {}.", newIndexMeta.getIndexTableName(), dataSetName, e);
@@ -180,14 +180,14 @@ public final class Database {
    */
   public void initDataBase() throws IOException {
     // 创建DataSetMeta表
-    createTable(META_TABLE_NAME, META_TABLE_COLUMN_FAMILY);
+    createTable(META_TABLE_NAME, META_TABLE_COLUMN_FAMILY, null);
   }
 
 
   /**
    * HBase table options
    */
-  public void createTable(String tableName, String columnFamily) throws IOException {
+  public void createTable(String tableName, String columnFamily, byte[][] splits) throws IOException {
     Admin admin = null;
     try {
       if (!tableExists(tableName)) {
@@ -195,7 +195,11 @@ public final class Database {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
         HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(columnFamily);
         hTableDescriptor.addFamily(hColumnDescriptor);
-        admin.createTable(hTableDescriptor);
+        if (splits != null) {
+          admin.createTable(hTableDescriptor, splits);
+        } else {
+          admin.createTable(hTableDescriptor);
+        }
       }
     } finally {
       if (admin != null) admin.close();

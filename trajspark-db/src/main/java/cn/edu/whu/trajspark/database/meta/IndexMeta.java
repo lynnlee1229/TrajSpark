@@ -111,4 +111,8 @@ public class IndexMeta implements Serializable {
     }
     return indexMetaList.get(0);
   }
+
+  public byte[][] getSplits() {
+    return indexStrategy.getSplits();
+  }
 }

@@ -6,5 +6,8 @@ package cn.edu.whu.trajspark.constant;
  */
 public class IndexConstants {
 
-  public static short DEFAULT_SHARD_NUM = 3;
+  /**
+   * 集群核数的整数倍
+   */
+  public static short DEFAULT_SHARD_NUM = 24;
 }

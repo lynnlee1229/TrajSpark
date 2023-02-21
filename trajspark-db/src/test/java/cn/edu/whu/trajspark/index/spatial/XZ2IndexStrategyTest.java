@@ -63,7 +63,7 @@ public class XZ2IndexStrategyTest extends TestCase {
       XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
       List<RowKeyRange> list = XZ2IndexStrategy.getScanRanges(spatialQueryCondition);
       for (RowKeyRange range : list) {
-        System.out.println("start:" + XZ2IndexStrategy.parseIndex2String(range.getStartKey()) + "end: " + XZ2IndexStrategy.parseIndex2String(range.getEndKey()));
+        System.out.println("start:" + XZ2IndexStrategy.parsePhysicalIndex2String(range.getStartKey()) + "end: " + XZ2IndexStrategy.parsePhysicalIndex2String(range.getEndKey()));
       }
     } catch (ParseException e) {
       e.printStackTrace();
@@ -74,7 +74,7 @@ public class XZ2IndexStrategyTest extends TestCase {
     Trajectory t = getExampleTrajectory();
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
-    System.out.println(XZ2IndexStrategy.parseIndex2String(byteArray));
+    System.out.println(XZ2IndexStrategy.parsePhysicalIndex2String(byteArray));
   }
 
   public void testGetShardNum() {

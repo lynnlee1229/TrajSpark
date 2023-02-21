@@ -7,10 +7,12 @@ import cn.edu.whu.trajspark.constant.IndexConstants;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
+import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,8 +30,21 @@ public abstract class IndexStrategy implements Serializable {
 
   protected IndexType indexType;
 
+  /**
+   * 获取轨迹在数据库中的物理索引, 即在逻辑索引之前拼接上shard
+   */
+  public ByteArray index(Trajectory trajectory) {
+    ByteArray logicalIndex = logicalIndex(trajectory);
+    short shard = (short) (logicalIndex.hashCode() % shardNum);
+    ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
+    buffer.put(logicalIndex.getBytes());
+    buffer.put(Bytes.toBytes(shard));
+    ByteArray physicalIndex = new ByteArray(buffer.array());
+    return physicalIndex;
+  }
+
   // 对轨迹编码
-  public abstract ByteArray index(Trajectory trajectory);
+  protected abstract ByteArray logicalIndex(Trajectory trajectory);
 
   public IndexType getIndexType() {
     return indexType;
@@ -54,7 +69,7 @@ public abstract class IndexStrategy implements Serializable {
 
   public abstract List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition);
 
-  public abstract String parseIndex2String(ByteArray byteArray);
+  public abstract String parsePhysicalIndex2String(ByteArray byteArray);
 
   public abstract SpatialCoding getSpatialCoding();
 
@@ -68,6 +83,20 @@ public abstract class IndexStrategy implements Serializable {
   public abstract short getShardNum(ByteArray byteArray);
 
   public abstract Object getObjectTrajId(ByteArray byteArray);
+
+  /**
+   * 为避免hotspot问题, 在index中设计了salt shard.
+   * 为进一步确保不同shard的数据分发至不同region server, 需要对相应的索引表作pre-split操作.
+   * 本方法根据shard的数量, 生成shard-1个分割点，从而将表pre-splt为shard个region.
+   * @return 本索引表的split points.
+   */
+  public byte[][] getSplits() {
+    byte[][] splits = new byte[shardNum - 1][];
+    for (int i = 0; i < shardNum - 1; i++) {
+      splits[i] = Bytes.toBytes(i + 1);
+    }
+    return splits;
+  }
 
   @Override
   public boolean equals(Object o) {

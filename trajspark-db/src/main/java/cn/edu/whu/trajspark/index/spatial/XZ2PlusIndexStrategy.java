@@ -22,8 +22,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
+
 /**
- * row key: shard(short) + XZPCode + [oid(string) + tid(string)]
+ * row key: shard(short) + XZPCode + OID + TID
  *
  * @author Haocheng Wang Created on 2022/11/1
  */
@@ -31,7 +34,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
 
   private XZ2PCoding xz2PCoding;
 
-  private static final int KEY_BYTE_LEN = Short.BYTES + XZ2PCoding.BYTES;
+  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + XZ2PCoding.BYTES + MAX_OID_LENGTH + MAX_TID_LENGTH;
 
   public XZ2PlusIndexStrategy() {
     indexType = IndexType.XZ2Plus;
@@ -39,10 +42,8 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public ByteArray index(Trajectory trajectory) {
+  protected ByteArray logicalIndex(Trajectory trajectory) {
     List<byte[]> elements = new LinkedList<>();
-    // 1. shard
-    elements.add(Bytes.toBytes((short) (Math.random() * shardNum)));
     // 3. xz2p code
     elements.add(xz2PCoding.code(trajectory.getLineString()).getBytes());
     // 4. oid
@@ -64,12 +65,11 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     // 1. xz2p coding
     List<CodingRange> codeRanges = xz2PCoding.ranges(spatialQueryCondition);
     List<CodingRange> keyScanRange = getKeyScanRange(codeRanges);
-
     // 2. concat shard and xz2p coding.
-    for (CodingRange xz2PCode : keyScanRange) {
+    for (CodingRange xz2PRange : keyScanRange) {
       for (short shard = 0; shard < shardNum; shard++) {
-        result.add(new RowKeyRange(new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PCode.getLower().getBytes())),
-            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PCode.getUpper().getBytes())), xz2PCode.isContained()));
+        result.add(new RowKeyRange(new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getLower().getBytes())),
+            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getUpper().getBytes())), xz2PRange.isContained()));
       }
     }
     return result;
@@ -97,7 +97,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public String parseIndex2String(ByteArray byteArray) {
+  public String parsePhysicalIndex2String(ByteArray byteArray) {
     return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", indexId=" + getIndexType()
         + ", xz2P=" + extractSpatialCode(byteArray) + ", oidTid=" + getObjectTrajId(byteArray)
         + '}';
@@ -142,13 +142,12 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
 
   @Override
   public Object getObjectTrajId(ByteArray byteArray) {
-    int allLen = byteArray.getBytes().length;
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
-    int objTIDArrayLen = allLen - Short.BYTES - Long.BYTES - XZ2PCoding.BYTES;
+    int objTIDArrayLen = PHYSICAL_KEY_BYTE_LEN - Short.BYTES - XZ2PCoding.BYTES;
     byte[] objTIDArray = new byte[objTIDArrayLen];
     buffer.get(objTIDArray);
     return new String(objTIDArray, StandardCharsets.UTF_8);

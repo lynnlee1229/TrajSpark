@@ -63,8 +63,8 @@ class IDTIndexStrategyTest extends TestCase {
     System.out.println("Single ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + IDTIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
-              + IDTIndexStrategy.parseIndex2String(scanRange.getEndKey()) + " isContained "
+          "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
+              + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + " isContained "
               + scanRange.isContained());
     }
   }
@@ -91,8 +91,8 @@ class IDTIndexStrategyTest extends TestCase {
     System.out.println("Multi ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + IDTIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
-              + IDTIndexStrategy.parseIndex2String(scanRange.getEndKey()));
+          "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
+              + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()));
     }
   }
 
@@ -119,8 +119,8 @@ class IDTIndexStrategyTest extends TestCase {
     System.out.println("Multi InnerBin ID-Time Range:");
     for (RowKeyRange scanRange : scanRanges) {
       System.out.println(
-          "start : " + IDTIndexStrategy.parseIndex2String(scanRange.getStartKey()) + " end : "
-              + IDTIndexStrategy.parseIndex2String(scanRange.getEndKey()));
+          "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
+              + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()));
     }
     long end = System.currentTimeMillis();
     System.out.println(end - start);
