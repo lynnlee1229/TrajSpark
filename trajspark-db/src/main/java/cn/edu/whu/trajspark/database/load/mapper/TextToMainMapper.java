@@ -21,14 +21,14 @@ import java.io.IOException;
  * @author Xu Qi
  * @since 2022/11/1
  */
-public class TextMapper extends Mapper<LongWritable, Text, ImmutableBytesWritable, Put> {
+public class TextToMainMapper extends Mapper<LongWritable, Text, ImmutableBytesWritable, Put> {
 
   private static IndexTable indexTable;
   private static TextTrajParser parser;
 
   public static void config(IndexTable indexTable, TextTrajParser parser) {
-    TextMapper.indexTable = indexTable;
-    TextMapper.parser = parser;
+    TextToMainMapper.indexTable = indexTable;
+    TextToMainMapper.parser = parser;
   }
 
   private byte[] getMapRowKey(Trajectory trajectory, IndexMeta indexMeta) {

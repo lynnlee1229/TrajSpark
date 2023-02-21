@@ -85,7 +85,7 @@ public class MetaTable {
         SerializerUtils.serializeList(indexMetaList, IndexMeta.class));
     // meta:main_table_meta
     p.addColumn(Bytes.toBytes(META_TABLE_COLUMN_FAMILY),
-        Bytes.toBytes(META_TABLE_MAIN_TABLE_META_QUALIFIER),
+        Bytes.toBytes(META_TABLE_CORE_INDEX_META_QUALIFIER),
         SerializerUtils.serializeObject(dataSetMeta.getCoreIndexMeta()));
     // meta:desc
     p.addColumn(Bytes.toBytes(META_TABLE_COLUMN_FAMILY),
@@ -100,7 +100,7 @@ public class MetaTable {
   private DataSetMeta fromResult(Result result) throws IOException {
     byte[] CF = Bytes.toBytes(META_TABLE_COLUMN_FAMILY);
     byte[] INDEX_METAS_CQ = Bytes.toBytes(META_TABLE_INDEX_META_QUALIFIER);
-    byte[] MAIN_TABLE_CQ = Bytes.toBytes(META_TABLE_MAIN_TABLE_META_QUALIFIER);
+    byte[] MAIN_TABLE_CQ = Bytes.toBytes(META_TABLE_CORE_INDEX_META_QUALIFIER);
     String dataSetName = new String(result.getRow());
     Cell cell1 = result.getColumnLatestCell(CF, INDEX_METAS_CQ);
     Cell cell2 = result.getColumnLatestCell(CF, MAIN_TABLE_CQ);

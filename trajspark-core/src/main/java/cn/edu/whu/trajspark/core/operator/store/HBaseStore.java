@@ -9,6 +9,7 @@ import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;

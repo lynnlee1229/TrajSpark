@@ -13,7 +13,7 @@ public class DBConstants {
   public static final String META_TABLE_NAME = "trajspark_db_meta";
   public static final String META_TABLE_COLUMN_FAMILY = "meta";
   public static final String META_TABLE_INDEX_META_QUALIFIER = "index_meta";
-  public static final String META_TABLE_MAIN_TABLE_META_QUALIFIER = "main_table_index_meta";
+  public static final String META_TABLE_CORE_INDEX_META_QUALIFIER = "main_table_index_meta";
   public static final String META_TABLE_DESC_QUALIFIER = "desc";
 
   // INDEX TABLE COLUMNS
@@ -28,6 +28,10 @@ public class DBConstants {
   public static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
   public static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
   public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
+
+  // Bulk load
+  public static final String BULK_LOAD_TEMP_FILE_PATH = "import.file.output.path";
+  public static final String PROCESS_INPUT_CONF_KEY = "import.process.input.path";
 
   // Connection
   public static final String OPEN_CONNECTION_FAILED = "Cannot connect to data base.";

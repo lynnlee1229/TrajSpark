@@ -28,7 +28,7 @@ public class DataSetMeta {
   }
 
   public DataSetMeta(String dataSetName, List<IndexMeta> indexMetaList, IndexMeta coreIndexMeta) {
-    check(indexMetaList, coreIndexMeta);
+    checkCoreIndexMeta(indexMetaList, coreIndexMeta);
     this.dataSetName = dataSetName;
     this.indexMetaList = indexMetaList;
     this.coreIndexMeta = coreIndexMeta;
@@ -59,7 +59,9 @@ public class DataSetMeta {
     List<IndexMeta> indexMetaList = getIndexMetaList();
     HashMap<IndexType, List<IndexMeta>> map = new HashMap<>();
     for (IndexMeta indexMeta : indexMetaList) {
-      map.put(indexMeta.getIndexStrategy().getIndexType(), Arrays.asList(indexMeta));
+      List<IndexMeta> list = map.getOrDefault(indexMeta.getIndexType(), new LinkedList<>());
+      list.add(indexMeta);
+      map.put(indexMeta.getIndexType(), list);
     }
     return map;
   }
@@ -74,9 +76,8 @@ public class DataSetMeta {
         '}';
   }
 
-  private void check(List<IndexMeta> indexMetaList, IndexMeta coreIndexMeta) throws IllegalArgumentException {
+  private void checkCoreIndexMeta(List<IndexMeta> indexMetaList, IndexMeta coreIndexMeta) throws IllegalArgumentException {
     // 检查重复
-    // TODO: 没有必要，indexMetaList应该替换用set类型。
     HashSet<IndexMeta> hashSet = new HashSet<>(indexMetaList);
     if (hashSet.size() != indexMetaList.size()) {
       throw new IllegalArgumentException("found duplicate index meta in the list.");
@@ -99,8 +100,33 @@ public class DataSetMeta {
         throw new IllegalArgumentException(String.format("Inconsistent core index meta found: %s and %s", coreTableName, curCoreTableName));
       }
     }
-    if (!coreIndexInList) {
-      throw new IllegalArgumentException("Core index not found in the index meta list");
+    // if (!coreIndexInList) {
+    //   throw new IllegalArgumentException("Core index not found in the index meta list");
+    // }
+  }
+
+  public void addIndexMeta(IndexMeta indexMeta) {
+    checkNewIndexMeta(indexMeta);
+    indexMetaList.add(indexMeta);
+  }
+
+  private void checkNewIndexMeta(IndexMeta newIndexMeta) {
+    // 检查数据集名称
+    if (!newIndexMeta.getDataSetName().equals(dataSetName)) {
+      throw new IllegalArgumentException(String.format("Inconsistent data set name, exist: %s, new index " +
+          "meta provided: %s.", dataSetName, newIndexMeta.getDataSetName()));
+    }
+    // 检查索引名称重复
+    for (IndexMeta indexMeta : indexMetaList) {
+      if (indexMeta.getIndexTableName().equals(newIndexMeta.getIndexTableName())) {
+        throw new IllegalArgumentException(String.format("Index table %s already exists.", newIndexMeta.getIndexTableName()));
+      }
+    }
+    // 与已有的index meta对比，确认对core index的一致性
+    String oldCoreIndexName = indexMetaList.get(0).coreIndexTableName;
+    if (!oldCoreIndexName.equals(newIndexMeta.getCoreIndexTableName())) {
+      throw new IllegalArgumentException(String.format("Inconsistent core index name, exist: %s, new index " +
+          "meta provided: %s.", oldCoreIndexName, newIndexMeta.getCoreIndexTableName()));
     }
   }
 
@@ -111,5 +137,16 @@ public class DataSetMeta {
       }
     }
     return null;
+  }
+
+  public void deleteIndex(String indexName) {
+    IndexMeta target = null;
+    for (IndexMeta im : indexMetaList) {
+      if (im.getIndexTableName().equals(indexName)) {
+        target = im;
+        break;
+      }
+    }
+    indexMetaList.remove(target);
   }
 }

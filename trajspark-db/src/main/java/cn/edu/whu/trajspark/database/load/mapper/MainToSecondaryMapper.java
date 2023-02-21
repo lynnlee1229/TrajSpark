@@ -19,12 +19,12 @@ import java.io.IOException;
  * @author Haocheng Wang
  * Created on 2023/2/17
  */
-public class CoreIndexTableMapper extends TableMapper<ImmutableBytesWritable, Put> {
+public class MainToSecondaryMapper extends TableMapper<ImmutableBytesWritable, Put> {
 
   private static IndexTable secondaryTable;
 
   public static void setSecondaryTable(IndexTable indexTable) {
-    CoreIndexTableMapper.secondaryTable = indexTable;
+    MainToSecondaryMapper.secondaryTable = indexTable;
   }
 
   @SuppressWarnings("rawtypes")

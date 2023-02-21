@@ -26,18 +26,18 @@ import java.util.List;
  * @author Haocheng Wang
  * Created on 2023/2/19
  */
-public class BulkloadTest {
+public class TextBulkloadTest {
   static DataSetMeta dataSetMeta;
-  static String database_name = "bulkLoadTest3";
+  public static String DATABASE_NAME = "bulkLoadTest3";
 
   static {
     List<IndexMeta> list = new LinkedList<>();
-    IndexMeta coreIndexMata = new IndexMeta(true, new XZ2IndexStrategy(), database_name, "default");
+    IndexMeta coreIndexMata = new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default");
     list.add(coreIndexMata);
     // list.add(new IndexMeta(true, new XZ2TIndexStrategy(), database_name, coreIndexMata, "default"));
     // list.add(new IndexMeta(true, new TXZ2IndexStrategy(), database_name, coreIndexMata, "default"));
-    list.add(new IndexMeta(false, new IDTIndexStrategy(), database_name, coreIndexMata, "default"));
-    dataSetMeta = new DataSetMeta(database_name, list);
+    list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, coreIndexMata, "default"));
+    dataSetMeta = new DataSetMeta(DATABASE_NAME, list);
   }
 
   // 确保hbase-site.xml, core-site.xml, hdfs-site.xml在class path中。
@@ -48,7 +48,7 @@ public class BulkloadTest {
     String inPath = "/data/hdfs_traj_example.txt";
     String output = "/tmp/";
     Database.getInstance().createDataSet(dataSetMeta);
-    TrajectoryDataDriver trajectoryDataDriver = new TrajectoryDataDriver();
+    TextBulkLoadDriver trajectoryDataDriver = new TextBulkLoadDriver();
     trajectoryDataDriver.setConf(conf);
     trajectoryDataDriver.bulkLoad(new Parser(), inPath, output, dataSetMeta);
   }

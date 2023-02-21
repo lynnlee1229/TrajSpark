@@ -72,6 +72,7 @@ public final class Database {
       if (metaTable != null) metaTable.close();
     }
   }
+
   public boolean tableExists(String tableName) throws IOException {
     Admin admin = null;
     try {
@@ -98,6 +99,24 @@ public final class Database {
       }
     }
     logger.info("Dataset {} created.", dataSetName);
+  }
+
+  /**
+   * 在原有DataSet的基础之上新加一个IndexMeta，此处仅更改data set meta中的信息，不包含表中数据的导入
+   */
+  public void addIndexMeta(String dataSetName, IndexMeta newIndexMeta) throws IOException {
+    try {
+      DataSet dataSet = getDataSet(dataSetName);
+      dataSet.addIndexMeta(newIndexMeta);
+      // put data into dataset meta table
+      getMetaTable().putDataSet(dataSet.getDataSetMeta());
+      // create index table for the new index meta.
+      createTable(newIndexMeta.getIndexTableName(), INDEX_TABLE_CF);
+      logger.info("Created index table {} for data set {}.", newIndexMeta.getIndexTableName(), dataSetName);
+    } catch (Exception e) {
+      logger.error("Failed index table {} for data set {}.", newIndexMeta.getIndexTableName(), dataSetName, e);
+      throw e;
+    }
   }
 
   public void deleteDataSet(String dataSetName) {
@@ -191,14 +210,14 @@ public final class Database {
     return connection;
   }
 
-  public void deleteTable(String tableName) throws IOException {
+  public void deleteTable(String tableName) {
     Admin admin = null;
-    if (this.tableExists(tableName)) {
+    try {
       admin = connection.getAdmin();
       admin.disableTable(TableName.valueOf(tableName));
       admin.deleteTable(TableName.valueOf(tableName));
-    } else {
-      throw new IOException("Table does not exists.");
+    } catch (IOException e) {
+      logger.warn("Table {} not exists, failed to delete it.", tableName);
     }
   }
 }

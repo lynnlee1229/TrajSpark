@@ -18,8 +18,16 @@ public class DataSet {
     this.dataSetMeta = dataSetMeta;
   }
 
+  public String getName() {
+    return dataSetMeta.getDataSetName();
+  }
+
   public IndexTable getCoreIndexTable() throws IOException {
     return new IndexTable(dataSetMeta.getCoreIndexMeta());
+  }
+
+  public String getCoreIndexName() throws IOException {
+    return getCoreIndexTable().getIndexMeta().getIndexTableName();
   }
 
   public IndexTable getIndexTable(IndexMeta indexMeta) throws IOException {
@@ -28,5 +36,18 @@ public class DataSet {
 
   public DataSetMeta getDataSetMeta() {
     return dataSetMeta;
+  }
+
+  // TODO
+  public boolean existsIndexMeta(IndexMeta im) {
+    return false;
+  }
+
+  public void addIndexMeta(IndexMeta indexMeta) {
+    dataSetMeta.addIndexMeta(indexMeta);
+  }
+
+  public void deleteIndexMeta(String indexName) {
+    dataSetMeta.deleteIndex(indexName);
   }
 }
