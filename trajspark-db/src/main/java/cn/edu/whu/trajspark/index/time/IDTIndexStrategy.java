@@ -14,9 +14,9 @@ import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.apache.hadoop.hbase.util.Bytes;
 import scala.Tuple2;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,6 +39,8 @@ public class IDTIndexStrategy extends IndexStrategy {
    * 作为行键时的字节数
    */
   private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + MAX_OID_LENGTH + XZTCoding.BYTES + MAX_TID_LENGTH;
+  private static final int LOGICAL_KEY_BYTE_LEN = PHYSICAL_KEY_BYTE_LEN - Short.BYTES;
+  private static final int SCAN_RANGE_BYTE_LEN =  PHYSICAL_KEY_BYTE_LEN - MAX_TID_LENGTH;
 
   public IDTIndexStrategy(XZTCoding timeCoding) {
     indexType = IndexType.OBJECT_ID_T;
@@ -50,18 +52,29 @@ public class IDTIndexStrategy extends IndexStrategy {
   }
 
   @Override
+  /**
+   * ID-T索引中，shard由object id的hashcode生成，在负载均衡的同时，同ID数据保持本地性
+   */
+  public ByteArray index(Trajectory trajectory) {
+    ByteArray logicalIndex = logicalIndex(trajectory);
+    short shard = (short) (trajectory.getObjectID().hashCode() % shardNum);
+    ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
+    buffer.put(Bytes.toBytes(shard));
+    buffer.put(logicalIndex.getBytes());
+    return new ByteArray(buffer.array());
+  }
+
+  @Override
   protected ByteArray logicalIndex(Trajectory trajectory) {
     TimeLine timeLine = new TimeLine(trajectory.getTrajectoryFeatures().getStartTime(),
         trajectory.getTrajectoryFeatures().getEndTime());
     long timeIndex = timeCoding.getIndex(timeLine);
     short binNum = timeCoding.dateToBinnedTime(timeLine.getTimeStart()).getBin();
-    byte[] oidBytesPadded = bytePadding(trajectory.getObjectID().getBytes(StandardCharsets.UTF_8), MAX_OID_LENGTH);
-    byte[] tidBytesPadded = bytePadding(trajectory.getTrajectoryID().getBytes(StandardCharsets.UTF_8), MAX_TID_LENGTH);
-    ByteBuffer byteBuffer = ByteBuffer.allocate(PHYSICAL_KEY_BYTE_LEN - Short.BYTES);
-    byteBuffer.put(oidBytesPadded);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(LOGICAL_KEY_BYTE_LEN);
+    byteBuffer.put(getObjectIDBytes(trajectory));
     byteBuffer.putShort(binNum);
     byteBuffer.putLong(timeIndex);
-    byteBuffer.put(tidBytesPadded);
+    byteBuffer.put(getTrajectoryIDBytes(trajectory));
     return new ByteArray(byteBuffer);
   }
 
@@ -170,9 +183,34 @@ public class IDTIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public Object getObjectTrajId(ByteArray byteArray) {
-    return null;
+  public String getObjectID(ByteArray physicalIndex) {
+    ByteBuffer buffer = physicalIndex.toByteBuffer();
+    buffer.flip();
+    buffer.getShort(); // shard
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    return new String(oidBytes, StandardCharsets.UTF_8);
   }
+
+  @Override
+  public String getTrajectoryID(ByteArray byteArray) {
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
+    // shard
+    buffer.getShort();
+    // OID
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    // time bin
+    buffer.getShort();
+    // time code
+    buffer.getLong();
+    // TID
+    byte[] tidBytes = new byte[MAX_TID_LENGTH];
+    buffer.get(tidBytes);
+    return new String(tidBytes, StandardCharsets.UTF_8);
+  }
+
 
   public String getObjectId(ByteArray physicalIndex) {
     ByteBuffer buffer = physicalIndex.toByteBuffer();
@@ -184,8 +222,8 @@ public class IDTIndexStrategy extends IndexStrategy {
   }
 
   private ByteArray toRowKeyRangeBoundary(short shard, ByteArray timeBytes, String oId, Boolean end) {
-    byte[] oidBytesPadding = bytePadding(oId.getBytes(StandardCharsets.UTF_8), MAX_OID_LENGTH);
-    ByteBuffer byteBuffer = ByteBuffer.allocate(PHYSICAL_KEY_BYTE_LEN);
+    byte[] oidBytesPadding = getObjectIDBytes(oId);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(SCAN_RANGE_BYTE_LEN);
     byteBuffer.putShort(shard);
     byteBuffer.put(oidBytesPadding);
     if (end) {
@@ -197,17 +235,4 @@ public class IDTIndexStrategy extends IndexStrategy {
     }
     return new ByteArray(byteBuffer);
   }
-
-  public static byte[] bytePadding(byte[] bytes, int length) {
-    byte[] b3 = new byte[length];
-    if (bytes.length < length) {
-      byte[] bytes1 = new byte[length - bytes.length];
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      bos.write(bytes1, 0, bytes1.length);
-      bos.write(bytes, 0, bytes.length);
-      b3 = bos.toByteArray();
-    }
-    return b3;
-  }
-
 }

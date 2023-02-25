@@ -13,8 +13,11 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
 
 /**
  * 接收对象,输出row-key.
@@ -31,16 +34,15 @@ public abstract class IndexStrategy implements Serializable {
   protected IndexType indexType;
 
   /**
-   * 获取轨迹在数据库中的物理索引, 即在逻辑索引之前拼接上shard
+   * 获取轨迹在数据库中的物理索引, 即在逻辑索引之前拼接上shard, shard由逻辑索引的hash值作模运算得到。
    */
   public ByteArray index(Trajectory trajectory) {
     ByteArray logicalIndex = logicalIndex(trajectory);
     short shard = (short) (logicalIndex.hashCode() % shardNum);
     ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
-    buffer.put(logicalIndex.getBytes());
     buffer.put(Bytes.toBytes(shard));
-    ByteArray physicalIndex = new ByteArray(buffer.array());
-    return physicalIndex;
+    buffer.put(logicalIndex.getBytes());
+    return new ByteArray(buffer.array());
   }
 
   // 对轨迹编码
@@ -82,7 +84,35 @@ public abstract class IndexStrategy implements Serializable {
 
   public abstract short getShardNum(ByteArray byteArray);
 
-  public abstract Object getObjectTrajId(ByteArray byteArray);
+  public byte[] getObjectIDBytes(Trajectory trajectory) {
+    return getObjectIDBytes(trajectory.getObjectID());
+  }
+
+  public byte[] getObjectIDBytes(String oid) {
+    return bytePadding(oid.getBytes(StandardCharsets.UTF_8), MAX_OID_LENGTH);
+  }
+
+  public byte[] getTrajectoryIDBytes(Trajectory trajectory) {
+    return bytePadding(trajectory.getTrajectoryID().getBytes(StandardCharsets.UTF_8), MAX_OID_LENGTH);
+  }
+
+  private byte[] bytePadding(byte[] bytes, int length) {
+    byte[] b3 = new byte[length];
+    if (bytes.length < length) {
+      byte[] bytes1 = new byte[length - bytes.length];
+      ByteBuffer buffer = ByteBuffer.allocate(length);
+      buffer.put(bytes1);
+      buffer.put(bytes);
+      b3 = buffer.array();
+    } else {
+      System.arraycopy(bytes, 0, b3, 0, length);
+    }
+    return b3;
+  }
+
+  public abstract String getObjectID(ByteArray byteArray);
+
+  public abstract String getTrajectoryID(ByteArray byteArray);
 
   /**
    * 为避免hotspot问题, 在index中设计了salt shard.

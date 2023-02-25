@@ -11,7 +11,6 @@ import scala.Tuple2;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,6 +19,7 @@ import java.util.List;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.DEFAULT_TIME_PERIOD;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TIME_BIN_PRECISION;
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang Created on 2022/10/2
@@ -34,7 +34,7 @@ public class XZTCoding implements TimeCoding {
   public static final int BYTES = Short.BYTES + Long.BYTES;
 
   @SuppressWarnings("checkstyle:StaticVariableName")
-  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, TIME_ZONE);
   private static Logger logger = LoggerFactory.getLogger(XZTCoding.class);
 
   public XZTCoding() {
@@ -155,7 +155,7 @@ public class XZTCoding implements TimeCoding {
 
   public TimeBin epochSecondToBinnedTime(long time) {
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneOffset.UTC);
+        TIME_ZONE);
     return dateToBinnedTime(zonedDateTime);
   }
 
@@ -221,8 +221,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   public int timeToBin(long time) {
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneOffset.UTC);
+    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(time), TIME_ZONE);
     return dateToBin(zonedDateTime);
   }
 
@@ -232,8 +231,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   public ZonedDateTime timeToZonedTime(long time) {
-    return ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneOffset.UTC);
+    return ZonedDateTime.ofInstant(Instant.ofEpochSecond(time), TIME_ZONE);
   }
 
 }

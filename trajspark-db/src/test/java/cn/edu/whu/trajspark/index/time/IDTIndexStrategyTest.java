@@ -10,12 +10,12 @@ import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 import static cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest.getExampleTrajectory;
 
 /**
@@ -50,8 +50,7 @@ class IDTIndexStrategyTest extends TestCase {
   @Test
   void getSingleScanRanges() {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        .withZone(
-            ZoneId.systemDefault());
+        .withZone(TIME_ZONE);
     ZonedDateTime start = ZonedDateTime.parse("2022-01-01 10:00:00", dateTimeFormatter);
     ZonedDateTime end = ZonedDateTime.parse("2022-01-02 12:00:00", dateTimeFormatter);
     TimeLine timeLine = new TimeLine(start, end);
@@ -72,8 +71,7 @@ class IDTIndexStrategyTest extends TestCase {
   @Test
   public void testGetMultiScanRange() {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        .withZone(
-            ZoneId.systemDefault());
+        .withZone(TIME_ZONE);
     ZonedDateTime start1 = ZonedDateTime.parse("2022-01-01 10:00:00", dateTimeFormatter);
     ZonedDateTime end1 = ZonedDateTime.parse("2022-01-02 12:00:00", dateTimeFormatter);
     TimeLine timeLine1 = new TimeLine(start1, end1);
@@ -100,8 +98,7 @@ class IDTIndexStrategyTest extends TestCase {
   public void testMultiInnerBinScan() {
     long start = System.currentTimeMillis();
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        .withZone(
-            ZoneId.systemDefault());
+        .withZone(TIME_ZONE);
     ZonedDateTime start1 = ZonedDateTime.parse("2022-01-01 10:00:00", dateTimeFormatter);
     ZonedDateTime end1 = ZonedDateTime.parse("2022-01-01 12:00:00", dateTimeFormatter);
     TimeLine timeLine1 = new TimeLine(start1, end1);

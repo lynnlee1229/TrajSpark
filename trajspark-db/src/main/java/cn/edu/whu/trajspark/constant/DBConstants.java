@@ -2,6 +2,9 @@ package cn.edu.whu.trajspark.constant;
 
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+
 import static cn.edu.whu.trajspark.base.trajectory.Trajectory.Schema.*;
 
 /**
@@ -39,4 +42,7 @@ public class DBConstants {
 
   // Initial
   public static final String INITIAL_FAILED = "Initial failed.";
+
+  // Time zone
+  public static final ZoneId TIME_ZONE = ZoneOffset.UTC;
 }

@@ -26,7 +26,7 @@ import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
 
 /**
- * row key: shard(short) + XZPCode + OID + TID
+ * row key: shard(short) + XZPCode + oid(max_oid_length) + tid(max_tid_length)
  *
  * @author Haocheng Wang Created on 2022/11/1
  */
@@ -35,6 +35,8 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   private XZ2PCoding xz2PCoding;
 
   private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + XZ2PCoding.BYTES + MAX_OID_LENGTH + MAX_TID_LENGTH;
+  private static final int LOGICAL_KEY_BYTE_LEN = PHYSICAL_KEY_BYTE_LEN - Short.BYTES;
+  private static final int SCAN_RANGE_BYTE_LEN =  PHYSICAL_KEY_BYTE_LEN - MAX_OID_LENGTH - MAX_TID_LENGTH;
 
   public XZ2PlusIndexStrategy() {
     indexType = IndexType.XZ2Plus;
@@ -47,7 +49,8 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     // 3. xz2p code
     elements.add(xz2PCoding.code(trajectory.getLineString()).getBytes());
     // 4. oid
-    elements.add(trajectory.getObjectID().getBytes());
+    elements.add(getObjectIDBytes(trajectory));
+    elements.add(getTrajectoryIDBytes(trajectory));
     // 5. tid
     elements.add(trajectory.getTrajectoryID().getBytes());
     return new ByteArray(elements);
@@ -99,7 +102,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   @Override
   public String parsePhysicalIndex2String(ByteArray byteArray) {
     return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", indexId=" + getIndexType()
-        + ", xz2P=" + extractSpatialCode(byteArray) + ", oidTid=" + getObjectTrajId(byteArray)
+        + ", xz2P=" + extractSpatialCode(byteArray) + ", oidAndTid=" + getObjectID(byteArray) + "-" + getTrajectoryID(byteArray)
         + '}';
   }
 
@@ -141,16 +144,29 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public Object getObjectTrajId(ByteArray byteArray) {
+  public String getObjectID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
-    int objTIDArrayLen = PHYSICAL_KEY_BYTE_LEN - Short.BYTES - XZ2PCoding.BYTES;
-    byte[] objTIDArray = new byte[objTIDArrayLen];
-    buffer.get(objTIDArray);
-    return new String(objTIDArray, StandardCharsets.UTF_8);
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    return new String(oidBytes, StandardCharsets.UTF_8);
+  }
+
+  @Override
+  public String getTrajectoryID(ByteArray byteArray) {
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
+    buffer.getShort();
+    byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
+    buffer.get(codingByteArray);
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    byte[] tidBytes = new byte[MAX_TID_LENGTH];
+    buffer.get(tidBytes);
+    return new String(tidBytes, StandardCharsets.UTF_8);
   }
 
   private List<CodingRange> getKeyScanRange(List<CodingRange> codingRanges) {

@@ -18,8 +18,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
+
 /**
- * row key: shard(short) + xz2(long) + xztCoding(short + long) + oidAndTid(string)
+ * row key: shard(short) + xz2(long) + xztCoding(short + long) + oid(max_oid_length) + tid(max_tid_length)
  *
  * @author Xu Qi
  * @since 2022/11/30
@@ -41,10 +44,9 @@ public class XZ2TIndexStrategy extends IndexStrategy {
     this.xztCoding = new XZTCoding();
   }
 
-  /**
-   * 作为行键时的字节数，不包含oid与tid。
-   */
-  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + XZ2Coding.BYTES + XZTCoding.BYTES;
+  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + XZ2Coding.BYTES + XZTCoding.BYTES + MAX_OID_LENGTH + MAX_TID_LENGTH;
+  private static final int LOGICAL_KEY_BYTE_LEN = PHYSICAL_KEY_BYTE_LEN - Short.BYTES;
+  private static final int SCAN_RANGE_BYTE_LEN =  PHYSICAL_KEY_BYTE_LEN - MAX_OID_LENGTH - MAX_TID_LENGTH;
 
   @Override
   protected ByteArray logicalIndex(Trajectory trajectory) {
@@ -52,18 +54,16 @@ public class XZ2TIndexStrategy extends IndexStrategy {
     TimeLine timeLine = new TimeLine(trajectory.getTrajectoryFeatures().getStartTime(),
         trajectory.getTrajectoryFeatures().getEndTime());
     ByteArray timeCode = xztCoding.code(timeLine);
-    String oid = trajectory.getObjectID();
-    String tid = trajectory.getTrajectoryID();
-    byte[] oidAndTidBytes = (oid + tid).getBytes();
-    ByteBuffer byteBuffer = ByteBuffer.allocate(PHYSICAL_KEY_BYTE_LEN + oidAndTidBytes.length - Short.BYTES);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(LOGICAL_KEY_BYTE_LEN);
     byteBuffer.put(spatialCoding.getBytes());
     byteBuffer.put(timeCode.getBytes());
-    byteBuffer.put(oidAndTidBytes);
+    byteBuffer.put(getObjectIDBytes(trajectory));
+    byteBuffer.put(getTrajectoryIDBytes(trajectory));
     return new ByteArray(byteBuffer);
   }
 
   private ByteArray toRowKeyRangeBoundary(short shard, ByteArray xz2Bytes, ByteArray timeBytes, Boolean end) {
-    ByteBuffer byteBuffer = ByteBuffer.allocate(PHYSICAL_KEY_BYTE_LEN);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(SCAN_RANGE_BYTE_LEN);
     byteBuffer.putShort(shard);
     byteBuffer.put(xz2Bytes.getBytes());
     if (end) {
@@ -139,7 +139,7 @@ public class XZ2TIndexStrategy extends IndexStrategy {
   public String parsePhysicalIndex2String(ByteArray physicalIndex) {
     return "Row key index: {" + "shardNum=" + getShardNum(physicalIndex) + ", xz2="
         + extractSpatialCode(physicalIndex) + ", bin = " + getTimeBinVal(physicalIndex) + ", timeCoding = "
-        + getTimeCodingVal(physicalIndex) + ", oidAndTid=" + getObjectTrajId(physicalIndex) + '}';
+        + getTimeCodingVal(physicalIndex) + ", oidAndTid=" + getObjectID(physicalIndex) + "-" + getTrajectoryID(physicalIndex) + '}';
   }
 
   @Override
@@ -189,15 +189,31 @@ public class XZ2TIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public Object getObjectTrajId(ByteArray byteArray) {
+  public String getObjectID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
     buffer.getLong();
     buffer.getShort();
     buffer.getLong();
-    byte[] stringBytes = new byte[buffer.capacity() - PHYSICAL_KEY_BYTE_LEN];
-    buffer.get(stringBytes);
-    return new String(stringBytes, StandardCharsets.UTF_8);
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    return new String(oidBytes, StandardCharsets.UTF_8);
   }
+
+  @Override
+  public String getTrajectoryID(ByteArray byteArray) {
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
+    buffer.getShort();
+    buffer.getLong();
+    buffer.getShort();
+    buffer.getLong();
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    byte[] tidBytes = new byte[MAX_TID_LENGTH];
+    buffer.get(tidBytes);
+    return new String(tidBytes, StandardCharsets.UTF_8);
+  }
+
 }

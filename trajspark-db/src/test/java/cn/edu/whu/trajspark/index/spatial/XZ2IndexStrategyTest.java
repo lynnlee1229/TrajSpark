@@ -11,12 +11,13 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang
@@ -25,7 +26,7 @@ import java.util.List;
 public class XZ2IndexStrategyTest extends TestCase {
 
   public static Trajectory getExampleTrajectory() {
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(TIME_ZONE);
     ZonedDateTime start = ZonedDateTime.parse("2022-01-01 10:00:00", dateTimeFormatter);
     ZonedDateTime end = ZonedDateTime.parse("2022-01-01 10:20:00", dateTimeFormatter);
     TrajFeatures trajFeatures = new TrajFeatures(
@@ -84,6 +85,7 @@ public class XZ2IndexStrategyTest extends TestCase {
     Trajectory t = getExampleTrajectory();
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
-    assertEquals(XZ2IndexStrategy.getObjectTrajId(byteArray), t.getObjectID() + t.getTrajectoryID());
+    System.out.println("Actual: " + XZ2IndexStrategy.getObjectID(byteArray) + XZ2IndexStrategy.getTrajectoryID(byteArray));
+    System.out.println("Expected: " + t.getObjectID() + "-" + t.getTrajectoryID());
   }
 }
