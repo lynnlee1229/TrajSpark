@@ -57,7 +57,7 @@ public class IDTIndexStrategy extends IndexStrategy {
    */
   public ByteArray index(Trajectory trajectory) {
     ByteArray logicalIndex = logicalIndex(trajectory);
-    short shard = (short) (trajectory.getObjectID().hashCode() % shardNum);
+    short shard = getShard(trajectory.getObjectID());
     ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
     buffer.put(Bytes.toBytes(shard));
     buffer.put(logicalIndex.getBytes());
@@ -115,11 +115,11 @@ public class IDTIndexStrategy extends IndexStrategy {
     List<RowKeyRange> result = new ArrayList<>();
     List<CodingRange> codingRanges = timeCoding.ranges(temporalQueryCondition);
     for (CodingRange codingRange : codingRanges) {
-      for (short shard = 0; shard < shardNum; shard++) {
-        ByteArray byteArray1 = toRowKeyRangeBoundary(shard, codingRange.getLower(), oId, false);
-        ByteArray byteArray2 = toRowKeyRangeBoundary(shard, codingRange.getUpper(), oId, true);
-        result.add(new RowKeyRange(byteArray1, byteArray2, codingRange.isContained()));
-      }
+      short shard = getShard(oId);
+      ByteArray byteArray1 = toRowKeyRangeBoundary(shard, codingRange.getLower(), oId, false);
+      ByteArray byteArray2 = toRowKeyRangeBoundary(shard, codingRange.getUpper(), oId, true);
+      result.add(new RowKeyRange(byteArray1, byteArray2, codingRange.isContained()));
+
     }
     return result;
   }
@@ -234,5 +234,9 @@ public class IDTIndexStrategy extends IndexStrategy {
       byteBuffer.put(timeBytes.getBytes());
     }
     return new ByteArray(byteBuffer);
+  }
+
+  private short getShard(String oid) {
+    return (short) Math.abs(oid.hashCode() % shardNum);
   }
 }

@@ -38,7 +38,7 @@ public abstract class IndexStrategy implements Serializable {
    */
   public ByteArray index(Trajectory trajectory) {
     ByteArray logicalIndex = logicalIndex(trajectory);
-    short shard = (short) (logicalIndex.hashCode() % shardNum);
+    short shard = (short) Math.abs((logicalIndex.hashCode() % shardNum));
     ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
     buffer.put(Bytes.toBytes(shard));
     buffer.put(logicalIndex.getBytes());

@@ -9,7 +9,6 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.query.basic.SpatialQuery;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
@@ -17,7 +16,7 @@ import junit.framework.TestCase;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
@@ -26,7 +25,6 @@ import org.locationtech.jts.io.WKTReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,15 +82,13 @@ public class XZ2QueryTest extends TestCase {
     SpatialQuery spatialQuery = new SpatialQuery(instance.getDataSet(DATASET_NAME), spatialIntersectQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     System.out.println(results.size());
+   indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory result : results) {
       ByteArray index = indexTable.getIndexMeta().getIndexStrategy()
           .index(result);
       System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
-      ZonedDateTime startTime = result.getTrajectoryFeatures().getStartTime();
-      ZonedDateTime endTime = result.getTrajectoryFeatures().getEndTime();
-      System.out.println(new TimeLine(startTime, endTime));
     }
-    assert spatialQuery.executeQuery().size() == 13;
+   assertEquals(spatialQuery.executeQuery().size(), 13);
   }
 
   @Test
@@ -100,6 +96,7 @@ public class XZ2QueryTest extends TestCase {
     Database instance = Database.getInstance();
     SpatialQuery spatialQuery = new SpatialQuery(instance.getDataSet(DATASET_NAME), spatialContainedQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory result : results) {
       System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(result));
     }
@@ -123,18 +120,19 @@ public class XZ2QueryTest extends TestCase {
     System.out.println(trips.size());
     int i = 0;
     int j = 0;
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory trajectory : trips) {
       if (envelope.contains(trajectory.getLineString())) {
-        System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(trajectory));
-        // System.out.println(trajectory);
+        ByteArray index = indexTable.getIndexMeta().getIndexStrategy().index(trajectory);
+        System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
         i++;
       }
     }
     System.out.println("CONTAIN: " + i);
     for (Trajectory trajectory : trips) {
       if (envelope1.intersects(trajectory.getLineString())) {
-        System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(trajectory));
-        // System.out.println(trajectory);
+        ByteArray index = indexTable.getIndexMeta().getIndexStrategy().index(trajectory);
+        System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
         j++;
       }
     }
