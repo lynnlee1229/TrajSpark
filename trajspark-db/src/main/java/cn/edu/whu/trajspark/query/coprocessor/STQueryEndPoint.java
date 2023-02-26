@@ -162,30 +162,29 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
    */
   protected boolean coarseFilter(Result result, QueryCondition.QueryRequest queryRequest) {
     WKTReader wktReader = new WKTReader();
-    boolean validate = true;
+    boolean spatialValidate = false;
+    boolean temporalValidate = false;
     // 利用MBR、POS CODE等对QueryRequest中的空间约束作初步判断
     if (queryRequest.hasSpatialQueryWindow()) {
       try {
         Geometry queryGeom = wktReader.read(queryRequest.getSpatialQueryWindow().getWkt());
         MinimumBoundingBox mbr = getTrajectoryMBR(result);
         if (queryRequest.getSpatialQueryType() == QueryCondition.QueryType.CONTAIN) {
-          validate = queryGeom.contains(mbr.toPolygon(4326));
+          spatialValidate = queryGeom.contains(mbr.toPolygon(4326));
         } else {
-          validate = queryGeom.intersects(mbr.toPolygon(4326));
+          spatialValidate = queryGeom.intersects(mbr.toPolygon(4326));
         }
         // TODO : filter with signature.
-        if (result.getValue(
-            COLUMN_FAMILY, SIGNATURE_QUALIFIER) != null) {
-          validate = validate;
-        }
+        // if (result.getValue(
+        //     COLUMN_FAMILY, SIGNATURE_QUALIFIER) != null) {
+        //   spatialValidate = spatialValidate;
+        // }
       } catch (ParseException | IOException e) {
         e.printStackTrace();
       }
+    } else {
+      spatialValidate = false;
     }
-    if (!validate) {
-      return false;
-    }
-    validate = false;
     if (queryRequest.hasTemporalQueryWindows()) {
       List<QueryCondition.TemporalQueryWindow> temporalQueryWindowList = queryRequest.getTemporalQueryWindows()
           .getTemporalQueryWindowList();
@@ -195,13 +194,15 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
         TimeLine queryTimeLine = new TimeLine(DateTimeParse.timeToZonedTime(temporalQueryWindow.getStartMs()),
             DateTimeParse.timeToZonedTime(temporalQueryWindow.getEndMs()));
         if (queryRequest.getTemporalQueryType() == QueryCondition.QueryType.CONTAIN) {
-          validate = validate || queryTimeLine.contain(trajTimeLine);
+          temporalValidate = temporalValidate || queryTimeLine.contain(trajTimeLine);
         } else {
-          validate = validate || queryTimeLine.intersect(trajTimeLine);
+          temporalValidate = temporalValidate || queryTimeLine.intersect(trajTimeLine);
         }
       }
+    } else {
+      temporalValidate = true;
     }
-    return validate;
+    return spatialValidate && temporalValidate;
   }
 
   /**
