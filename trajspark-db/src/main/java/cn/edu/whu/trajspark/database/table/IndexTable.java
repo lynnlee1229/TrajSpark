@@ -56,6 +56,11 @@ public class IndexTable {
     this.table = Database.getInstance().getTable(indexMeta.getIndexTableName());
   }
 
+  public IndexTable(String tableName) throws IOException {
+    this.indexMeta = Database.getInstance().getDataSet(extractDataSetName(tableName)).getIndexTable(tableName).getIndexMeta();
+    this.table = Database.getInstance().getTable(tableName);
+  }
+
   public IndexMeta getIndexMeta() {
     return indexMeta;
   }

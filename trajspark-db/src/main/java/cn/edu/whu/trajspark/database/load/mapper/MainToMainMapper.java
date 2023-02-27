@@ -10,8 +10,11 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
+
+import static cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils.getIndexTable;
 
 /**
  * @author Haocheng Wang
@@ -19,10 +22,12 @@ import java.io.IOException;
  */
 public class MainToMainMapper extends TableMapper<ImmutableBytesWritable, Put> {
 
-  private static IndexTable output;
+  private static IndexTable indexTable;
 
-  public static void setMainTable(IndexTable indexTable) {
-    MainToMainMapper.output = indexTable;
+  @Override
+  protected void setup(Mapper<ImmutableBytesWritable, Result, ImmutableBytesWritable, Put>.Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    indexTable = getIndexTable(context.getConfiguration());
   }
 
   @SuppressWarnings("rawtypes")
@@ -34,7 +39,7 @@ public class MainToMainMapper extends TableMapper<ImmutableBytesWritable, Put> {
   @Override
   protected void map(ImmutableBytesWritable key, Result coreIndexRow, Context context) throws IOException, InterruptedException {
     Trajectory t = TrajectorySerdeUtils.getTrajectoryFromResult(coreIndexRow);
-    Put p = TrajectorySerdeUtils.getPutForMainIndex(output.getIndexMeta(), t);
+    Put p = TrajectorySerdeUtils.getPutForMainIndex(indexTable.getIndexMeta(), t);
     context.write(new ImmutableBytesWritable(p.getRow()), p);
   }
 }

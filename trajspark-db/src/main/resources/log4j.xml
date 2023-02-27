@@ -9,18 +9,18 @@
             <param name="ConversionPattern" value="%-3p (%F:%L) %d{MM-dd HH:mm:ss,SSS} %m  \n"/>
         </layout>
     </appender>
-    <!-- 输出日志到文件 -->
-    <appender name="fileAppender" class="org.apache.log4j.FileAppender">
-        <!-- 输出文件全路径名-->
-        <param name="File" value="trajspark-db.log"/>
-        <param name="Threshold" value="INFO"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="[%p][%d{yyyy-MM-dd HH:mm:ss SSS}][%c]-[%m]%n"/>
-        </layout>
-    </appender>
+    <!--&lt;!&ndash; 输出日志到文件 &ndash;&gt;-->
+    <!--<appender name="fileAppender" class="org.apache.log4j.FileAppender">-->
+    <!--    &lt;!&ndash; 输出文件全路径名&ndash;&gt;-->
+    <!--    <param name="File" value="trajspark-db.log"/>-->
+    <!--    <param name="Threshold" value="INFO"/>-->
+    <!--    <layout class="org.apache.log4j.PatternLayout">-->
+    <!--        <param name="ConversionPattern" value="[%p][%d{yyyy-MM-dd HH:mm:ss SSS}][%c]-[%m]%n"/>-->
+    <!--    </layout>-->
+    <!--</appender>-->
     <root>
         <level value="INFO"/>
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="fileAppender"/>
+        <!--<appender-ref ref="fileAppender"/>-->
     </root>
 </log4j:configuration>

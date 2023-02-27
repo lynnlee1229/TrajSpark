@@ -7,7 +7,7 @@ import org.locationtech.jts.io.ParseException;
  * @author Haocheng Wang
  * Created on 2023/2/19
  */
-public interface TextTrajParser {
+public abstract class TextTrajParser {
 
-  public Trajectory parse(String line) throws ParseException;
+  public abstract Trajectory parse(String line) throws ParseException;
 }

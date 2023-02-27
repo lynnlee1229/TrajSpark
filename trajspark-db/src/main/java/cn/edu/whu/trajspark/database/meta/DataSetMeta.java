@@ -130,7 +130,7 @@ public class DataSetMeta {
     }
   }
 
-  private static IndexMeta getIndexMetaByName(List<IndexMeta> indexMetaList, String tableName) {
+  public static IndexMeta getIndexMetaByName(List<IndexMeta> indexMetaList, String tableName) {
     for (IndexMeta im : indexMetaList) {
       if (im.getIndexTableName().equals(tableName)) {
         return im;
