@@ -102,7 +102,7 @@ public class IDTemporalQueryTest {
     for (Trajectory trajectory : trajectories) {
       System.out.println(trajectory);
     }
-    assertEquals(10, IDTemporalQuery.executeQuery().size());
+    assertEquals(13, IDTemporalQuery.executeQuery().size());
   }
 
   @Test
@@ -115,7 +115,7 @@ public class IDTemporalQueryTest {
     for (Trajectory trajectory : trajectories) {
       System.out.println(trajectory);
     }
-    assertEquals(6, IDTemporalQuery.executeQuery().size());
+    assertEquals(10, IDTemporalQuery.executeQuery().size());
   }
 
   @Test
@@ -130,11 +130,12 @@ public class IDTemporalQueryTest {
       TimeLine trajTimeLine = new TimeLine(startTime, endTime);
       for (TimeLine queryTimeLine : timeLineList) {
         if (queryTimeLine.contain(trajTimeLine)) {
+          System.out.println(new TimeLine(startTime, endTime));
           i++;
         }
         if (queryTimeLine.intersect(trajTimeLine)) {
-          // System.out.println(new TimeLine(startTime, endTime));
-          System.out.println(trajectory);
+//           System.out.println(new TimeLine(startTime, endTime));
+//          System.out.println(trajectory);
           j++;
         }
       }

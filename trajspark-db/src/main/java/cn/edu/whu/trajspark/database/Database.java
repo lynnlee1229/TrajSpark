@@ -84,6 +84,7 @@ public final class Database {
   }
 
   public void createDataSet(DataSetMeta dataSetMeta) throws IOException {
+    instance.initDataBase();
     String dataSetName = dataSetMeta.getDataSetName();
     if (dataSetExists(dataSetName)) {
       logger.warn("The dataset(name: {}) already exists.", dataSetName);

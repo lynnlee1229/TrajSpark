@@ -35,9 +35,9 @@ public class SpatialQueryTest extends TestCase {
   public static SpatialQueryCondition spatialIntersectQueryCondition;
   public static SpatialQueryCondition spatialContainedQueryCondition;
   static String QUERY_WKT_INTERSECT =
-      "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
+          "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
   static String QUERY_WKT_CONTAIN =
-      "POLYGON((114.06266851544588 22.55279006251164,114.09511251569002 22.55263152858115,114.09631414532869 22.514023096146417,114.02833624005525 22.513705939082808,114.02799291730135 22.553107129826113,114.06266851544588 22.55279006251164))";
+          "POLYGON((114.06266851544588 22.55279006251164,114.09511251569002 22.55263152858115,114.09631414532869 22.514023096146417,114.02833624005525 22.513705939082808,114.02799291730135 22.553107129826113,114.06266851544588 22.55279006251164))";
 
   static {
     System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
@@ -110,7 +110,11 @@ public class SpatialQueryTest extends TestCase {
     List<Trajectory> results = spatialQuery.executeQuery();
     System.out.println(results.size());
     for (Trajectory result : results) {
-      System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(result));
+      ByteArray index = indexTable.getIndexMeta().getIndexStrategy().index(result);
+      System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
+      ZonedDateTime startTime = result.getTrajectoryFeatures().getStartTime();
+      ZonedDateTime endTime = result.getTrajectoryFeatures().getEndTime();
+      System.out.println(new TimeLine(startTime, endTime));
     }
     assertEquals(19, spatialQuery.executeQuery().size());
   }

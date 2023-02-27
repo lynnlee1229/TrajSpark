@@ -58,7 +58,7 @@ class SpatialTemporalQueryTest extends TestCase {
       "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
   static String QUERY_WKT_CONTAIN =
       "POLYGON((114.06266851544588 22.55279006251164,114.09511251569002 22.55263152858115,114.09631414532869 22.514023096146417,114.02833624005525 22.513705939082808,114.02799291730135 22.553107129826113,114.06266851544588 22.55279006251164))";
-  static List<TimeLine> timeLineList = new ArrayList<>();
+  static List<TimeLine> timeLineList = IDTemporalQueryTest.timeLineList;
 
   static {
     // 查询条件
@@ -66,9 +66,9 @@ class SpatialTemporalQueryTest extends TestCase {
     TemporalQueryCondition temporalIntersectQuery = IDTemporalQueryTest.temporalIntersectCondition;
     SpatialQueryCondition spatialIntersectQueryCondition = SpatialQueryTest.spatialIntersectQueryCondition;
     SpatialQueryCondition spatialContainedQueryCondition = SpatialQueryTest.spatialContainedQueryCondition;
-    stQueryConditionContain = new SpatialTemporalQueryCondition(
-        spatialIntersectQueryCondition, temporalIntersectQuery);
     stQueryConditionIntersect = new SpatialTemporalQueryCondition(
+        spatialIntersectQueryCondition, temporalIntersectQuery);
+    stQueryConditionContain = new SpatialTemporalQueryCondition(
         spatialContainedQueryCondition, temporalContainQuery);
   }
 
@@ -77,8 +77,8 @@ class SpatialTemporalQueryTest extends TestCase {
     Database instance = Database.getInstance();
     // create dataset
     List<IndexMeta> list = new LinkedList<>();
-    IndexMeta indexMeta1 = new IndexMeta(true, xz2TIndexStrategy, DATASET_NAME, "default");
-    IndexMeta indexMeta0 = new IndexMeta(false, txz2IndexStrategy, DATASET_NAME, indexMeta1, "default");
+    IndexMeta indexMeta1 = new IndexMeta(true, txz2IndexStrategy, DATASET_NAME, "default");
+    IndexMeta indexMeta0 = new IndexMeta(false, xz2TIndexStrategy, DATASET_NAME, indexMeta1, "default");
     IndexMeta indexMeta2 = new IndexMeta(false, xz2IndexStrategy, DATASET_NAME, indexMeta1, "default");
     IndexMeta indexMeta3 = new IndexMeta(false, IDTIndexStrategy, DATASET_NAME, indexMeta1, "default");
     list.add(indexMeta0);
@@ -133,7 +133,7 @@ class SpatialTemporalQueryTest extends TestCase {
     Database instance = Database.getInstance();
     IndexTable indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     SpatialTemporalQuery spatialTemporalQuery = new SpatialTemporalQuery(instance.getDataSet(DATASET_NAME),
-        stQueryConditionContain);
+            stQueryConditionIntersect);
     List<Trajectory> trajectories = spatialTemporalQuery.executeQuery();
     System.out.println(trajectories.size());
     WKTReader wktReader = new WKTReader();
@@ -146,7 +146,7 @@ class SpatialTemporalQueryTest extends TestCase {
       Polygon envelopeINTERSECT = (Polygon) wktReader.read(QUERY_WKT_INTERSECT).getEnvelope();
       System.out.println("envelopeINTERSECT :  " + envelopeINTERSECT.intersects(trajectory.getLineString()));
     }
-    assertEquals(spatialTemporalQuery.executeQuery().size(),5);
+    assertEquals(spatialTemporalQuery.executeQuery().size(),1);
   }
 
   @Test
@@ -154,7 +154,7 @@ class SpatialTemporalQueryTest extends TestCase {
     Database instance = Database.getInstance();
     IndexTable indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     SpatialTemporalQuery spatialTemporalQuery = new SpatialTemporalQuery(instance.getDataSet(DATASET_NAME),
-        stQueryConditionIntersect);
+        stQueryConditionContain);
     List<Trajectory> trajectories = spatialTemporalQuery.executeQuery();
     System.out.println(trajectories.size());
     for (Trajectory trajectory : trajectories) {
@@ -167,7 +167,7 @@ class SpatialTemporalQueryTest extends TestCase {
       Polygon envelopeCONTAIN = (Polygon) wktReader.read(QUERY_WKT_CONTAIN).getEnvelope();
       System.out.println("envelopeCONTAIN :  " + envelopeCONTAIN.contains(trajectory.getLineString()));
     }
-    assertEquals(spatialTemporalQuery.executeQuery().size(),3);
+    assertEquals(spatialTemporalQuery.executeQuery().size(),8);
   }
 
   @Test

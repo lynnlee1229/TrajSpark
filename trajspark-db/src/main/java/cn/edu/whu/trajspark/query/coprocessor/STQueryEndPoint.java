@@ -183,7 +183,7 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
         e.printStackTrace();
       }
     } else {
-      spatialValidate = false;
+      spatialValidate = true;
     }
     if (queryRequest.hasTemporalQueryWindows()) {
       List<QueryCondition.TemporalQueryWindow> temporalQueryWindowList = queryRequest.getTemporalQueryWindows()

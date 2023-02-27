@@ -104,7 +104,7 @@ public class SecondaryQueryTest {
     for (Trajectory trajectory : trajectories) {
       System.out.println(trajectory);
     }
-    assertEquals(3, trajectories.size());
+    assertEquals(8, trajectories.size());
   }
 
   @Test
@@ -116,7 +116,7 @@ public class SecondaryQueryTest {
     for (Trajectory trajectory : trajectories) {
       System.out.println(trajectory);
     }
-    assertEquals(5, trajectories.size());
+    assertEquals(1, trajectories.size());
   }
 
   @Test

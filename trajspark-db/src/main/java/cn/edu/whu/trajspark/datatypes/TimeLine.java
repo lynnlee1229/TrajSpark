@@ -59,9 +59,7 @@ public class TimeLine {
   }
 
   public boolean intersect(TimeLine other) {
-    return (lessOrEqualTo(other.timeStart, timeStart) && lessOrEqualTo(timeStart, other.timeEnd))
-        || (lessOrEqualTo(timeEnd, other.timeEnd) && lessOrEqualTo(other.timeStart, timeEnd))
-        || this.contain(other);
+    return lessOrEqualTo(timeStart, other.timeEnd) && lessOrEqualTo(other.timeStart, timeEnd);
   }
 
   private boolean lessOrEqualTo(ZonedDateTime t1, ZonedDateTime t2) {
