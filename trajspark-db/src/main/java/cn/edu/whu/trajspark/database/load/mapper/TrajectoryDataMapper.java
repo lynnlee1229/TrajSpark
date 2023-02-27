@@ -129,7 +129,6 @@ public class TrajectoryDataMapper {
       value.add(new KeyValueInfo(frame, keyValue));
     }
     value.sort(Comparator.comparing(KeyValueInfo::getQualifier));
-    value.forEach(System.out::println);
     for (KeyValueInfo keyValueInfo : value) {
       sortedValue.add(keyValueInfo.getValue());
     }

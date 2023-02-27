@@ -6,7 +6,7 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -20,19 +20,18 @@ public class TableBulkLoadTest {
   // 确保hbase-site.xml, core-site.xml, hdfs-site.xml在class path中。
   @Test
   public void testBulkLoad() throws Exception {
-    String output = "/tmp/";
+    String output = "hdfs:///tmp/trajspark";
     DataSet dataSet = Database.getInstance().getDataSet(TextBulkloadTest.DATABASE_NAME);
     Configuration conf = HBaseConfiguration.create();
     IndexMeta coreIndexMeta = dataSet.getCoreIndexTable().getIndexMeta();
-    IndexMeta newIndexMeta = new IndexMeta(false, new XZ2IndexStrategy(), TextBulkloadTest.DATABASE_NAME, coreIndexMeta, "additional_index2");
+    IndexMeta newIndexMeta = new IndexMeta(false, new XZ2IndexStrategy(), TextBulkloadTest.DATABASE_NAME, coreIndexMeta, "additional_index3");
     Database.getInstance().addIndexMeta(newIndexMeta.getDataSetName(), newIndexMeta);
     TableBulkLoadDriver tableBulkLoadDriver = new TableBulkLoadDriver();
     tableBulkLoadDriver.setConf(conf);
     tableBulkLoadDriver.bulkLoad(output, newIndexMeta);
   }
 
-
-  @org.junit.Test
+  @Test
   public void testDeleteDataSet2() throws IOException {
     Database instance = Database.getInstance();
     instance.deleteDataSet("bulkLoadTest3");

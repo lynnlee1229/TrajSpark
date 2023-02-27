@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.driver.TextBulkLoadDriver;
 import cn.edu.whu.trajspark.database.load.mapper.MainToMainMapper;
 import cn.edu.whu.trajspark.database.load.mapper.MainToSecondaryMapper;
+import cn.edu.whu.trajspark.database.load.mapper.TextToMainMapper;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import org.apache.hadoop.conf.Configuration;
@@ -19,15 +20,24 @@ import org.apache.hadoop.hbase.mapreduce.PutSortReducer;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.*;
+import static org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner.DEFAULT_PATH;
+import static org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner.PARTITIONER_PATH;
 
 /**
  * @author Haocheng Wang
  * Created on 2023/2/20
  */
-public class BulkLoadUtils {
+public class BulkLoadDriverUtils {
+
+  private static final Logger logger = LoggerFactory.getLogger(BulkLoadDriverUtils.class);
 
   private static Database instance;
 
@@ -44,7 +54,7 @@ public class BulkLoadUtils {
    * 执行此方法时，应确保DataSetMeta中已有本Secondary Table的信息。
    */
   public static void createIndexFromTable(Configuration conf, IndexMeta indexMeta) throws IOException {
-    Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH));
+    Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY));
     String inputTableName = indexMeta.getCoreIndexTableName();
     String outTableName = indexMeta.getIndexTableName();
     Job job = Job.getInstance(conf, "Batch Import HBase Table：" + outTableName);
@@ -76,15 +86,61 @@ public class BulkLoadUtils {
     }
 
     // 配置Reduce算子
-    job.setNumReduceTasks(1);
     job.setReducerClass(PutSortReducer.class);
 
     RegionLocator locator = instance.getConnection().getRegionLocator(TableName.valueOf(outTableName));
     try (Admin admin = instance.getAdmin(); Table table = instance.getTable(outTableName)) {
       HFileOutputFormat2.configureIncrementalLoad(job, table, locator);
+      cancelDeleteOnExit(job);
       if (!job.waitForCompletion(true)) {
         return;
       }
+      LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
+      loader.doBulkLoad(outPath, admin, table, locator);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * 将文本文件中的数据bulk load到索引表中，见{@link TextBulkLoadDriver#mainIndexBulkLoad}.
+   * @param conf
+   * @param indexTable
+   * @throws IOException
+   */
+  public static void createIndexFromFile(Configuration conf, IndexTable indexTable, Class parser) throws IOException {
+    Path inPath = new Path(conf.get(BULK_LOAD_INPUT_FILE_PATH_KEY));
+    Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY));
+    String tableName = indexTable.getIndexMeta().getIndexTableName();
+    Job job = Job.getInstance(conf, "Batch Import HBase Table：" + tableName);
+    job.setJarByClass(TextBulkLoadDriver.class);
+    FileInputFormat.setInputPaths(job, inPath);
+    FileSystem fs = outPath.getFileSystem(conf);
+    if (fs.exists(outPath)) {
+      fs.delete(outPath, true);
+    }
+
+    // config parser and IndexTable
+    job.getConfiguration().setClass(BULKLOAD_TEXT_PARSER_CLASS, parser, TextTrajParser.class);
+    job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, indexTable.getIndexMeta().getIndexTableName());
+
+    // config Map related content
+    Class<TextToMainMapper> cls = TextToMainMapper.class;
+    job.setMapperClass(cls);
+    job.setMapOutputKeyClass(ImmutableBytesWritable.class);
+    job.setMapOutputValueClass(Put.class);
+
+    //配置Reduce
+    job.setNumReduceTasks(1);
+    job.setReducerClass(PutSortReducer.class);
+
+    RegionLocator locator = instance.getConnection().getRegionLocator(TableName.valueOf(tableName));
+    try (Admin admin = instance.getAdmin(); Table table = instance.getTable(tableName)) {
+      HFileOutputFormat2.setOutputPath(job, outPath);
+      HFileOutputFormat2.configureIncrementalLoad(job, table, locator);
+      cancelDeleteOnExit(job);
+      job.waitForCompletion(true);
+      logger.info("HFileOutputFormat2 file ready on {}", outPath);
       LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
       loader.doBulkLoad(outPath, admin, table, locator);
     } catch (Exception e) {
@@ -96,5 +152,15 @@ public class BulkLoadUtils {
     Scan scan = new Scan();
     scan.addFamily(Bytes.toBytes(DBConstants.INDEX_TABLE_CF));
     return scan;
+  }
+
+  // https://blog.csdn.net/jiandabang/article/details/96483807
+  public static void cancelDeleteOnExit(Job job) throws IOException {
+    Configuration conf = job.getConfiguration();
+    FileSystem fs = FileSystem.get(conf);
+    String partitionsFile = conf.get(PARTITIONER_PATH, DEFAULT_PATH);
+    Path partitionsPath = new Path(partitionsFile);
+    fs.makeQualified(partitionsPath);
+    fs.cancelDeleteOnExit(partitionsPath);
   }
 }
