@@ -56,7 +56,7 @@ public class BulkLoadDriverUtils {
    * 执行此方法时，应确保DataSetMeta中已有本Secondary Table的信息。
    */
   public static void createIndexFromTable(Configuration conf, IndexMeta indexMeta, DataSetMeta dataSetMeta) throws IOException {
-      Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY));
+    Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY));
     String inputTableName = dataSetMeta.getCoreIndexMeta().getIndexTableName();
     String outTableName = indexMeta.getIndexTableName();
     Job job = Job.getInstance(conf, "Batch Import HBase Table：" + outTableName);
@@ -69,7 +69,7 @@ public class BulkLoadDriverUtils {
     FileOutputFormat.setOutputPath(job, outPath);
 
     // 配置Map算子，根据待写入Index是否为主索引，选择对应的Mapper实现。
-    job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, indexMeta.getIndexTableName());
+    job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, outTableName);
     if (indexMeta.isMainIndex()) {
       TableMapReduceUtil.initTableMapperJob(inputTableName,
           buildCoreIndexScan(),
@@ -123,7 +123,7 @@ public class BulkLoadDriverUtils {
 
     // config parser and IndexTable
     job.getConfiguration().setClass(BULKLOAD_TEXT_PARSER_CLASS, parser, TextTrajParser.class);
-    job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, indexTable.getIndexMeta().getIndexTableName());
+    job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, tableName);
 
     // config Map related content
     Class<TextToMainMapper> cls = TextToMainMapper.class;

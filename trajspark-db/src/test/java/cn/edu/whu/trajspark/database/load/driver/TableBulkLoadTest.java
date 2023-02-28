@@ -22,9 +22,7 @@ public class TableBulkLoadTest {
   @Test
   public void testBulkLoad() throws Exception {
     String output = "hdfs:///tmp/trajspark";
-    DataSet dataSet = Database.getInstance().getDataSet(TextBulkloadTest.DATABASE_NAME);
     Configuration conf = HBaseConfiguration.create();
-    IndexMeta coreIndexMeta = dataSet.getCoreIndexTable().getIndexMeta();
     IndexMeta newIndexMeta = new IndexMeta(false, new XZ2IndexStrategy(), TextBulkloadTest.DATABASE_NAME, "additional_index2");
     Database.getInstance().addIndexMeta(newIndexMeta.getDataSetName(), newIndexMeta);
     DataSetMeta dataSetMeta = Database.getInstance().getDataSetMeta(newIndexMeta.getDataSetName());

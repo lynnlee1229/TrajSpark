@@ -33,7 +33,7 @@ public final class Database {
 
   private Connection connection;
   private Configuration configuration;
-  private static Database instance;
+  private volatile static Database instance;
 
   private Database() {
     configuration = HBaseConfiguration.create();
@@ -41,9 +41,13 @@ public final class Database {
 
   public static Database getInstance() throws IOException {
     if (instance == null) {
+      synchronized (Database.class) {
+        if (instance == null) {
           instance = new Database();
-          instance.openConnection();
+        }
       }
+    }
+    instance.openConnection();
     return instance;
   }
 

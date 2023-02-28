@@ -3,8 +3,6 @@ package cn.edu.whu.trajspark.database.load.driver;
 import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
-import cn.edu.whu.trajspark.database.Database;
-import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import org.apache.hadoop.conf.Configuration;

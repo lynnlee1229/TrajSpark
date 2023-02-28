@@ -116,6 +116,14 @@ public class DataSetMeta {
         }
         return null;
     }
+    public static IndexMeta getIndexMetaByName(List<IndexMeta> indexMetaList, String tableName) {
+        for (IndexMeta im : indexMetaList) {
+            if (im.getIndexTableName().equals(tableName)) {
+                return im;
+            }
+        }
+        return null;
+    }
 
     public void deleteIndex(String indexName) {
         IndexMeta target = null;
