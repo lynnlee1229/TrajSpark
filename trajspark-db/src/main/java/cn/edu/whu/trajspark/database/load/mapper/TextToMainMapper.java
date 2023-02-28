@@ -5,7 +5,6 @@ import cn.edu.whu.trajspark.database.load.TextTrajParser;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -15,8 +14,8 @@ import org.locationtech.jts.io.ParseException;
 
 import java.io.IOException;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.BULKLOAD_TARGET_INDEX_NAME;
-import static cn.edu.whu.trajspark.constant.DBConstants.BULKLOAD_TEXT_PARSER_CLASS;
+import static cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils.getIndexTable;
+import static cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils.getTextParser;
 
 /**
  * 从Text文件中读取数据，并将其转换为Main Index的put对象。
@@ -54,15 +53,5 @@ public class TextToMainMapper extends Mapper<LongWritable, Text, ImmutableBytesW
     } catch (ParseException e) {
       e.printStackTrace();
     }
-  }
-
-  private IndexTable getIndexTable(Configuration conf) throws IOException {
-    String tableName = conf.get(BULKLOAD_TARGET_INDEX_NAME);
-    return new IndexTable(tableName);
-  }
-
-  private TextTrajParser getTextParser(Configuration conf) throws InstantiationException, IllegalAccessException {
-    Class cls = conf.getClass(BULKLOAD_TEXT_PARSER_CLASS, null);
-    return (TextTrajParser) cls.newInstance();
   }
 }

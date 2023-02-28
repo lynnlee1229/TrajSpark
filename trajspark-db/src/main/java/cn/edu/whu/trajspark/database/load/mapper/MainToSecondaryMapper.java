@@ -10,8 +10,11 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
+
+import static cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils.getIndexTable;
 
 /**
  * 从Core index表中读取数据，并将其转换为辅助索引表的put对象。
@@ -23,8 +26,10 @@ public class MainToSecondaryMapper extends TableMapper<ImmutableBytesWritable, P
 
   private static IndexTable secondaryTable;
 
-  public static void setSecondaryTable(IndexTable indexTable) {
-    MainToSecondaryMapper.secondaryTable = indexTable;
+  @Override
+  protected void setup(Mapper<ImmutableBytesWritable, Result, ImmutableBytesWritable, Put>.Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    secondaryTable = getIndexTable(context.getConfiguration());
   }
 
   @SuppressWarnings("rawtypes")

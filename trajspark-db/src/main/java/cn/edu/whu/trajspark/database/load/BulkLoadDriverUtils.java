@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.database.load;
 
 import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
+import cn.edu.whu.trajspark.database.load.driver.TableBulkLoadDriver;
 import cn.edu.whu.trajspark.database.load.driver.TextBulkLoadDriver;
 import cn.edu.whu.trajspark.database.load.mapper.MainToMainMapper;
 import cn.edu.whu.trajspark.database.load.mapper.MainToSecondaryMapper;
@@ -68,8 +69,8 @@ public class BulkLoadDriverUtils {
     FileOutputFormat.setOutputPath(job, outPath);
 
     // 配置Map算子，根据待写入Index是否为主索引，选择对应的Mapper实现。
+    job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, indexMeta.getIndexTableName());
     if (indexMeta.isMainIndex()) {
-      MainToMainMapper.setMainTable(new IndexTable(indexMeta));
       TableMapReduceUtil.initTableMapperJob(inputTableName,
           buildCoreIndexScan(),
           MainToMainMapper.class,
@@ -77,7 +78,6 @@ public class BulkLoadDriverUtils {
           Put.class,
           job);
     } else {
-      MainToSecondaryMapper.setSecondaryTable(new IndexTable(indexMeta));
       TableMapReduceUtil.initTableMapperJob(inputTableName,
           buildCoreIndexScan(),
           MainToSecondaryMapper.class,
@@ -145,6 +145,7 @@ public class BulkLoadDriverUtils {
       LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
       loader.doBulkLoad(outPath, admin, table, locator);
     } catch (Exception e) {
+      logger.error("meet error:", e);
       throw new RuntimeException(e);
     }
   }
@@ -163,5 +164,15 @@ public class BulkLoadDriverUtils {
     Path partitionsPath = new Path(partitionsFile);
     fs.makeQualified(partitionsPath);
     fs.cancelDeleteOnExit(partitionsPath);
+  }
+
+  public static IndexTable getIndexTable(Configuration conf) throws IOException {
+    String tableName = conf.get(BULKLOAD_TARGET_INDEX_NAME);
+    return new IndexTable(tableName);
+  }
+
+  public static TextTrajParser getTextParser(Configuration conf) throws InstantiationException, IllegalAccessException {
+    Class cls = conf.getClass(BULKLOAD_TEXT_PARSER_CLASS, null);
+    return (TextTrajParser) cls.newInstance();
   }
 }
