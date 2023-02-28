@@ -1,38 +1,20 @@
 package cn.edu.whu.trajspark.database.load.driver;
 
-import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
-import cn.edu.whu.trajspark.database.load.BulkLoadUtils;
+import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
 import cn.edu.whu.trajspark.database.load.TextTrajParser;
-import cn.edu.whu.trajspark.database.load.mapper.TextToMainMapper;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Admin;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.RegionLocator;
-import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
-import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
-import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
-import org.apache.hadoop.hbase.mapreduce.PutSortReducer;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.BULK_LOAD_TEMP_FILE_PATH;
-import static cn.edu.whu.trajspark.constant.DBConstants.PROCESS_INPUT_CONF_KEY;
+import static cn.edu.whu.trajspark.constant.DBConstants.BULK_LOAD_INPUT_FILE_PATH_KEY;
+import static cn.edu.whu.trajspark.constant.DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY;
 
 /**
  * @author Xu Qi
@@ -46,47 +28,12 @@ public class TextBulkLoadDriver extends Configured {
 
   private void setUpConfiguration(String inPath, String outPath) {
     Configuration conf = getConf();
-    conf.set(PROCESS_INPUT_CONF_KEY, inPath);
-    conf.set(BULK_LOAD_TEMP_FILE_PATH, outPath);
+    conf.set(BULK_LOAD_INPUT_FILE_PATH_KEY, inPath);
+    conf.set(BULK_LOAD_TEMP_FILE_PATH_KEY, outPath);
   }
 
-  /**
-   * 将文本文件中的数据bulk load到某索引表中
-   */
-  private void runTextToMainBulkLoad(Class<? extends Mapper> cls, Configuration conf, IndexTable indexTable) throws IOException {
-    Path inPath = new Path(conf.get(PROCESS_INPUT_CONF_KEY));
-    Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH));
-    String tableName = indexTable.getIndexMeta().getIndexTableName();
-    Job job = Job.getInstance(conf, "Batch Import HBase Table：" + tableName);
-    job.setJarByClass(TextBulkLoadDriver.class);
-    FileInputFormat.setInputPaths(job, inPath);
-    FileSystem fs = outPath.getFileSystem(conf);
-    if (fs.exists(outPath)) {
-      fs.delete(outPath, true);
-    }
-    FileOutputFormat.setOutputPath(job, outPath);
 
-    //Configure Map related content
-    job.setMapperClass(cls);
-    job.setMapOutputKeyClass(ImmutableBytesWritable.class);
-    job.setMapOutputValueClass(Put.class);
-
-    //配置Reduce
-    job.setNumReduceTasks(1);
-    job.setReducerClass(PutSortReducer.class);
-
-    RegionLocator locator = instance.getConnection().getRegionLocator(TableName.valueOf(tableName));
-    try (Admin admin = instance.getAdmin(); Table table = instance.getTable(tableName)) {
-      HFileOutputFormat2.configureIncrementalLoad(job, table, locator);
-      job.waitForCompletion(true);
-      LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
-      loader.doBulkLoad(outPath, admin, table, locator);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void textToMainIndexes(TextTrajParser parser, DataSetMeta dataSetMeta) throws Exception {
+  private void textToMainIndexes(Class parser, DataSetMeta dataSetMeta) throws Exception {
     // 多个dataset meta，先处理其中的主索引，后处理其中的辅助索引
     List<IndexMeta> indexMetaList = dataSetMeta.getIndexMetaList();
     for (IndexMeta im : indexMetaList) {
@@ -95,8 +42,7 @@ public class TextBulkLoadDriver extends Configured {
         logger.info("Starting bulk load main index, meta: {}", im);
         IndexTable indexTable = new IndexTable(im);
         try {
-          TextToMainMapper.config(indexTable, parser::parse);
-          runTextToMainBulkLoad(TextToMainMapper.class, getConf(), indexTable);
+          BulkLoadDriverUtils.createIndexFromFile(getConf(), indexTable, parser);
         } catch (Exception e) {
           logger.error("Failed to finish bulk load main index {}", im, e);
           throw e;
@@ -116,15 +62,15 @@ public class TextBulkLoadDriver extends Configured {
   }
 
   /**
-   * 将文本形式的轨迹数据以MapReduce BulkLoad的形式导入至HBase表中。
-   *
+   * 将文本文件中的轨迹数据以MapReduce BulkLoad的形式导入至HBase中，本方法仅适用于全新的数据集。
+   * 需要配合{@link Database#createDataSet}使用，该方法后将创建相关索引的空表，本方法负责向空表中写入数据。
    * @param parser 将文本解析为Trajectory对象的实现类
    * @param inPath 输入文件路径，该文件应位于HDFS上
-   * @param outPath MapReduce BulkLoad过程中产生的中间文件路径，该文件应位于HDFS上
+   * @param outPath MapReduce BulkLoad过程中产生的中间文件路径，该路径应位于HDFS上
    * @param dataSetMeta 目标数据集的元信息
    * @throws Exception BulkLoad失败
    */
-  public void bulkLoad(TextTrajParser parser, String inPath, String outPath, DataSetMeta dataSetMeta) throws Exception {
+  public void datasetBulkLoad(Class parser, String inPath, String outPath, DataSetMeta dataSetMeta) throws Exception {
     instance = Database.getInstance();
     logger.info("Starting bulk load dataset {}", dataSetMeta.getDataSetName());
     long start = System.currentTimeMillis();
@@ -135,6 +81,34 @@ public class TextBulkLoadDriver extends Configured {
     tableToSecondaryIndexes(dataSetMeta);
     logger.info("All indexes of Dataset [{}] have been loaded into HBase, total time cost: {}ms.",
         dataSetMeta.getDataSetName(),
+        System.currentTimeMillis() - start);
+  }
+
+  /**
+   * 将文本文件中的轨迹数据以MapReduce BulkLoad的形式导入至index meta对应的索引表中。
+   * 要求目标数据集已经存在于MetaTable中，index meta信息已写入dataset meta中, HBase table已创建。
+   * 需要配合{@link Database#addIndexMeta}使用，该方法中负责将待添加index meta的信息更新至dataSetMeta中，并创建新表，
+   * 但不负责数据的实际写入。数据写入由本类负责。
+   * @param cls 将文本解析为Trajectory的类对象，需实现{@link TextTrajParser}
+   * @param inPath 输入文件路径，该文件应位于HDFS上
+   * @param outPath MapReduce BulkLoad过程中产生的中间文件路径，该路径应位于HDFS上
+   * @param indexMeta 待写入index的元信息
+   * @throws Exception BulkLoad失败
+   */
+  public void mainIndexBulkLoad(Class cls, String inPath, String outPath, IndexMeta indexMeta) throws Exception {
+    if (!indexMeta.isMainIndex()) {
+      String msg = String.format("IndexMeta: %s is not main index, can't bulk load in this method.", indexMeta.getIndexTableName());
+      logger.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
+    logger.info("Starting bulk load index {} into dataset {}", indexMeta.getIndexTableName(), indexMeta.getDataSetName());
+    long start = System.currentTimeMillis();
+    setUpConfiguration(inPath, outPath);
+    // 利用文本文件将数据导入至所有主数据表中
+    BulkLoadDriverUtils.createIndexFromFile(getConf(), new IndexTable(indexMeta), cls);
+    logger.info("Index [{}] have been loaded into dataset {}, total time cost: {}ms.",
+        indexMeta.getIndexTableName(),
+        indexMeta.getDataSetName(),
         System.currentTimeMillis() - start);
   }
 }

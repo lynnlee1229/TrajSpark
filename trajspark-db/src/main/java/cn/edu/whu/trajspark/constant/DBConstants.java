@@ -33,8 +33,10 @@ public class DBConstants {
   public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
 
   // Bulk load
-  public static final String BULK_LOAD_TEMP_FILE_PATH = "import.file.output.path";
-  public static final String PROCESS_INPUT_CONF_KEY = "import.process.input.path";
+  public static final String BULK_LOAD_TEMP_FILE_PATH_KEY = "import.file.output.path";
+  public static final String BULK_LOAD_INPUT_FILE_PATH_KEY = "import.process.input.path";
+  public static final String BULKLOAD_TARGET_INDEX_NAME = "bulkload.target.index.name";
+  public static final String BULKLOAD_TEXT_PARSER_CLASS = "bulkload.parser.class";
 
   // Connection
   public static final String OPEN_CONNECTION_FAILED = "Cannot connect to data base.";

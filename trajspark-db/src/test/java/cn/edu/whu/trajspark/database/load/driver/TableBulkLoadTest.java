@@ -7,7 +7,7 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ public class TableBulkLoadTest {
   // 确保hbase-site.xml, core-site.xml, hdfs-site.xml在class path中。
   @Test
   public void testBulkLoad() throws Exception {
-    String output = "/tmp/";
+    String output = "hdfs:///tmp/trajspark";
     DataSet dataSet = Database.getInstance().getDataSet(TextBulkloadTest.DATABASE_NAME);
     Configuration conf = HBaseConfiguration.create();
     IndexMeta coreIndexMeta = dataSet.getCoreIndexTable().getIndexMeta();
@@ -33,8 +33,7 @@ public class TableBulkLoadTest {
     tableBulkLoadDriver.bulkLoad(output, newIndexMeta, dataSetMeta);
   }
 
-
-  @org.junit.Test
+  @Test
   public void testDeleteDataSet2() throws IOException {
     Database instance = Database.getInstance();
     instance.deleteDataSet("bulkLoadTest3");

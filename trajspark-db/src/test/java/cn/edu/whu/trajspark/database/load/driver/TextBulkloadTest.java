@@ -7,10 +7,11 @@ import cn.edu.whu.trajspark.database.load.TextTrajParser;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
+import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
 import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
@@ -28,14 +29,16 @@ import java.util.List;
  */
 public class TextBulkloadTest {
   static DataSetMeta dataSetMeta;
-  public static String DATABASE_NAME = "bulkLoadTest3";
-
+  public static String DATABASE_NAME = "bulkLoadTest2";
+  static IndexMeta coreIndexMata = new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default");
   static {
     List<IndexMeta> list = new LinkedList<>();
     list.add(new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default"));
     // list.add(new IndexMeta(true, new XZ2TIndexStrategy(), database_name, coreIndexMata, "default"));
     // list.add(new IndexMeta(true, new TXZ2IndexStrategy(), database_name, coreIndexMata, "default"));
     list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, "default"));
+    list.add(coreIndexMata);
+    list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, coreIndexMata, "default"));
     dataSetMeta = new DataSetMeta(DATABASE_NAME, list);
   }
 
@@ -43,16 +46,26 @@ public class TextBulkloadTest {
   // hdfs dfs -put traj/hdfs_traj_example.txt /data/
   @Test
   public void testBulkLoad() throws Exception {
-    Configuration conf = HBaseConfiguration.create();
-    String inPath = "/data/hdfs_traj_example.txt";
-    String output = "/tmp/";
+    String inPath = "hdfs:///data/hdfs_traj_example.txt";
+    String output = "hdfs:///tmp/trajspark";
     Database.getInstance().createDataSet(dataSetMeta);
     TextBulkLoadDriver trajectoryDataDriver = new TextBulkLoadDriver();
-    trajectoryDataDriver.setConf(conf);
-    trajectoryDataDriver.bulkLoad(new Parser(), inPath, output, dataSetMeta);
+    trajectoryDataDriver.datasetBulkLoad(Parser.class, inPath, output, dataSetMeta);
   }
 
-  private static class Parser implements TextTrajParser {
+  @Test
+  public void testBulkLoadNewIndex() throws Exception {
+    String inPath = "hdfs:///data/hdfs_traj_example.txt";
+    String output = "hdfs:///tmp/trajspark/";
+    IndexMeta indexMeta = new IndexMeta(true,new XZ2TIndexStrategy(), DATABASE_NAME, coreIndexMata, "default5");
+    Database.getInstance().addIndexMeta(DATABASE_NAME, indexMeta);
+    TextBulkLoadDriver trajectoryDataDriver = new TextBulkLoadDriver();
+    Configuration conf = HBaseConfiguration.create();
+    trajectoryDataDriver.setConf(conf);
+    trajectoryDataDriver.mainIndexBulkLoad(Parser.class, inPath, output, indexMeta);
+  }
+
+  private static class Parser extends TextTrajParser {
     @Override
     public Trajectory parse(String line) throws ParseException {
       String[] strs = line.split("\\|");

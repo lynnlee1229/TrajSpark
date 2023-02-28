@@ -34,6 +34,10 @@ public class DataSet {
     return new IndexTable(indexMeta);
   }
 
+  public IndexTable getIndexTable(String tableName) throws IOException {
+    return getIndexTable(DataSetMeta.getIndexMetaByName(dataSetMeta.getIndexMetaList(), tableName));
+  }
+
   public DataSetMeta getDataSetMeta() {
     return dataSetMeta;
   }
