@@ -56,7 +56,7 @@ public class TextBulkLoadDriver extends Configured {
   private void tableToSecondaryIndexes(DataSetMeta dataSetMeta) throws Exception {
     for (IndexMeta im : dataSetMeta.getIndexMetaList()) {
       if (!im.isMainIndex()) {
-        BulkLoadUtils.createIndexFromTable(getConf(), im, dataSetMeta);
+        BulkLoadDriverUtils.createIndexFromTable(getConf(), im, dataSetMeta);
       }
     }
   }

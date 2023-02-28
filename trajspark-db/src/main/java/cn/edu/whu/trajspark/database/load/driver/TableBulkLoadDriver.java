@@ -3,7 +3,6 @@ package cn.edu.whu.trajspark.database.load.driver;
 import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
-import cn.edu.whu.trajspark.database.load.BulkLoadUtils;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import org.apache.hadoop.conf.Configuration;
@@ -26,8 +25,6 @@ public class TableBulkLoadDriver extends Configured {
   public void bulkLoad(String tempOutPutPath, IndexMeta newIndex, DataSetMeta dataSetMeta) throws IOException {
     Configuration conf = getConf();
     conf.set(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY, tempOutPutPath);
-    BulkLoadDriverUtils.createIndexFromTable(conf, newIndex);
-    conf.set(DBConstants.BULK_LOAD_TEMP_FILE_PATH, tempOutPutPath);
-    BulkLoadUtils.createIndexFromTable(conf, newIndex, dataSetMeta);
+    BulkLoadDriverUtils.createIndexFromTable(conf, newIndex, dataSetMeta);
   }
 }

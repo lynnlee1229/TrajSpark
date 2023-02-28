@@ -30,15 +30,11 @@ import java.util.List;
 public class TextBulkloadTest {
   static DataSetMeta dataSetMeta;
   public static String DATABASE_NAME = "bulkLoadTest2";
-  static IndexMeta coreIndexMata = new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default");
+
   static {
     List<IndexMeta> list = new LinkedList<>();
     list.add(new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default"));
-    // list.add(new IndexMeta(true, new XZ2TIndexStrategy(), database_name, coreIndexMata, "default"));
-    // list.add(new IndexMeta(true, new TXZ2IndexStrategy(), database_name, coreIndexMata, "default"));
     list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, "default"));
-    list.add(coreIndexMata);
-    list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, coreIndexMata, "default"));
     dataSetMeta = new DataSetMeta(DATABASE_NAME, list);
   }
 
@@ -57,7 +53,7 @@ public class TextBulkloadTest {
   public void testBulkLoadNewIndex() throws Exception {
     String inPath = "hdfs:///data/hdfs_traj_example.txt";
     String output = "hdfs:///tmp/trajspark/";
-    IndexMeta indexMeta = new IndexMeta(true,new XZ2TIndexStrategy(), DATABASE_NAME, coreIndexMata, "default5");
+    IndexMeta indexMeta = new IndexMeta(true,new XZ2TIndexStrategy(), DATABASE_NAME, "default5");
     Database.getInstance().addIndexMeta(DATABASE_NAME, indexMeta);
     TextBulkLoadDriver trajectoryDataDriver = new TextBulkLoadDriver();
     Configuration conf = HBaseConfiguration.create();
