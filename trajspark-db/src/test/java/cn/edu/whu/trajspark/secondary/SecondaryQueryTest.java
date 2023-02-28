@@ -53,10 +53,9 @@ public class SecondaryQueryTest {
     Database instance = Database.getInstance();
     // 创建数据集，3个索引：S, ID_T, TS，TS为主索引，S主索引
     List<IndexMeta> list = new LinkedList<>();
-    IndexMeta coreIndexMeta = new IndexMeta(true, xz2IndexStrategy, DATASET_NAME, "default");
-    list.add(coreIndexMeta);
-    list.add(new IndexMeta(false, IDTIndexStrategy, DATASET_NAME, coreIndexMeta,"default"));
-    list.add(new IndexMeta(true, xz2TIndexStrategy, DATASET_NAME, coreIndexMeta,"default"));
+    list.add(new IndexMeta(true, xz2IndexStrategy, DATASET_NAME, "default"));
+    list.add(new IndexMeta(false, IDTIndexStrategy, DATASET_NAME, "default"));
+    list.add(new IndexMeta(true, xz2TIndexStrategy, DATASET_NAME, "default"));
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
   }
@@ -92,7 +91,7 @@ public class SecondaryQueryTest {
       trajectory.getTrajectoryFeatures();
       System.out.println(trajectory);
     }
-    assertEquals(10, IDTemporalQuery.executeQuery().size());
+    assertEquals(13, IDTemporalQuery.executeQuery().size());
   }
 
   @Test

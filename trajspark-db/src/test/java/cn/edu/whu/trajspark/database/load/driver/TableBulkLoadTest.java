@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.database.load.driver;
 
 import cn.edu.whu.trajspark.database.DataSet;
 import cn.edu.whu.trajspark.database.Database;
+import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import org.apache.hadoop.conf.Configuration;
@@ -24,11 +25,12 @@ public class TableBulkLoadTest {
     DataSet dataSet = Database.getInstance().getDataSet(TextBulkloadTest.DATABASE_NAME);
     Configuration conf = HBaseConfiguration.create();
     IndexMeta coreIndexMeta = dataSet.getCoreIndexTable().getIndexMeta();
-    IndexMeta newIndexMeta = new IndexMeta(false, new XZ2IndexStrategy(), TextBulkloadTest.DATABASE_NAME, coreIndexMeta, "additional_index2");
+    IndexMeta newIndexMeta = new IndexMeta(false, new XZ2IndexStrategy(), TextBulkloadTest.DATABASE_NAME, "additional_index2");
     Database.getInstance().addIndexMeta(newIndexMeta.getDataSetName(), newIndexMeta);
+    DataSetMeta dataSetMeta = Database.getInstance().getDataSetMeta(newIndexMeta.getDataSetName());
     TableBulkLoadDriver tableBulkLoadDriver = new TableBulkLoadDriver();
     tableBulkLoadDriver.setConf(conf);
-    tableBulkLoadDriver.bulkLoad(output, newIndexMeta);
+    tableBulkLoadDriver.bulkLoad(output, newIndexMeta, dataSetMeta);
   }
 
 

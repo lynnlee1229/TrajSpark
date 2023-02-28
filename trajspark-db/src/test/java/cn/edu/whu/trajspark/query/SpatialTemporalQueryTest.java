@@ -78,9 +78,9 @@ class SpatialTemporalQueryTest extends TestCase {
     // create dataset
     List<IndexMeta> list = new LinkedList<>();
     IndexMeta indexMeta1 = new IndexMeta(true, txz2IndexStrategy, DATASET_NAME, "default");
-    IndexMeta indexMeta0 = new IndexMeta(false, xz2TIndexStrategy, DATASET_NAME, indexMeta1, "default");
-    IndexMeta indexMeta2 = new IndexMeta(false, xz2IndexStrategy, DATASET_NAME, indexMeta1, "default");
-    IndexMeta indexMeta3 = new IndexMeta(false, IDTIndexStrategy, DATASET_NAME, indexMeta1, "default");
+    IndexMeta indexMeta0 = new IndexMeta(false, xz2TIndexStrategy, DATASET_NAME, "default");
+    IndexMeta indexMeta2 = new IndexMeta(false, xz2IndexStrategy, DATASET_NAME, "default");
+    IndexMeta indexMeta3 = new IndexMeta(false, IDTIndexStrategy, DATASET_NAME, "default");
     list.add(indexMeta0);
     list.add(indexMeta1);
     list.add(indexMeta2);

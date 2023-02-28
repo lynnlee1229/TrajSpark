@@ -33,7 +33,7 @@ public final class Database {
 
   private Connection connection;
   private Configuration configuration;
-  private volatile static Database instance;
+  private static Database instance;
 
   private Database() {
     configuration = HBaseConfiguration.create();
@@ -41,13 +41,9 @@ public final class Database {
 
   public static Database getInstance() throws IOException {
     if (instance == null) {
-      synchronized (Database.class) {
-        if (instance == null) {
           instance = new Database();
           instance.openConnection();
-        }
       }
-    }
     return instance;
   }
 
@@ -170,7 +166,7 @@ public final class Database {
     }
   }
 
-  private void openConnection() throws IOException {
+  public void openConnection() throws IOException {
     int threads = Runtime.getRuntime().availableProcessors() * 4;
     ExecutorService service = new ForkJoinPool(threads);
     connection = ConnectionFactory.createConnection(configuration, service);

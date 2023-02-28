@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.driver.TextBulkLoadDriver;
 import cn.edu.whu.trajspark.database.load.mapper.MainToMainMapper;
 import cn.edu.whu.trajspark.database.load.mapper.MainToSecondaryMapper;
+import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import org.apache.hadoop.conf.Configuration;
@@ -43,9 +44,9 @@ public class BulkLoadUtils {
    * 本方法以核心索引表中的轨迹为数据源，按照新增IndexMeta转换，并BulkLoad至HBase中。
    * 执行此方法时，应确保DataSetMeta中已有本Secondary Table的信息。
    */
-  public static void createIndexFromTable(Configuration conf, IndexMeta indexMeta) throws IOException {
+  public static void createIndexFromTable(Configuration conf, IndexMeta indexMeta, DataSetMeta dataSetMeta) throws IOException {
     Path outPath = new Path(conf.get(DBConstants.BULK_LOAD_TEMP_FILE_PATH));
-    String inputTableName = indexMeta.getCoreIndexTableName();
+    String inputTableName = dataSetMeta.getCoreIndexMeta().getIndexTableName();
     String outTableName = indexMeta.getIndexTableName();
     Job job = Job.getInstance(conf, "Batch Import HBase Table：" + outTableName);
     job.setJarByClass(TextBulkLoadDriver.class);

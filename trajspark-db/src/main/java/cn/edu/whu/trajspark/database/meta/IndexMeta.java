@@ -16,7 +16,6 @@ public class IndexMeta implements Serializable {
   boolean isMainIndex;
   IndexStrategy indexStrategy;
   String dataSetName;
-  String coreIndexTableName;
   String indexTableName;
 
   public IndexMeta() {
@@ -33,19 +32,6 @@ public class IndexMeta implements Serializable {
     this.indexStrategy = indexStrategy;
     this.dataSetName = dataSetName;
     this.indexTableName = dataSetName + "-" + indexStrategy.getIndexType().name() + "-" + tableNameSuffix;
-    this.coreIndexTableName = indexTableName;
-  }
-
-  public IndexMeta(boolean isMainIndex,
-                   IndexStrategy indexStrategy,
-                   String dataSetName,
-                   IndexMeta coreIndexMeta,
-                   String tableNameSuffix) {
-    this.isMainIndex = isMainIndex;
-    this.indexStrategy = indexStrategy;
-    this.dataSetName = dataSetName;
-    this.coreIndexTableName = coreIndexMeta.getIndexTableName();
-    this.indexTableName =  dataSetName + "-" + indexStrategy.getIndexType().name() + "-" + tableNameSuffix;;
   }
 
   public IndexType getIndexType() {
@@ -68,19 +54,14 @@ public class IndexMeta implements Serializable {
     return indexTableName;
   }
 
-  public String getCoreIndexTableName() {
-    return coreIndexTableName;
-  }
-
   @Override
   public String toString() {
     return "IndexMeta{" +
-        "isMainIndex=" + isMainIndex +
-        ", indexStrategy=" + indexStrategy +
-        ", dataSetName='" + dataSetName + '\'' +
-        ", coreIndexTableName=" + coreIndexTableName +
-        ", indexTableName='" + indexTableName + '\'' +
-        '}';
+            "isMainIndex=" + isMainIndex +
+            ", indexStrategy=" + indexStrategy +
+            ", dataSetName='" + dataSetName + '\'' +
+            ", indexTableName='" + indexTableName + '\'' +
+            '}';
   }
 
   @Override
@@ -88,12 +69,12 @@ public class IndexMeta implements Serializable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     IndexMeta indexMeta = (IndexMeta) o;
-    return isMainIndex == indexMeta.isMainIndex && Objects.equals(indexStrategy, indexMeta.indexStrategy) && Objects.equals(dataSetName, indexMeta.dataSetName) && Objects.equals(coreIndexTableName, indexMeta.coreIndexTableName) && Objects.equals(indexTableName, indexMeta.indexTableName);
+    return isMainIndex == indexMeta.isMainIndex && Objects.equals(indexStrategy, indexMeta.indexStrategy) && Objects.equals(dataSetName, indexMeta.dataSetName) && Objects.equals(indexTableName, indexMeta.indexTableName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(isMainIndex, indexStrategy, dataSetName, coreIndexTableName, indexTableName);
+    return Objects.hash(isMainIndex, indexStrategy, dataSetName, indexTableName);
   }
 
   /**

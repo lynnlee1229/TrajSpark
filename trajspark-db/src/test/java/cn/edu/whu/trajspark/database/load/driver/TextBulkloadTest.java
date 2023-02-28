@@ -32,11 +32,10 @@ public class TextBulkloadTest {
 
   static {
     List<IndexMeta> list = new LinkedList<>();
-    IndexMeta coreIndexMata = new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default");
-    list.add(coreIndexMata);
+    list.add(new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default"));
     // list.add(new IndexMeta(true, new XZ2TIndexStrategy(), database_name, coreIndexMata, "default"));
     // list.add(new IndexMeta(true, new TXZ2IndexStrategy(), database_name, coreIndexMata, "default"));
-    list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, coreIndexMata, "default"));
+    list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, "default"));
     dataSetMeta = new DataSetMeta(DATABASE_NAME, list);
   }
 
