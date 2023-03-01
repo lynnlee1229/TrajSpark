@@ -38,7 +38,7 @@ public class MainToMainMapper extends TableMapper<ImmutableBytesWritable, Put> {
 
   @Override
   protected void map(ImmutableBytesWritable key, Result coreIndexRow, Context context) throws IOException, InterruptedException {
-    Trajectory t = TrajectorySerdeUtils.getTrajectoryFromResult(coreIndexRow);
+    Trajectory t = TrajectorySerdeUtils.getAllTrajectoryFromResult(coreIndexRow);
     Put p = TrajectorySerdeUtils.getPutForMainIndex(indexTable.getIndexMeta(), t);
     context.write(new ImmutableBytesWritable(p.getRow()), p);
   }

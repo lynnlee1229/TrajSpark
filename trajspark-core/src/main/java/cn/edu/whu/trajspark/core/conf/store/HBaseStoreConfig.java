@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import scala.NotImplementedError;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -94,7 +95,19 @@ public class HBaseStoreConfig implements IStoreConfig {
       List<IndexMeta> otherIndexMeta = createOtherIndex(otherIndex, TextSplitType.CSV);
       indexMetaList.addAll(otherIndexMeta);
     }
+    checkIndexMeta(indexMetaList, mainIndexMeta);
     return indexMetaList;
+  }
+  private void checkIndexMeta(List<IndexMeta> indexMetaList, IndexMeta mainIndexMeta){
+    // 检查重复
+    HashSet<IndexMeta> hashSet = new HashSet<>(indexMetaList);
+    if (hashSet.size() != indexMetaList.size()) {
+      throw new IllegalArgumentException("found duplicate index meta in the list.");
+    }
+    //检查主索引
+    if(hashSet.contains(mainIndexMeta)){
+      hashSet.remove(mainIndexMeta);
+    }
   }
 
   private IndexMeta createIndexMeta(IndexType indexType, Boolean isMainIndex) {

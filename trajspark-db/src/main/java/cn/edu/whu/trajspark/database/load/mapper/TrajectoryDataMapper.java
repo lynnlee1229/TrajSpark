@@ -75,7 +75,7 @@ public class TrajectoryDataMapper {
     HFileOutputFormat2.configureIncrementalLoad(job, table, locator);
   }
 
-  public static List<Put> mapTrajectoryToRow(Trajectory trajectory, List<IndexMeta> indexMetaList)
+  public static List<Put> mapTrajectoryToMultiRow(Trajectory trajectory, List<IndexMeta> indexMetaList)
       throws IOException {
     ArrayList<Put> putArrayList = new ArrayList<>();
     for (IndexMeta indexMeta : indexMetaList) {
@@ -89,6 +89,16 @@ public class TrajectoryDataMapper {
     }
     return putArrayList;
   }
+
+    public static Put mapTrajectoryToSingleRow(Trajectory trajectory, IndexMeta indexMeta)
+            throws IOException {
+            final byte[] rowKey = getMapRowKey(trajectory, indexMeta);
+            Put put = getMapPut(trajectory, indexMeta);
+            if (rowKey == null || rowKey.length == 0) {
+                LOGGER.info("Trajectory Key is invalid");
+            }
+            return put;
+    }
 
   public static List<Tuple2<KeyFamilyQualifier, KeyValue>> mapPutToKeyValue(Put put)
       throws IOException {
@@ -107,6 +117,7 @@ public class TrajectoryDataMapper {
       byte[] quaFilterValue = result.getValue(COLUMN_FAMILY, Bytes.toBytes(frame));
       KeyValue keyValue = new KeyValue(put.getRow(), COLUMN_FAMILY, Bytes.toBytes(frame),
           quaFilterValue);
+      byte[] row = result.getRow();
       KeyFamilyQualifier keyFamilyQualifier = new KeyFamilyQualifier(result.getRow(), COLUMN_FAMILY,
           Bytes.toBytes(frame));
       value.add(new Tuple2<>(keyFamilyQualifier, keyValue));
@@ -136,7 +147,7 @@ public class TrajectoryDataMapper {
   }
 
   public static Trajectory mapHBaseResultToTrajectory(Result result) throws IOException {
-    return TrajectorySerdeUtils.mainRowToTrajectory(result);
+    return TrajectorySerdeUtils.getAllTrajectoryFromResult(result);
   }
 
 }

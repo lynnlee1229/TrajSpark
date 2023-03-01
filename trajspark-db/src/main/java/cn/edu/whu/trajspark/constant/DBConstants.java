@@ -28,9 +28,14 @@ public class DBConstants {
   public static final byte[] MBR_QUALIFIER = Bytes.toBytes(MBR);
   public static final byte[] START_POINT_QUALIFIER = Bytes.toBytes(START_POSITION);
   public static final byte[] END_POINT_QUALIFIER = Bytes.toBytes(END_POSITION);
+  public static final byte[] START_TIME_QUALIFIER = Bytes.toBytes(START_TIME);
+  public static final byte[] END_TIME_QUALIFIER = Bytes.toBytes(END_TIME);
   public static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
   public static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
   public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
+  public static final byte[] POINT_NUMBER_QUALIFIER = Bytes.toBytes(POINT_NUMBER);
+  public static final byte[] SPEED_QUALIFIER = Bytes.toBytes(SPEED);
+  public static final byte[] LENGTH_QUALIFIER = Bytes.toBytes(LENGTH);
 
   // Bulk load
   public static final String BULK_LOAD_TEMP_FILE_PATH_KEY = "import.file.output.path";
