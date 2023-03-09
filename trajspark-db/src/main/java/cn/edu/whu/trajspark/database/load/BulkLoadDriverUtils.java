@@ -17,9 +17,9 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
-import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
 import org.apache.hadoop.hbase.mapreduce.PutSortReducer;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
+import org.apache.hadoop.hbase.tool.BulkLoadHFiles;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -60,7 +60,7 @@ public class BulkLoadDriverUtils {
     String inputTableName = dataSetMeta.getCoreIndexMeta().getIndexTableName();
     String outTableName = indexMeta.getIndexTableName();
     Job job = Job.getInstance(conf, "Batch Import HBase Table：" + outTableName);
-    job.setJarByClass(TextBulkLoadDriver.class);
+    job.setJarByClass(TableBulkLoadDriver.class);
     // 设置MapReduce任务输出的路径
     FileSystem fs = outPath.getFileSystem(conf);
     if (fs.exists(outPath)) {
@@ -96,8 +96,7 @@ public class BulkLoadDriverUtils {
       if (!job.waitForCompletion(true)) {
         return;
       }
-      LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
-      loader.doBulkLoad(outPath, admin, table, locator);
+      BulkLoadHFiles.create(conf).bulkLoad(table.getName(), outPath);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -142,8 +141,7 @@ public class BulkLoadDriverUtils {
       cancelDeleteOnExit(job);
       job.waitForCompletion(true);
       logger.info("HFileOutputFormat2 file ready on {}", outPath);
-      LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
-      loader.doBulkLoad(outPath, admin, table, locator);
+      BulkLoadHFiles.create(conf).bulkLoad(table.getName(), outPath);
     } catch (Exception e) {
       logger.error("meet error:", e);
       throw new RuntimeException(e);

@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
-/**
- *
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,33 +20,52 @@
  */
 -->
 <configuration>
+  <!--
+    The following properties are set for running HBase as a single process on a
+    developer workstation. With this configuration, HBase is running in
+    "stand-alone" mode and without a distributed file system. In this mode, and
+    without further configuration, HBase and ZooKeeper data are stored on the
+    local filesystem, in a path under the value configured for `hbase.tmp.dir`.
+    This value is overridden from its default value of `/tmp` because many
+    systems clean `/tmp` on a regular basis. Instead, it points to a path within
+    this HBase installation directory.
+
+    Running against the `LocalFileSystem`, as opposed to a distributed
+    filesystem, runs the risk of data integrity issues and data loss. Normally
+    HBase will refuse to run in such an environment. Setting
+    `hbase.unsafe.stream.capability.enforce` to `false` overrides this behavior,
+    permitting operation. This configuration is for the developer workstation
+    only and __should not be used in production!__
+
+    See also https://hbase.apache.org/book.html#standalone_dist
+  -->
   <property>
-    <name>hbase.rootdir</name>
-    <value>hdfs://localhost:9000/hbase</value>
-  </property>
-  <property>
+    <property>
+      <name>hbase.rootdir</name>
+      <value>hdfs://localhost:9000/hbase</value>
+    </property>
+    <!-- 解决加载Observer时报错：DoNotRetryIOException -->
+    <property>
+      <name>hbase.table.sanity.checks</name>
+      <value>false</value>
+    </property>
+    <!-- 防止因协处理器启动失败，导致RegionServer挂掉，从而导致HBase崩溃 -->
+    <property>
+      <name>hbase.coprocessor.abortonerror</name>
+      <value>false</value>
+    </property>
     <name>hbase.cluster.distributed</name>
     <value>true</value>
   </property>
-<!--  <property>-->
-<!--    <name>hbase.tmp.dir</name>-->
-<!--    <value>/usr/local/hbase-1.4.13/tmp</value>-->
-<!--  </property>-->
-  <property>
-    <name>hbase.zookeeper.quorum</name>
-    <value>localhost</value>
-  </property>
-  <property>
-    <name>hbase.master.ipc.address</name>
-    <value>0.0.0.0</value>
-  </property>
-  <property>
-    <name>hbase.regionserver.ipc.address</name>
-    <value>0.0.0.0</value>
-  </property>
   <property>
     <name>hbase.zookeeper.property.dataDir</name>
-<!--    <value>/Users/haocheng/tmp/zookeeper</value>-->
-    <value>/usr/local/zookeeper/zkData</value>
+    <value>/Users/haocheng/tmp/zookeeper</value>
+  </property>
+  <!-- coprocessors config -->
+  <property>
+    <name>hbase.coprocessor.user.egion.classes</name>
+    <value>
+      cn.edu.whu.trajspark.query.coprocessor.STQueryEndPoint
+    </value>
   </property>
 </configuration>

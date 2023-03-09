@@ -1,16 +1,13 @@
 package cn.edu.whu.trajspark.query.coprocessor;
 
-import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.Coprocessor;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
+
+import java.io.IOException;
 
 /**
  * need to new HTableDescriptor to modifyTable HTableDescriptor htd =
@@ -30,12 +27,7 @@ public class CoprocessorLoader {
     Admin admin = connection.getAdmin();
     if (admin.tableExists(TableName.valueOf(tableName))) {
       admin.disableTable(TableName.valueOf(tableName));
-      HTableDescriptor htd = new HTableDescriptor(tableName);
-      HColumnDescriptor columnFamily1 = new HColumnDescriptor(familyName);
-      htd.addFamily(columnFamily1);
-      htd.addCoprocessor(className, new Path(jarPath),
-          Coprocessor.PRIORITY_USER, null);
-      admin.modifyTable(TableName.valueOf(tableName), htd);
+      admin.modifyTable(TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName)).build());
       admin.enableTable(TableName.valueOf(tableName));
       admin.close();
       connection.close();
@@ -50,10 +42,7 @@ public class CoprocessorLoader {
     Admin admin = connection.getAdmin();
     if (admin.tableExists(TableName.valueOf(tableName))) {
       admin.disableTable(TableName.valueOf(tableName));
-      HTableDescriptor htd = new HTableDescriptor(tableName);
-      HColumnDescriptor columnFamily1 = new HColumnDescriptor(familyName);
-      htd.addFamily(columnFamily1);
-      admin.modifyTable(TableName.valueOf(tableName), htd);
+      admin.modifyTable(TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName)).build());
       admin.enableTable(TableName.valueOf(tableName));
       admin.close();
       connection.close();

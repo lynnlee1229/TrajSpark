@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -103,6 +104,12 @@ public class IDTemporalQueryTest {
       System.out.println(trajectory);
     }
     assertEquals(13, IDTemporalQuery.executeQuery().size());
+  }
+
+  @Test
+  void test2() throws IOException {
+    ByteBuffer byteBuffer1 = ByteBuffer.allocate(20);
+    byteBuffer1.flip();
   }
 
   @Test

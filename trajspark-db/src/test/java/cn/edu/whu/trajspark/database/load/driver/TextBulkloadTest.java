@@ -1,7 +1,6 @@
 package cn.edu.whu.trajspark.database.load.driver;
 
 import cn.edu.whu.trajspark.database.Database;
-import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
@@ -9,9 +8,8 @@ import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
 import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;

@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Haocheng Wang
@@ -94,6 +94,7 @@ public class XZ2PQueryTest {
   @Test
   public void testExecuteIntersectQuery() throws IOException {
     Database instance = Database.getInstance();
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialIntersectQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     for (Trajectory result : results) {
@@ -105,6 +106,7 @@ public class XZ2PQueryTest {
   @Test
   public void testExecuteContainQuery() throws IOException {
     Database instance = Database.getInstance();
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialContainedQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     for (Trajectory result : results) {

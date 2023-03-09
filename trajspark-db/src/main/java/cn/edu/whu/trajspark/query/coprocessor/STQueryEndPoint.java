@@ -12,13 +12,12 @@ import com.google.protobuf.RpcCallback;
 import com.google.protobuf.RpcController;
 import com.google.protobuf.Service;
 import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.Coprocessor;
 import org.apache.hadoop.hbase.CoprocessorEnvironment;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.coprocessor.CoprocessorException;
-import org.apache.hadoop.hbase.coprocessor.CoprocessorService;
+import org.apache.hadoop.hbase.coprocessor.RegionCoprocessor;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.filter.MultiRowRangeFilter;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
@@ -39,11 +38,15 @@ import static cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils.*;
 /**
  * @author Haocheng Wang Created on 2022/10/27
  */
-public class STQueryEndPoint extends QueryCondition.QueryService implements Coprocessor, CoprocessorService {
+public class STQueryEndPoint extends QueryCondition.QueryService implements RegionCoprocessor {
 
   private final Logger logger = LoggerFactory.getLogger(STQueryEndPoint.class);
   private RegionCoprocessorEnvironment env;
   private Database instance = null;
+
+  public STQueryEndPoint() {
+
+  }
 
   @Override
   public void query(RpcController controller, QueryCondition.QueryRequest request,
@@ -127,7 +130,7 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
   }
 
   /**
-   * 获取含以下列的scan: mbr, start, end, plist, mo_id, traj_id
+   * 获取含以下列的scan: mbr, start, end, plist, mo_id, traj_id, poscode, ptr
    */
   protected Scan buildScan() {
     Scan scan = new Scan();
@@ -137,7 +140,6 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
     scan.addColumn(COLUMN_FAMILY, TRAJ_POINTS_QUALIFIER);
     scan.addColumn(COLUMN_FAMILY, OBJECT_ID_QUALIFIER);
     scan.addColumn(COLUMN_FAMILY, TRAJECTORY_ID_QUALIFIER);
-    scan.addColumn(COLUMN_FAMILY, SIGNATURE_QUALIFIER);
     scan.addColumn(COLUMN_FAMILY, PTR_QUALIFIER);
     return scan;
   }
@@ -164,7 +166,7 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
     WKTReader wktReader = new WKTReader();
     boolean spatialValidate = false;
     boolean temporalValidate = false;
-    // 利用MBR、POS CODE等对QueryRequest中的空间约束作初步判断
+    // 利用MBR对QueryRequest中的空间约束作初步判断
     if (queryRequest.hasSpatialQueryWindow()) {
       try {
         Geometry queryGeom = wktReader.read(queryRequest.getSpatialQueryWindow().getWkt());
@@ -174,11 +176,6 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
         } else {
           spatialValidate = queryGeom.intersects(mbr.toPolygon(4326));
         }
-        // TODO : filter with signature.
-        // if (result.getValue(
-        //     COLUMN_FAMILY, SIGNATURE_QUALIFIER) != null) {
-        //   spatialValidate = spatialValidate;
-        // }
       } catch (ParseException | IOException e) {
         e.printStackTrace();
       }
@@ -252,12 +249,7 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
 
   @Override
   public void stop(CoprocessorEnvironment env) throws IOException {
-    instance.closeConnection();
-  }
-
-  @Override
-  public Service getService() {
-    return this;
+    logger.warn("STQueryEndPoint is unregistered, running stop() hook!");
   }
 
   static class MarkedScan {
@@ -281,5 +273,10 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Copr
         .setTid(ByteString.copyFrom(
             getByteArrayByQualifier(result, TRAJECTORY_ID_QUALIFIER)))
         .build();
+  }
+
+  @Override
+  public Iterable<Service> getServices() {
+    return RegionCoprocessor.super.getServices();
   }
 }

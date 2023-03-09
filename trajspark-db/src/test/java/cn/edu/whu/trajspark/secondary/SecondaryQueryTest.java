@@ -26,14 +26,15 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 /**
  * @author Haocheng Wang
  * Created on 2023/2/14
  */
 public class SecondaryQueryTest {
-  static String DATASET_NAME = "secondary_query_test3";
+  static String DATASET_NAME = "secondary_query_test";
 
   // 查询条件
   static TemporalQueryCondition temporalContainQuery = IDTemporalQueryTest.temporalContainCondition;

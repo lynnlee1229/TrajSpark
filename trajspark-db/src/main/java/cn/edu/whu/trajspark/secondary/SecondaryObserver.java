@@ -8,13 +8,13 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.index.IndexType;
-import org.apache.hadoop.hbase.CoprocessorEnvironment;
-import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.coprocessor.BaseRegionObserver;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
-import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
+import org.apache.hadoop.hbase.coprocessor.RegionObserver;
+import org.apache.hadoop.hbase.wal.WALEdit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,31 +28,22 @@ import java.util.Map;
  * @author Haocheng Wang
  * Created on 2023/2/1
  */
-public class SecondaryObserver extends BaseRegionObserver {
+public class SecondaryObserver implements RegionObserver {
 
-  private transient static Database instance;
-
-  @Override
-  public void start(CoprocessorEnvironment e) throws IOException {
-    instance = Database.getInstance();
-  }
-
-  @Override
-  public void stop(CoprocessorEnvironment e) throws IOException {
-    instance.closeConnection();
-  }
+  private static final Logger logger = LoggerFactory.getLogger(SecondaryObserver.class);
 
   /***
    * 在主索引表的put完成后，对其他主索引表、辅助索引表添加相应的记录。
    */
   @Override
-  public void postPut(final ObserverContext<RegionCoprocessorEnvironment> e,
-               final Put put, final WALEdit edit, final Durability durability) throws IOException {
+  public void postPut(ObserverContext<RegionCoprocessorEnvironment> c, Put put, WALEdit edit) throws IOException {
+    Database instance = Database.getInstance();
+    RegionObserver.super.postPut(c, put, edit);
     // 根据主数据表的Put对象还原待插入轨迹
     byte[] mainIndexTableRowKey = put.getRow();
     Trajectory trajectory = getTrajectoryFromPut(put);
     // 获取待处理的主索引、辅助索引表名称
-    String datasetName = IndexTable.extractDataSetName(e.getEnvironment().getRegionInfo().getTable().getNameAsString());
+    String datasetName = IndexTable.extractDataSetName(c.getEnvironment().getRegionInfo().getTable().getNameAsString());
     DataSet dataSet = instance.getDataSet(datasetName);
     DataSetMeta dataSetMeta = dataSet.getDataSetMeta();
     IndexMeta mainIndexMeta = dataSetMeta.getCoreIndexMeta();
@@ -66,8 +57,6 @@ public class SecondaryObserver extends BaseRegionObserver {
       }
     }
   }
-
-
 
   private Trajectory getTrajectoryFromPut(Put put) throws IOException {
     return TrajectorySerdeUtils.getTrajectoryFromPut(put);

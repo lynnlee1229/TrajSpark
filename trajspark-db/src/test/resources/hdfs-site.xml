@@ -14,19 +14,17 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-<!-- Put site-specific property overrides in this file. -->
-
 <configuration>
-	<property>
-		<name>dfs.replication</name>
-		<value>1</value>
-	</property>
-	<property>
-                <name>dfs.namenode.name.dir</name>
-                <value>file://${hadoop.tmp.dir}/dfs/name</value>
-        </property>
-	<property>
-                <name>dfs.datanode.data.dir</name>
-                <value>file://${hadoop.tmp.dir}/dfs/data</value>
-        </property>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file://${hadoop.tmp.dir}/dfs/name</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file://${hadoop.tmp.dir}/dfs/data</value>
+    </property>
 </configuration>
