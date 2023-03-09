@@ -2,9 +2,9 @@ package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
-import org.junit.Test;
+import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategyTest;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.io.WKTWriter;
 
 /**

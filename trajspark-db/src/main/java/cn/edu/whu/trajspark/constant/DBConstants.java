@@ -29,7 +29,6 @@ public class DBConstants {
   public static final byte[] START_POINT_QUALIFIER = Bytes.toBytes(START_POSITION);
   public static final byte[] END_POINT_QUALIFIER = Bytes.toBytes(END_POSITION);
   public static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
-  public static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
   public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
 
   // Bulk load

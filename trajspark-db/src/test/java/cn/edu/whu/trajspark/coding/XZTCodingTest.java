@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import junit.framework.TestCase;
@@ -31,8 +32,8 @@ class XZTCodingTest extends TestCase {
         "timeStart: " + exampleTrajectory.getTrajectoryFeatures().getStartTime() + "timeEnd: "
             + exampleTrajectory.getTrajectoryFeatures().getEndTime());
     System.out.println(timeLineRange);
-    short timeBinVal = IDTIndexStrategy.getTimeBinVal(index);
-    long timeCodingVal = IDTIndexStrategy.getTimeCodingVal(index);
+    TimeBin timeBinVal = IDTIndexStrategy.getTimeBin(index);
+    long timeCodingVal = IDTIndexStrategy.getTimeElementCode(index);
     List<Integer> sequenceCode = XZTCoding.getSequenceCode(timeCodingVal);
     long coding = 0L;
     for (int i = 0; i < sequenceCode.size(); i++) {

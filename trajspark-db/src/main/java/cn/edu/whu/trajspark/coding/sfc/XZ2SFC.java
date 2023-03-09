@@ -390,6 +390,7 @@ public class XZ2SFC implements Serializable {
           if (overlapped == null) {
             return false;
           }
+          // todo: 应该以穿过的网格线个数为准
           return Math.max(overlapped.xmax - overlapped.xmin, overlapped.ymax - overlapped.ymin) > element.length / 2;
         }
       }

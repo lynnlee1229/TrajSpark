@@ -6,6 +6,7 @@ import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.coding.XZ2Coding;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
@@ -15,6 +16,7 @@ import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -112,7 +114,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   @Override
   public ByteArray extractSpatialCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     byte[] bytes = new byte[XZ2Coding.BYTES];
     buffer.get(bytes);
@@ -125,26 +127,26 @@ public class XZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public short getTimeBinVal(ByteArray byteArray) {
+  public TimeBin getTimeBin(ByteArray byteArray) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public long getTimeCodingVal(ByteArray byteArray) {
+  public long getTimeElementCode(ByteArray byteArray) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public short getShardNum(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     return buffer.getShort();
   }
 
   @Override
   public String getObjectID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     buffer.getLong();
     byte[] stringBytes = new byte[MAX_OID_LENGTH];
@@ -155,7 +157,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
   @Override
   public String getTrajectoryID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     buffer.getLong();
     byte[] oidBytes = new byte[MAX_OID_LENGTH];

@@ -48,12 +48,12 @@ public class IDTemporalQueryTest {
   static List<TimeLine> timeLineList = new ArrayList<>();
   static {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(TIME_ZONE);
-    ZonedDateTime start = ZonedDateTime.parse("2015-12-25 06:00:00", dateTimeFormatter);
-    ZonedDateTime end = ZonedDateTime.parse("2015-12-25 07:00:00", dateTimeFormatter);
-    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 15:00:00", dateTimeFormatter);
-    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 16:00:00", dateTimeFormatter);
-    testTimeLine1 = new TimeLine(start, end);
-    testTimeLine2 = new TimeLine(start1, end1);
+    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 06:00:00", dateTimeFormatter);
+    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 07:00:00", dateTimeFormatter);
+    ZonedDateTime start2 = ZonedDateTime.parse("2015-12-25 15:00:00", dateTimeFormatter);
+    ZonedDateTime end2 = ZonedDateTime.parse("2015-12-25 16:00:00", dateTimeFormatter);
+    testTimeLine1 = new TimeLine(start1, end1);
+    testTimeLine2 = new TimeLine(start2, end2);
     timeLineList.add(testTimeLine1);
     timeLineList.add(testTimeLine2);
     temporalIntersectCondition = new TemporalQueryCondition(timeLineList, TemporalQueryType.INTERSECT);

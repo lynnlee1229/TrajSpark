@@ -59,20 +59,16 @@ public class CodingRange {
   public void concatTimeIndexRange(TimeIndexRange timeIndexRange) {
     if (lower == null || upper == null) {
       lower = new ByteArray(
-          ByteBuffer.allocate(Short.BYTES + Long.BYTES).putShort(timeIndexRange.getBin()).
-              putLong(timeIndexRange.getLower()));
+          ByteBuffer.allocate(XZTCoding.BYTES_NUM).putLong(timeIndexRange.getLowerXZTCode()));
       upper = new ByteArray(
-          ByteBuffer.allocate(Short.BYTES + Long.BYTES).putShort(timeIndexRange.getBin()).
-              putLong(timeIndexRange.getUpper()));
+          ByteBuffer.allocate(XZTCoding.BYTES_NUM).putLong(timeIndexRange.getUpperXZTCode()));
     } else {
-      lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + Short.BYTES + Long.BYTES)
+      lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + XZTCoding.BYTES_NUM)
           .put(lower.getBytes())
-          .putShort(timeIndexRange.getBin())
-          .putLong(timeIndexRange.getLower()));
-      upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + Short.BYTES + Long.BYTES)
+          .putLong(timeIndexRange.getLowerXZTCode()));
+      upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + XZTCoding.BYTES_NUM)
           .put(upper.getBytes())
-          .putShort(timeIndexRange.getBin())
-          .putLong(timeIndexRange.getUpper()));
+          .putLong(timeIndexRange.getUpperXZTCode()));
     }
     contained = timeIndexRange.isContained();
   }

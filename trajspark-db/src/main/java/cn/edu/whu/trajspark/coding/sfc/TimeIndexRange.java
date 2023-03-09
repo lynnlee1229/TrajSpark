@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.coding.sfc;
 
-import cn.edu.whu.trajspark.datatypes.TimeBin;
+import java.util.Objects;
 
 /**
  * @author Xu Qi
@@ -8,47 +8,44 @@ import cn.edu.whu.trajspark.datatypes.TimeBin;
  */
 public class TimeIndexRange {
 
-  private final long lower;
-  private final long upper;
-  private final TimeBin timeBin;
-  private final short bin;
+  private  long lowerXZTCode;
+  private  long upperXZTCode;
   private boolean contained;
 
-  public TimeIndexRange(long lower, long upper, TimeBin timeBin, boolean contained) {
-    this.lower = lower;
-    this.upper = upper;
-    this.timeBin = timeBin;
-    this.bin = timeBin.getBin();
-    this.contained = contained;
+  public TimeIndexRange(long lowerXZTCode, long upperXZTCode, boolean contained) {
+   this.lowerXZTCode = lowerXZTCode;
+   this.upperXZTCode = upperXZTCode;
+   this.contained = contained;
   }
 
-  public long getLower() {
-    return lower;
+
+  public long getLowerXZTCode() {
+    return lowerXZTCode;
   }
 
-  public long getUpper() {
-    return upper;
-  }
-
-  public short getBin() {
-    return bin;
-  }
-
-  public TimeBin getTimeBin() {
-    return timeBin;
+  public long getUpperXZTCode() {
+    return upperXZTCode;
   }
 
   public boolean isContained() {
     return contained;
   }
 
-  public void setContained(boolean contained) {
-    this.contained = contained;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    TimeIndexRange that = (TimeIndexRange) o;
+    return lowerXZTCode == that.lowerXZTCode && upperXZTCode == that.upperXZTCode && contained == that.contained;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(lowerXZTCode, upperXZTCode, contained);
   }
 
   @Override
   public String toString() {
-    return "TimeIndexRange{" + "lower=" + lower + ", upper=" + upper + ", timeBin=" + timeBin
-        + ", bin=" + bin + ", contained=" + contained + '}';
+    return "TimeIndexRange{" + "lower=" + lowerXZTCode + ", upper=" + upperXZTCode + ", contained=" + contained + '}';
   }
 }

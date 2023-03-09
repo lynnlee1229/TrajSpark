@@ -9,11 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class XZTCoding implements TimeCoding {
   private final TimePeriod timePeriod;
   private cn.edu.whu.trajspark.coding.sfc.XZTSFC XZTSFC;
 
-  public static final int BYTES = Short.BYTES + Long.BYTES;
+  public static final int BYTES_NUM = Long.BYTES;
 
   @SuppressWarnings("checkstyle:StaticVariableName")
   static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, TIME_ZONE);
@@ -55,6 +55,7 @@ public class XZTCoding implements TimeCoding {
     }
     this.g = g;
     this.timePeriod = timePeriod;
+    this.XZTSFC = XZTSFC.apply(g, timePeriod);
   }
 
   public long getIndex(ZonedDateTime start, ZonedDateTime end) {
@@ -62,6 +63,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   /**
+   * 将TimeLine转为Long型编码。
    * @param timeLine With time starting point and end point information
    * @return Time coding
    */
@@ -71,13 +73,24 @@ public class XZTCoding implements TimeCoding {
     return XZTSFC.index(timeLine, bin);
   }
 
-  public ByteArray code(TimeLine timeLine) {
-    ByteBuffer br = ByteBuffer.allocate(Short.BYTES + Long.BYTES);
-    short bin = dateToBinnedTime(timeLine.getTimeStart()).getBin();
+  /**
+   * 将TimeLine转换为字节数组型的编码。
+   * @param timeLine
+   * @return
+   */
+  public ByteArray index(TimeLine timeLine) {
+    ByteBuffer br = ByteBuffer.allocate(BYTES_NUM);
     long index = getIndex(timeLine);
-    br.putShort(bin);
     br.putLong(index);
     return new ByteArray(br);
+  }
+
+  public long getElementCode(long xztCode) {
+    return xztCode % XZTSFC.binElementCnt();
+  }
+
+  public TimeBin getTimeBin(long xztCode) {
+    return XZTSFC.getTimeBin(xztCode);
   }
 
   @Override
@@ -87,39 +100,38 @@ public class XZTCoding implements TimeCoding {
     return rangesToCodingRange(indexRangeList);
   }
 
-  public List<CodingRange> rangesMerged(TemporalQueryCondition condition) {
-    List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
-    indexRangeList = XZTSFC.ranges(condition.getQueryWindows(), condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
-    List<TimeIndexRange> intervalKeyMerge = getIntervalKeyMerge(indexRangeList);
-    return rangesToCodingRange(intervalKeyMerge);
-  }
-
-  public List<TimeIndexRange> getIntervalKeyMerge(List<TimeIndexRange> ranges) {
-    ranges.sort(
-        Comparator.comparing(TimeIndexRange::getBin).thenComparing(TimeIndexRange::getLower));
-    List<TimeIndexRange> result = new ArrayList<>();
-    TimeIndexRange current = ranges.get(0);
-    int i = 1;
-    while (i < ranges.size()) {
-      TimeIndexRange indexRange = ranges.get(i);
-      if (indexRange.getTimeBin().equals(current.getTimeBin())
-          & indexRange.getLower() <= current.getUpper() + g
-          & indexRange.isContained() == current.isContained()
-      ) {
-        // merge the two ranges
-        current = new TimeIndexRange(current.getLower(),
-            indexRange.getUpper(), indexRange.getTimeBin(),
-            false);
-      } else {
-        // append the last range and set the current range for future merging
-        result.add(current);
-        current = indexRange;
-      }
-      i += 1;
-    }
-    result.add(current);
-    return result;
-  }
+  // public List<CodingRange> rangesMerged(TemporalQueryCondition condition) {
+  //   List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
+  //   indexRangeList = XZTSFC.ranges(condition.getQueryWindows(), condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
+  //   List<TimeIndexRange> intervalKeyMerge = getIntervalKeyMerge(indexRangeList);
+  //   return rangesToCodingRange(intervalKeyMerge);
+  // }
+  //
+  // public List<TimeIndexRange> getIntervalKeyMerge(List<TimeIndexRange> ranges) {
+  //   ranges.sort(Comparator.comparing(TimeIndexRange::getLowerXZTCode));
+  //   List<TimeIndexRange> result = new ArrayList<>();
+  //   TimeIndexRange current = ranges.get(0);
+  //   int i = 1;
+  //   while (i < ranges.size()) {
+  //     TimeIndexRange indexRange = ranges.get(i);
+  //     if (indexRange.getTimeBin().equals(current.getTimeBin())
+  //         & indexRange.getLowerElementCode() <= current.getUpperElementCode() + g
+  //         & indexRange.isContained() == current.isContained()
+  //     ) {
+  //       // merge the two ranges
+  //       current = new TimeIndexRange(current.getLowerElementCode(),
+  //           indexRange.getUpperElementCode(), indexRange.getTimeBin(),
+  //           false, this);
+  //     } else {
+  //       // append the last range and set the current range for future merging
+  //       result.add(current);
+  //       current = indexRange;
+  //     }
+  //     i += 1;
+  //   }
+  //   result.add(current);
+  //   return result;
+  // }
 
   public List<CodingRange> rangesToCodingRange(List<TimeIndexRange> timeIndexRangeList) {
     List<CodingRange> codingRangeList = new LinkedList<>();
@@ -131,7 +143,7 @@ public class XZTCoding implements TimeCoding {
     return codingRangeList;
   }
 
-  public XZTSFC getXztCoding() {
+  public XZTSFC getXZTSFC() {
     return XZTSFC;
   }
 
@@ -140,12 +152,13 @@ public class XZTCoding implements TimeCoding {
     return timePeriod;
   }
 
-  public static Tuple2<Short, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
+  public Tuple2<Integer, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
     ByteBuffer byteBuffer1 = timeBytes.toByteBuffer();
-    byteBuffer1.flip();
-    short bin = byteBuffer1.getShort();
-    long timeCode = byteBuffer1.getLong() + 1;
-    return new Tuple2<>(bin, timeCode);
+    ((Buffer) byteBuffer1).flip();
+    long xzt = byteBuffer1.getLong();
+    int binID = getTimeBin(xzt).getBinID();
+    long elementCode = getElementCode(xzt);
+    return new Tuple2<>(binID, elementCode);
   }
 
   public TimeBin getTrajectoryTimeBin(TrajFeatures features) {
@@ -160,7 +173,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   public TimeBin dateToBinnedTime(ZonedDateTime zonedDateTime) {
-    short binId = (short) timePeriod.getChronoUnit().between(Epoch, zonedDateTime);
+    int binId = (int) timePeriod.getChronoUnit().between(Epoch, zonedDateTime);
     return new TimeBin(binId, timePeriod);
   }
 
@@ -170,6 +183,8 @@ public class XZTCoding implements TimeCoding {
    */
   public List<Integer> getSequenceCode(long coding) {
     int g = this.g;
+    // coding 减去 bin cnt
+    coding = getElementCode(coding);
     List<Integer> list = new ArrayList<>(g);
     for (int i = 0; i < g; i++) {
       if (coding <= 0) {
@@ -187,10 +202,10 @@ public class XZTCoding implements TimeCoding {
    * Obtaining Minimum Time Bounding Box Based on Coding Information
    *
    * @param coding  Time coding
-   * @param timeBin Time interval information
    * @return With time starting point and end point information
    */
-  public TimeLine getTimeLine(long coding, TimeBin timeBin) {
+  public TimeLine getXZTElementTimeLine(long coding) {
+    TimeBin timeBin = getTimeBin(coding);
     List<Integer> list = getSequenceCode(coding);
     double timeMin = 0.0;
     double timeMax = 1.0;
@@ -205,9 +220,7 @@ public class XZTCoding implements TimeCoding {
     ZonedDateTime binStartTime = timeBinToDate(timeBin);
     long timeStart = (long) (timeMin * timePeriod.getChronoUnit().getDuration().getSeconds())
         + binStartTime.toEpochSecond();
-    long timeEnd = (long) (
-        (2 * (timeMax * timePeriod.getChronoUnit().getDuration().getSeconds()) - (timeMin
-            * timePeriod.getChronoUnit().getDuration().getSeconds()))
+    long timeEnd = (long) ((timeMax * timePeriod.getChronoUnit().getDuration().getSeconds())
             + binStartTime.toEpochSecond());
     ZonedDateTime startTime = timeToZonedTime(timeStart);
     ZonedDateTime endTime = timeToZonedTime(timeEnd);
@@ -216,7 +229,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   public static ZonedDateTime timeBinToDate(TimeBin binnedTime) {
-    long bin = binnedTime.getBin();
+    long bin = binnedTime.getBinID();
     return binnedTime.getTimePeriod().getChronoUnit().addTo(Epoch, bin);
   }
 

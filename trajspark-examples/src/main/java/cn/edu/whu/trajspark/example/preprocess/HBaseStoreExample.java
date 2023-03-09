@@ -9,7 +9,6 @@ import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class HBaseStoreExample {
       throw new RuntimeException(e);
     }
   }
-  @Test
+
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
     instance.deleteDataSet("TRAJECTORY_TEST");
