@@ -64,7 +64,7 @@ class IDTIndexStrategyTest extends TestCase {
       System.out.println(
           "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
               + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + " isContained "
-              + scanRange.isContained());
+              + scanRange.isValidate());
     }
   }
 

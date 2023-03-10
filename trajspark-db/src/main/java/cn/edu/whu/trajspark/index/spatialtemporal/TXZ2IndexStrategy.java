@@ -118,19 +118,23 @@ public class TXZ2IndexStrategy extends IndexStrategy {
     List<RowKeyRange> result = new ArrayList<>();
     SpatialQueryCondition spatialQueryCondition = spatialTemporalQueryCondition.getSpatialQueryCondition();
     TemporalQueryCondition temporalQueryCondition = spatialTemporalQueryCondition.getTemporalQueryCondition();
-    // 1. get xzt coding
     List<CodingRange> temporalCodingRanges = xztCoding.ranges(temporalQueryCondition);
+    // 四重循环，所有可能的时间编码都应单独取值
     for (CodingRange temporalCodingRange : temporalCodingRanges) {
-      // 2. get xz2 coding
+      long lowerXZTCode = Bytes.toLong(temporalCodingRange.getLower().getBytes());
+      long upperXZTCode = Bytes.toLong(temporalCodingRange.getUpper().getBytes());
       List<CodingRange> spatialCodingRanges = xz2Coding.ranges(spatialQueryCondition);
-      for (CodingRange codingRange : spatialCodingRanges) {
-        // 3. concat shard index
-        for (short shard = 0; shard < shardNum; shard++) {
-          ByteArray byteArray1 = toRowKeyRangeBoundary(shard, temporalCodingRange.getLower(),
-              codingRange.getLower(), false);
-          ByteArray byteArray2 = toRowKeyRangeBoundary(shard, temporalCodingRange.getUpper(),
-              codingRange.getUpper(), true);
-          result.add(new RowKeyRange(byteArray1, byteArray2, false));
+      boolean tValidate = temporalCodingRange.isValidated();
+      for (long xztCode = lowerXZTCode; xztCode <= upperXZTCode; xztCode++) {
+        for (CodingRange spatialCodingRange : spatialCodingRanges) {
+          boolean sValidate = spatialCodingRange.isValidated();
+          for (short shard = 0; shard < shardNum; shard++) {
+            ByteArray byteArray1 = toRowKeyRangeBoundary(shard, new ByteArray(Bytes.toBytes(xztCode)),
+                spatialCodingRange.getLower(), false);
+            ByteArray byteArray2 = toRowKeyRangeBoundary(shard, new ByteArray(Bytes.toBytes(xztCode)),
+                spatialCodingRange.getUpper(), true);
+            result.add(new RowKeyRange(byteArray1, byteArray2, tValidate && sValidate));
+          }
         }
       }
     }

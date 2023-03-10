@@ -17,12 +17,12 @@ public class CodingRange {
 
   ByteArray lower;
   ByteArray upper;
-  boolean contained;
+  boolean validated;
 
-  public CodingRange(ByteArray lower, ByteArray upper, boolean contained) {
+  public CodingRange(ByteArray lower, ByteArray upper, boolean validated) {
     this.lower = lower;
     this.upper = upper;
-    this.contained = contained;
+    this.validated = validated;
   }
 
   public CodingRange() {
@@ -36,15 +36,15 @@ public class CodingRange {
     return upper;
   }
 
-  public boolean isContained() {
-    return contained;
+  public boolean isValidated() {
+    return validated;
   }
 
   public void concatSfcRange(SFCRange sfcRange) {
     if (lower == null || upper == null) {
       lower = new ByteArray(ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(sfcRange.lower));
       upper = new ByteArray(ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(sfcRange.upper));
-      contained = sfcRange.contained;
+      validated = sfcRange.validated;
     } else {
       lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + Long.SIZE / Byte.SIZE)
           .put(lower.getBytes())
@@ -52,7 +52,7 @@ public class CodingRange {
       upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + Long.SIZE / Byte.SIZE)
           .put(upper.getBytes())
           .putLong(sfcRange.upper));
-      contained = sfcRange.contained;
+      validated = sfcRange.validated;
     }
   }
 
@@ -70,7 +70,7 @@ public class CodingRange {
           .put(upper.getBytes())
           .putLong(timeIndexRange.getUpperXZTCode()));
     }
-    contained = timeIndexRange.isContained();
+    validated = timeIndexRange.isContained();
   }
 
  public void concatPosCodeRange(PosCodeRange posCodeRange) {
@@ -92,7 +92,7 @@ public class CodingRange {
     return "CodingRange{" +
         "lower=" + lower +
         ", upper=" + upper +
-        ", contained=" + contained +
+        ", contained=" + validated +
         '}';
   }
 }

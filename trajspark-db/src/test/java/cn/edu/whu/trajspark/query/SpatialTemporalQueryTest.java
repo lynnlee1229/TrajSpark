@@ -123,7 +123,7 @@ class SpatialTemporalQueryTest extends TestCase {
       System.out.println(
           "start : " + xz2TIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
               + xz2TIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + "isContained "
-              + scanRange.isContained());
+              + scanRange.isValidate());
     }
   }
 

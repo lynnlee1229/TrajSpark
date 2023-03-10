@@ -74,7 +74,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     for (CodingRange xz2PRange : keyScanRange) {
       for (short shard = 0; shard < shardNum; shard++) {
         result.add(new RowKeyRange(new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getLower().getBytes())),
-            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getUpper().getBytes())), xz2PRange.isContained()));
+            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getUpper().getBytes())), xz2PRange.isValidated()));
       }
     }
     return result;
@@ -177,14 +177,14 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
       ByteArray lower = codingRange.getLower();
       ByteArray upper = codingRange.getUpper();
       // 被包含的索引区间，只精确到xz2编码即可
-      if (codingRange.isContained()) {
+      if (codingRange.isValidated()) {
         ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES);
         ByteBuffer byteBuffer = upper.toByteBuffer();
         ((Buffer)byteBuffer).flip();
         long xz2Coding = byteBuffer.getLong() + 1;
         byteBufferTemp.putLong(xz2Coding);
         ByteArray newUpper = new ByteArray(byteBufferTemp);
-        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
+        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isValidated()));
       } else { // 待精过滤的索引区间，xz2编码后还需要添加posCode。
         ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES + Byte.BYTES);
         ByteBuffer byteBuffer = upper.toByteBuffer();
@@ -201,7 +201,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
           byteBufferTemp.put((byte) (posCode + 1));
         }
         ByteArray newUpper = new ByteArray(byteBufferTemp);
-        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
+        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isValidated()));
       }
     }
     return codingRangesList;

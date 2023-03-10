@@ -116,7 +116,7 @@ public class IDTIndexStrategy extends IndexStrategy {
       short shard = getShard(oId);
       ByteArray byteArray1 = toRowKeyRangeBoundary(shard, codingRange.getLower(), oId, false);
       ByteArray byteArray2 = toRowKeyRangeBoundary(shard, codingRange.getUpper(), oId, true);
-      result.add(new RowKeyRange(byteArray1, byteArray2, codingRange.isContained()));
+      result.add(new RowKeyRange(byteArray1, byteArray2, codingRange.isValidated()));
 
     }
     return result;

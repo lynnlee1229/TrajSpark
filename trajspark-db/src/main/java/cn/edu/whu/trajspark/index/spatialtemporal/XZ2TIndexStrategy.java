@@ -112,19 +112,22 @@ public class XZ2TIndexStrategy extends IndexStrategy {
     List<RowKeyRange> result = new ArrayList<>();
     SpatialQueryCondition spatialQueryCondition = spatialTemporalQueryCondition.getSpatialQueryCondition();
     TemporalQueryCondition temporalQueryCondition = spatialTemporalQueryCondition.getTemporalQueryCondition();
-    // 1. get xz2 coding
-    List<CodingRange> spatialCodingRanges = xz2Coding.ranges(spatialQueryCondition);
-    for (CodingRange spatialCodingRange : spatialCodingRanges) {
-      // 2. get xzt coding
+    // 四重循环，所有可能的时间编码都应单独取值
+    for (CodingRange spatialCodingRange : xz2Coding.ranges(spatialQueryCondition)) {
+      long lowerXZ2Code = Bytes.toLong(spatialCodingRange.getLower().getBytes());
+      long upperXZ2Code = Bytes.toLong(spatialCodingRange.getUpper().getBytes());
       List<CodingRange> temporalCodingRanges = xztCoding.ranges(temporalQueryCondition);
-      for (CodingRange timeCodingRange : temporalCodingRanges) {
-        // 3. concat shard index
-        for (short shard = 0; shard < shardNum; shard++) {
-          ByteArray byteArray1 = toRowKeyRangeBoundary(shard, spatialCodingRange.getLower(),
-              timeCodingRange.getLower(), false);
-          ByteArray byteArray2 = toRowKeyRangeBoundary(shard, spatialCodingRange.getUpper(),
-              timeCodingRange.getUpper(), true);
-          result.add(new RowKeyRange(byteArray1, byteArray2, false));
+      boolean sValidate = spatialCodingRange.isValidated();
+      for (long xzCode = lowerXZ2Code; xzCode <= upperXZ2Code; xzCode++) {
+        for (CodingRange temporalCodingRange : temporalCodingRanges) {
+          boolean tValidate = temporalCodingRange.isValidated();
+          for (short shard = 0; shard < shardNum; shard++) {
+            ByteArray byteArray1 = toRowKeyRangeBoundary(shard, new ByteArray(Bytes.toBytes(xzCode)),
+                temporalCodingRange.getLower(), false);
+            ByteArray byteArray2 = toRowKeyRangeBoundary(shard, new ByteArray(Bytes.toBytes(xzCode)),
+                temporalCodingRange.getUpper(), true);
+            result.add(new RowKeyRange(byteArray1, byteArray2, tValidate && sValidate));
+          }
         }
       }
     }

@@ -319,9 +319,9 @@ public class XZ2SFC implements Serializable {
     int i = 1;
     while (i < ranges.size()) {
       SFCRange range = ranges.get(i);
-      if (range.lower == current.upper + 1 && range.contained == current.contained) {
+      if (range.lower == current.upper + 1 && range.validated == current.validated) {
         current = new SFCRange(current.lower, Math.max(current.upper, range.upper),
-            range.contained);
+            range.validated);
       } else {
         // append the last range and set the current range for future merging
         result.add(current);

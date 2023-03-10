@@ -73,7 +73,7 @@ public class XZ2IndexStrategy extends IndexStrategy {
     for (CodingRange xz2Coding : codingRanges) {
       for (short shard = 0; shard < shardNum; shard++) {
         result.add(new RowKeyRange(toRowKeyRangeBoundary(shard, xz2Coding.getLower(), false),
-            toRowKeyRangeBoundary(shard, xz2Coding.getUpper(), true), xz2Coding.isContained()));
+            toRowKeyRangeBoundary(shard, xz2Coding.getUpper(), true), xz2Coding.isValidated()));
       }
     }
     return result;

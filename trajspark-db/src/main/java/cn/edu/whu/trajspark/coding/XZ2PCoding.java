@@ -74,7 +74,7 @@ public class XZ2PCoding implements SpatialCoding {
     // 以上为xz2的索引范围, 接下来需要串接PosCode
     for (SFCRange sfcRange : rawSFCRange) {
       // contained, 该Index range的所有轨迹都位于查询范围内部
-      if (sfcRange.contained) {
+      if (sfcRange.validated) {
         CodingRange codingRange = new CodingRange();
         codingRange.concatSfcRange(sfcRange);
         res.add(codingRange);
