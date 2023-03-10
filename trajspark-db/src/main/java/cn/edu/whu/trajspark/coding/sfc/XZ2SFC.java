@@ -373,9 +373,9 @@ public class XZ2SFC implements Serializable {
   /**
    * 判断某XZ2 Element是否可能存储了被query bound完全包含的对象，其应满足以下条件：
    * <ol>
-   *   <li>Element本身与query bound非相离</li>
+   *   <li>element与query相交</li>
    *   <li>Element的右侧、上侧、右上侧同大小Element至少有一个与当前query bound非相离</li>
-   *   <li>Element Ext与Query Bound重叠范围的最大边长大于Element边长的一半</li>
+   *   <li>Element Ext与Query Bound重叠范围在x或y方向上穿过的l+1层网格数量不少于2条</li>
    * </ol>
    */
   private boolean canStoreContainedObjects(XElement element, Bound query) {
@@ -390,8 +390,8 @@ public class XZ2SFC implements Serializable {
           if (overlapped == null) {
             return false;
           }
-          // todo: 应该以穿过的网格线个数为准
-          return Math.max(overlapped.xmax - overlapped.xmin, overlapped.ymax - overlapped.ymin) > element.length / 2;
+          return getMaxCrossChildGridLine(element, overlapped) >= 2;
+          // return Math.max(overlapped.xmax - overlapped.xmin, overlapped.ymax - overlapped.ymin) > element.length / 2;
         }
       }
     }
@@ -399,6 +399,25 @@ public class XZ2SFC implements Serializable {
   }
 
 
+  private int getMaxCrossChildGridLine(XElement element, Bound bound) {
+    // 子单元的宽度(x方向)与高度(y方向)
+    double childWidth = (element.xmax - element.xmin) / 2;
+    double childHeight = (element.ymax - element.ymin) / 2;
+
+    // 在x方向上，overlapped穿过的l+1层网格线的条数
+    // 左侧线需要加一, 因为当最小值与线重合时，不算穿过。
+    int leftLine = (int) (bound.xmin / childWidth) + 1;
+    // 当最大值与线重合时，需要减1。
+    int rightLine = (int) (bound.xmax / childWidth) - (bound.xmin % childWidth == 0 ? 1 : 0);
+    int xCrossLineNum = rightLine - leftLine + 1;
+
+    // 在y方向上，overlapped穿过的l+1层网格线的条数
+    int upperLine = (int) (bound.ymax / childHeight) - (bound.ymax % childHeight == 0 ? 1 : 0);
+    int lowerLine = (int) (bound.xmin / childHeight) + 1;
+    int yCrossLineNum = upperLine - lowerLine + 1;
+
+    return Math.max(xCrossLineNum, yCrossLineNum);
+  }
 
   public Bound getBound(long codeSequence) {
     // 1. get sequence
