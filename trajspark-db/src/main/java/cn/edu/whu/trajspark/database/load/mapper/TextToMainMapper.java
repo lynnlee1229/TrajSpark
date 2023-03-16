@@ -52,6 +52,7 @@ public class TextToMainMapper extends Mapper<LongWritable, Text, ImmutableBytesW
       context.write(new ImmutableBytesWritable(put.getRow()), put);
     } catch (ParseException e) {
       e.printStackTrace();
+      System.out.println("Write failed:" + value);
     }
   }
 }

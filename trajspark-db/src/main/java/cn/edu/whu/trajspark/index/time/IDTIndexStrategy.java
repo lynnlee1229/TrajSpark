@@ -15,6 +15,8 @@ import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -32,6 +34,8 @@ import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
  * @since 2022/10/7
  */
 public class IDTIndexStrategy extends IndexStrategy {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(IDTIndexStrategy.class);
 
   private final XZTCoding timeCoding;
 
@@ -56,12 +60,17 @@ public class IDTIndexStrategy extends IndexStrategy {
    * ID-T索引中，shard由object id的hashcode生成，在负载均衡的同时，同ID数据保持本地性
    */
   public ByteArray index(Trajectory trajectory) {
-    ByteArray logicalIndex = logicalIndex(trajectory);
-    short shard = getShard(trajectory.getObjectID());
-    ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
-    buffer.put(Bytes.toBytes(shard));
-    buffer.put(logicalIndex.getBytes());
-    return new ByteArray(buffer.array());
+    try {
+      ByteArray logicalIndex = logicalIndex(trajectory);
+      short shard = getShard(trajectory.getObjectID());
+      ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
+      buffer.put(Bytes.toBytes(shard));
+      buffer.put(logicalIndex.getBytes());
+      return new ByteArray(buffer.array());
+    } catch (Exception e) {
+      LOGGER.error("Failed to get index of: " + trajectory.toString());
+      throw new IllegalArgumentException();
+    }
   }
 
   @Override
