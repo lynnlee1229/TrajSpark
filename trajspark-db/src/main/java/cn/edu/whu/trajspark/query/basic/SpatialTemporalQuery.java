@@ -24,6 +24,7 @@ import java.util.Map;
 public class SpatialTemporalQuery extends AbstractQuery {
 
   private SpatialTemporalQueryCondition spatialTemporalQueryCondition;
+  private boolean filterBeforeLookFullRow = true;
 
   public SpatialTemporalQuery(DataSet dataSet,
                               SpatialTemporalQueryCondition spatialTemporalQueryCondition) throws IOException {
@@ -35,6 +36,14 @@ public class SpatialTemporalQuery extends AbstractQuery {
                               SpatialTemporalQueryCondition spatialTemporalQueryCondition) throws IOException {
     super(indexTable);
     this.spatialTemporalQueryCondition = spatialTemporalQueryCondition;
+  }
+
+  public SpatialTemporalQuery(IndexTable indexTable,
+                              SpatialTemporalQueryCondition spatialTemporalQueryCondition,
+                              boolean filterBeforeLookFullRow) throws IOException {
+    super(indexTable);
+    this.spatialTemporalQueryCondition = spatialTemporalQueryCondition;
+    this.filterBeforeLookFullRow = filterBeforeLookFullRow;
   }
 
   @Override
@@ -67,6 +76,7 @@ public class SpatialTemporalQuery extends AbstractQuery {
         .setTemporalQueryWindows(
             QueryCondition.TemporalQueryWindows.newBuilder().addAllTemporalQueryWindow(temporalQueryWindows)
                 .build())
+        .setFilterBeforeLookFullRow(filterBeforeLookFullRow)
         .addAllRange(ranges).build();
 
     return STCoprocessorQuery.executeQuery(targetIndexTable, spatialTemporalQueryRequest);

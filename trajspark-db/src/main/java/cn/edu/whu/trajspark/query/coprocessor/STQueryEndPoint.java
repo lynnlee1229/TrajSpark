@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Regi
   @Override
   public void query(RpcController controller, QueryCondition.QueryRequest request,
       RpcCallback<QueryCondition.QueryResponse> done) {
-
+    boolean filterBeforeLookFullRow = request.getFilterBeforeLookFullRow();
     List<QueryCondition.Range> rangeList = request.getRangeList();
     List<QueryCondition.TrajectoryResult> trajectoryResults = new ArrayList<>();
     try {
@@ -71,13 +72,18 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Regi
             }
             trajectoryResults.add(buildTrajectoryResult(result));
           } else {
+            // 如果当前索引是辅助索引，且不需要在回表查询之前作粗过滤，则先回表查询。
+            if (!isMainIndexed(result) && !filterBeforeLookFullRow) {
+              result = getMainIndexedResult(result);
+            }
             // 使用pos code, mbr等粗过滤
             if (coarseFilter(result, request)) {
-              // 使用point list作精过滤
-              // TODO: 精过滤考虑放到Client端
+              // 如果filterBeforeLookFullRow为真，则此时result仍然是辅助索引
+              // 相当于先通过了初步过滤，现在要回表查询。
               if (!isMainIndexed(result)) {
                 result = getMainIndexedResult(result);
               }
+              // 使用point list作精过滤
               if (fineFilter(result, request)) {
                 trajectoryResults.add(buildTrajectoryResult(result));
               }
@@ -277,6 +283,6 @@ public class STQueryEndPoint extends QueryCondition.QueryService implements Regi
 
   @Override
   public Iterable<Service> getServices() {
-    return RegionCoprocessor.super.getServices();
+    return Collections.singleton(this);
   }
 }
