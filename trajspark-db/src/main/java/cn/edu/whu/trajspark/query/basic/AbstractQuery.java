@@ -41,6 +41,10 @@ public abstract class AbstractQuery {
    */
   public abstract List<RowKeyRange> getIndexRanges() throws IOException;
 
+  public IndexTable getTargetIndexTable() {
+    return targetIndexTable;
+  }
+
   /**
    * Query <strong>all</strong> ranges that meets query request on target table.
    * @return

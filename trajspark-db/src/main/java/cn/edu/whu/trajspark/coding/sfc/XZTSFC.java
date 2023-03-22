@@ -234,8 +234,9 @@ public class XZTSFC implements Serializable {
           false, true);
       ranges.add(timeIndexRange);
     } else if (timeElement.isExOverlaps(timeQuery)) {
-      // 若timeQuery的最小值与timeElement相交，则timeElement内的时间范围必与timeQuery相交。
-      if (timeQuery.getReTimeStart() <= timeElement.getTimeEnd() && timeQuery.getReTimeStart() >= timeElement.getTimeStart()) {
+      // 若timeQuery与timeElement右端点相交，则timeElement内的时间范围必与timeQuery相交。
+      if (timeQuery.getReTimeStart() <= timeElement.getTimeEnd() && timeQuery.getReTimeStart() >= timeElement.getTimeStart()
+      && timeQuery.getReTimeEnd() >= timeElement.getTimeEnd()) {
         timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
             true, true);
       } else {
