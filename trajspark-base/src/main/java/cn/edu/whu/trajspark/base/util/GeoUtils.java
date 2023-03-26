@@ -45,6 +45,13 @@ public class GeoUtils implements Serializable {
     return getEuclideanDistanceKM(p1.getX(), p1.getY(), p2.getX(), p2.getY());
   }
 
+  public static double getEuclideanDistance(Geometry geom1, Geometry geom2, String unit) {
+    if (unit == "m") {
+      return getEuclideanDistanceM(geom1, geom2);
+    }
+    return getEuclideanDistanceKM(geom1, geom2);
+  }
+
   public static double getEuclideanDistanceM(Geometry geom1, Geometry geom2) {
     org.locationtech.jts.geom.Point p1 = geom1.getCentroid();
     org.locationtech.jts.geom.Point p2 = geom2.getCentroid();
