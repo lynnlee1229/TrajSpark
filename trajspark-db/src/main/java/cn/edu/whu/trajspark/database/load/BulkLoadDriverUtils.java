@@ -70,6 +70,8 @@ public class BulkLoadDriverUtils {
 
     // 配置Map算子，根据待写入Index是否为主索引，选择对应的Mapper实现。
     job.getConfiguration().set(BULKLOAD_TARGET_INDEX_NAME, outTableName);
+    job.getConfiguration().setBoolean(ENABLE_SIMPLE_SECONDARY_INDEX, indexMeta.getIndexTableName().contains("simple"));
+
     if (indexMeta.isMainIndex()) {
       TableMapReduceUtil.initTableMapperJob(inputTableName,
           buildCoreIndexScan(),

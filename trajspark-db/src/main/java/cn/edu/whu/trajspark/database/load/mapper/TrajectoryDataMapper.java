@@ -61,7 +61,7 @@ public class TrajectoryDataMapper {
       put = TrajectorySerdeUtils.getPutForMainIndex(indexMeta, trajectory);
       mainIndexKey = put.getRow();
     } else {
-      put = TrajectorySerdeUtils.getPutForSecondaryIndex(indexMeta, trajectory, mainIndexKey);
+      put = TrajectorySerdeUtils.getPutForSecondaryIndex(indexMeta, trajectory, mainIndexKey, false);
     }
     return put;
   }

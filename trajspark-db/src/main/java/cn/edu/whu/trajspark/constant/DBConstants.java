@@ -36,6 +36,7 @@ public class DBConstants {
   public static final String BULK_LOAD_INPUT_FILE_PATH_KEY = "import.process.input.path";
   public static final String BULKLOAD_TARGET_INDEX_NAME = "bulkload.target.index.name";
   public static final String BULKLOAD_TEXT_PARSER_CLASS = "bulkload.parser.class";
+  public static final String ENABLE_SIMPLE_SECONDARY_INDEX = "enable.simple.secondary.index";
 
   // Connection
   public static final String OPEN_CONNECTION_FAILED = "Cannot connect to data base.";
