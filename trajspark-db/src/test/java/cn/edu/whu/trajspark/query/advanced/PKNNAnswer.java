@@ -16,8 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import static cn.edu.whu.trajspark.query.advanced.PKNNQuery.BASIC_BUFFER_DISTANCE;
-
 /**
  * @author Haocheng Wang
  * Created on 2023/2/17
@@ -84,7 +82,7 @@ public class PKNNAnswer {
   }
 
   private double getSearchRadiusKM(int stage) {
-    return BASIC_BUFFER_DISTANCE * Math.pow(Math.sqrt(2), stage - 1);
+    return 1 * Math.pow(Math.sqrt(2), stage - 1);
   }
 
 

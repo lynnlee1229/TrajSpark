@@ -118,40 +118,6 @@ public class XZTSFC implements Serializable {
     return new ArrayList<>(result);
   }
 
-  // public List<TimeIndexRange> overlapQuery(List<TimeLine> timeLineList, Boolean isContained) {
-  //   List<TimeIndexRange> ranges = new ArrayList<>(5000);
-  //   Deque<TimeElement> remaining = new ArrayDeque<>(5000);
-  //   for (TimeLine timeLine : timeLineListcontainSequenceCodeRange) {
-  //     List<TimeBin> timeBinList = getTimeBinList(timeLine);
-  //     for (TimeBin timeBin : timeBinList) {
-  //       double[] doubles = normalize(timeLine.getTimeStart(), timeLine.getTimeEnd(), timeBin,
-  //           false);
-  //       TimeLine line = new TimeLine(doubles[0], doubles[1]);
-  //       short level = 0;
-  //       remaining.add(initXZTElement);
-  //       remaining.add(levelSeparator);
-  //       while (level < g && !remaining.isEmpty()) {
-  //         TimeElement next = remaining.poll();
-  //         if (next.equals(levelSeparator)) {
-  //           // we've fully processed a level, increment our state
-  //           if (!remaining.isEmpty()) {
-  //             level = (short) (level + 1);
-  //             remaining.add(levelSeparator);
-  //           }
-  //         } else {
-  //           ranges = getSequenceCodeRange(line, next, level, ranges, remaining, timeBin,
-  //               isContained);
-  //         }
-  //       }
-  //       ArrayList<TimeLine> timeLines = new ArrayList<>();
-  //       timeLines.add(line);
-  //       ranges = getMaxLevelSequenceCodeRange(level, timeLines, ranges, remaining, timeBin);
-  //     }
-  //   }
-  //   ranges = getCodeRangeKeyMerge(ranges);
-  //   return ranges;
-  // }
-
   public Boolean isOverlapped(TimeElement timeElement, List<TimeLine> timeLineList) {
     int i = 0;
     while (i < timeLineList.size()) {
@@ -234,9 +200,8 @@ public class XZTSFC implements Serializable {
           false, true);
       ranges.add(timeIndexRange);
     } else if (timeElement.isExOverlaps(timeQuery)) {
-      // 若timeQuery与timeElement右端点相交，则timeElement内的时间范围必与timeQuery相交。
-      if (timeQuery.getReTimeStart() <= timeElement.getTimeEnd() && timeQuery.getReTimeStart() >= timeElement.getTimeStart()
-      && timeQuery.getReTimeEnd() >= timeElement.getTimeEnd()) {
+      // 若timeQuery包含了timeElement右端点，则timeElement内的时间范围必与timeQuery相交。
+      if (timeQuery.getReTimeStart() <= timeElement.getTimeEnd() && timeQuery.getReTimeEnd() >= timeElement.getTimeEnd()) {
         timeIndexRange = sequenceInterval(timeElement.getTimeStart(), level, timeBin,
             true, true);
       } else {

@@ -31,6 +31,8 @@ import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
  */
 public class TXZ2IndexStrategy extends IndexStrategy {
 
+  private static final long serialVersionUID = 8511586531909133379L;
+
   private final XZ2Coding xz2Coding;
   private final XZTCoding xztCoding;
 
@@ -167,6 +169,13 @@ public class TXZ2IndexStrategy extends IndexStrategy {
   @Override
   public TimeCoding getTimeCoding() {
     return xztCoding;
+  }
+
+  public long getTimeCode(ByteArray byteArray) {
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    ((Buffer) buffer).flip();
+    buffer.getShort();
+    return buffer.getLong();
   }
 
   @Override

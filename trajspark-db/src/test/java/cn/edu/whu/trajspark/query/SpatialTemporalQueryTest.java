@@ -9,10 +9,8 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.RowKeyRange;
-import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
-import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import cn.edu.whu.trajspark.query.basic.SpatialTemporalQuery;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
@@ -44,8 +42,6 @@ class SpatialTemporalQueryTest extends TestCase {
 
 
   // index strategies
-  static IDTIndexStrategy IDTIndexStrategy =  IDTemporalQueryTest.IDTIndexStrategy;
-  static XZ2IndexStrategy xz2IndexStrategy = new XZ2IndexStrategy();
   static XZ2TIndexStrategy xz2TIndexStrategy = new XZ2TIndexStrategy();
 
 
@@ -77,13 +73,7 @@ class SpatialTemporalQueryTest extends TestCase {
     // create dataset
     List<IndexMeta> list = new LinkedList<>();
     IndexMeta indexMeta1 = new IndexMeta(true, txz2IndexStrategy, DATASET_NAME, "default");
-    IndexMeta indexMeta0 = new IndexMeta(false, xz2TIndexStrategy, DATASET_NAME, "default");
-    IndexMeta indexMeta2 = new IndexMeta(false, xz2IndexStrategy, DATASET_NAME, "default");
-    IndexMeta indexMeta3 = new IndexMeta(false, IDTIndexStrategy, DATASET_NAME, "default");
-    list.add(indexMeta0);
     list.add(indexMeta1);
-    list.add(indexMeta2);
-    list.add(indexMeta3);
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
     // insert data
@@ -182,16 +172,15 @@ class SpatialTemporalQueryTest extends TestCase {
     int i = 0;
     int j = 0;
     WKTReader wktReader = new WKTReader();
-    Polygon envelope = (Polygon) wktReader.read(QUERY_WKT_CONTAIN).getEnvelope();
-    Polygon envelope1 = (Polygon) wktReader.read(QUERY_WKT_INTERSECT).getEnvelope();
+    Polygon containEnv = (Polygon) wktReader.read(QUERY_WKT_CONTAIN).getEnvelope();
+    Polygon intersectEnv = (Polygon) wktReader.read(QUERY_WKT_INTERSECT).getEnvelope();
     for (Trajectory trajectory : trips) {
       ZonedDateTime startTime = trajectory.getTrajectoryFeatures().getStartTime();
       ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
-      if (envelope.contains(trajectory.getLineString())) {
+      TimeLine trajTimeLine = new TimeLine(startTime, endTime);
+      if (containEnv.contains(trajectory.getLineString())) {
         for (TimeLine timeLine : timeLineList) {
-          if (timeLine.getTimeStart().toEpochSecond() <= startTime.toEpochSecond()
-              && endTime.toEpochSecond() <= timeLine.getTimeEnd().toEpochSecond()
-          ) {
+          if (timeLine.contain(trajTimeLine)) {
             System.out.println(new TimeLine(startTime, endTime));
             i++;
           }
@@ -202,11 +191,10 @@ class SpatialTemporalQueryTest extends TestCase {
     for (Trajectory trajectory : trips) {
       ZonedDateTime startTime = trajectory.getTrajectoryFeatures().getStartTime();
       ZonedDateTime endTime = trajectory.getTrajectoryFeatures().getEndTime();
-      if (envelope1.intersects(trajectory.getLineString())) {
+      TimeLine trajTimeLine = new TimeLine(startTime, endTime);
+      if (intersectEnv.intersects(trajectory.getLineString())) {
         for (TimeLine timeLine : timeLineList) {
-          if (startTime.toEpochSecond() <= timeLine.getTimeEnd().toEpochSecond()
-              && timeLine.getTimeStart().toEpochSecond() <= endTime.toEpochSecond()
-          ) {
+          if (timeLine.intersect(trajTimeLine)) {
             System.out.println(new TimeLine(startTime, endTime));
             j++;
           }

@@ -243,7 +243,7 @@ public class XZTCoding implements TimeCoding {
     return (int) binId;
   }
 
-  public ZonedDateTime timeToZonedTime(long time) {
+  public static ZonedDateTime timeToZonedTime(long time) {
     return ZonedDateTime.ofInstant(Instant.ofEpochSecond(time), TIME_ZONE);
   }
 
