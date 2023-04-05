@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.core.common.index;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import org.locationtech.jts.geom.Envelope;
@@ -9,7 +10,7 @@ import org.locationtech.jts.geom.Geometry;
  * @author Lynn Lee
  * @date 2023/3/27
  **/
-public interface TreeIndex<T extends Geometry> {
+public interface TreeIndex<T extends Geometry> extends Serializable {
 
   class Node<T extends Geometry> {
     T geom;

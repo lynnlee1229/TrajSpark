@@ -1,6 +1,7 @@
 package cn.edu.whu.trajspark.core.common.index;
 
 import cn.edu.whu.trajspark.base.util.GeoUtils;
+import java.io.Serializable;
 import java.util.List;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -11,7 +12,7 @@ import org.locationtech.jts.index.strtree.STRtree;
  * @author Lynn Lee
  * @date 2023/3/27
  **/
-public class STRTreeIndex<T extends Geometry> implements TreeIndex<T> {
+public class STRTreeIndex<T extends Geometry> implements TreeIndex<T>, Serializable {
 
   private static final int DEFAULT_NODE_CAPACITY = 2;
   private final STRtree stRtree;
