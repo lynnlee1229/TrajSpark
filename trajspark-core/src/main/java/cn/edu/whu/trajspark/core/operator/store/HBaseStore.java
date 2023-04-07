@@ -9,31 +9,21 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
-import cn.edu.whu.trajspark.datatypes.ByteArray;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.RegionLocator;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
 import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -105,7 +95,7 @@ public class HBaseStore extends Configured implements IStore {
 //  修改权限：否则可能会卡住
     FsShell shell = new FsShell(getConf());
     int setPermissionfalg = -1;
-    setPermissionfalg = shell.run(new String[]{"-chmod", "-R", "777", storeConfig.getLocation()});
+    setPermissionfalg = shell.run(new String[] {"-chmod", "-R", "777", storeConfig.getLocation()});
     if (setPermissionfalg != 0) {
       System.out.println("Set Permission failed");
       return;
@@ -119,10 +109,12 @@ public class HBaseStore extends Configured implements IStore {
   }
 
   public void deleteHFile(String path) throws IOException {
-    Configuration conf= getConf();
-    conf.set("fs.defaultFS","hdfs://localhost:9000");
+    Configuration conf = getConf();
+//    conf.set("fs.defaultFS", "hdfs://localhost:9000");
+    // TODO add fs.defaultFS to storeConf
+    conf.set("fs.defaultFS", "hdfs://u0:9000");
     FileSystem fs = FileSystem.get(conf);
-    fs.delete(new Path(path),true);
+    fs.delete(new Path(path), true);
     fs.close();
   }
 
