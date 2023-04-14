@@ -23,6 +23,6 @@
   </property>
   <property>
     <name>hadoop.tmp.dir</name>
-    <value>file:///mnt/hgfs/disk/cluster/hadoop/tmp/dell</value>
+    <value>file:///home/cluster/u0disk/hadoop/tmp/u0</value>
   </property>
 </configuration>

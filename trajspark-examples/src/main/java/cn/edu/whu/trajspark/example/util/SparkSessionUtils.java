@@ -27,8 +27,9 @@ public class SparkSessionUtils {
       sparkConf.set("fs.defaultFS", loadConfig.getFsDefaultName());
     }
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
-    sparkConf.set("spark.kryoserializer.buffer.max", "256m");
+    sparkConf.set("spark.kryoserializer.buffer.max", "512m");
     sparkConf.set("spark.kryoserializer.buffer", "64m");
+    sparkConf.set("spark.default.parallelism","24");
     if (isLocal) {
       sparkConf.setMaster("local[*]");
     }

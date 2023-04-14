@@ -3,10 +3,10 @@ package cn.edu.whu.trajspark.core.operator.process.segmenter;
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.process.noisefilter.FilterUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import org.apache.spark.api.java.JavaRDD;
+
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * @author Lynn Lee
@@ -17,6 +17,9 @@ public class CountSegmenter implements ISegmenter {
   @Override
   public List<Trajectory> segmentFunction(Trajectory rawTrajectory) {
     Random random = new Random();
+//    Set<TrajPoint> tmpSet = new TreeSet<>(Comparator.comparing(TrajPoint::getTimestamp));
+//    tmpSet.addAll(rawTrajectory.getPointList());
+//    List<TrajPoint> tmpList = new ArrayList<>(tmpSet);
     List<TrajPoint> tmpPointList = FilterUtils.sortPointList(rawTrajectory.getPointList());
     List<Trajectory> res = new ArrayList<>();
     List<Integer> segIndex = new ArrayList<>();
@@ -24,8 +27,9 @@ public class CountSegmenter implements ISegmenter {
     int threshold = random.nextInt(20) + 30;
     int count = 0;
     for (int i = 0; i < tmpPointList.size() - 1; ++i) {
+      TrajPoint p0 = tmpPointList.get(i), p1 = tmpPointList.get(i + 1);
       count++;
-      if (count >= threshold) {
+      if (ChronoUnit.SECONDS.between(p0.getTimestamp(), p1.getTimestamp()) >= 3600||count >= threshold) {
         segIndex.add(i + 1);
         count = 0;
         threshold = random.nextInt(20) + 30;
@@ -42,7 +46,7 @@ public class CountSegmenter implements ISegmenter {
           rawTrajectory.getObjectID(),
           tmpPts,
           rawTrajectory.getExtendedValues(),
-          0);
+          0.05);
       if (tmp == null) {
         continue;
       }

@@ -25,4 +25,13 @@
 	  <name>dfs.permissions.enabled</name>
 	  <value>false</value>
   </property>
+<property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:///home/cluster/u0disk/hadoop/namenode</value>
+  </property>
+    <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:///home/cluster/u0disk/hadoop/datanode0</value>
+  </property>
+
 </configuration>

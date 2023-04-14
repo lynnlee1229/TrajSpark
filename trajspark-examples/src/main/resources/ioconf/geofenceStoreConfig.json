@@ -2,7 +2,7 @@
   "loadConfig": {
     "@type": "hdfs",
     "master": "local[*]",
-    "location": "hdfs://u0:9000/cars",
+    "location": "hdfs://u0:9000/geofence/newcars/",
     "fsDefaultName": "hdfs://u0:9000",
     "fileMode": "multi_file",
     "partNum": 8,
@@ -47,10 +47,9 @@
   },
   "storeConfig": {
     "@type": "hbase",
-    "location": "hdfs://u0:9000/traj_geofence/",
+    "location": "hdfs://u0:9000/geofence_traj/",
     "schema": "POINT_BASED_TRAJECTORY",
-    "dataSetName": "TRAJECTORY_GEOFENCE",
-    "mainIndex": "OBJECT_ID_T",
-    "otherIndex": "XZ2,TXZ2"
+    "dataSetName": "GEOFENCE_TRAJECTORY",
+    "mainIndex": "OBJECT_ID_T"
   }
 }
