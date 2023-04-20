@@ -60,7 +60,7 @@ public class XZ2IndexStrategyTest extends TestCase {
     WKTReader reader = new WKTReader();
     try {
       Geometry geom = reader.read("POLYGON ((114.345703125 30.531005859375, 114.345703125 30.5419921875, 114.36767578125 30.5419921875, 114.36767578125 30.531005859375, 114.345703125 30.531005859375))");
-      SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(geom.getEnvelopeInternal(), SpatialQueryCondition.SpatialQueryType.INTERSECT);
+      SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(geom, SpatialQueryCondition.SpatialQueryType.INTERSECT);
       XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
       List<RowKeyRange> list = XZ2IndexStrategy.getScanRanges(spatialQueryCondition);
       for (RowKeyRange range : list) {

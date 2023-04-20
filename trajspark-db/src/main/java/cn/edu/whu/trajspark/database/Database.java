@@ -47,7 +47,6 @@ public final class Database {
         }
       }
     }
-    instance.openConnection();
     return instance;
   }
 
