@@ -1,29 +1,25 @@
 package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
-import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.coding.sfc.XZTSFC;
-import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.coding.sfc.TimeIndexRange;
-import cn.edu.whu.trajspark.datatypes.TimePeriod;
+import cn.edu.whu.trajspark.coding.sfc.XZTSFC;
+import cn.edu.whu.trajspark.datatypes.*;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.Tuple2;
+
 import java.nio.ByteBuffer;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import scala.Tuple2;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.DEFAULT_TIME_PERIOD;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TIME_BIN_PRECISION;
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang Created on 2022/10/2
@@ -38,7 +34,7 @@ public class XZTCoding implements TimeCoding {
   public static final int BYTES = Short.BYTES + Long.BYTES;
 
   @SuppressWarnings("checkstyle:StaticVariableName")
-  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, TIME_ZONE);
   private static Logger logger = LoggerFactory.getLogger(XZTCoding.class);
 
   public XZTCoding() {
@@ -87,25 +83,13 @@ public class XZTCoding implements TimeCoding {
   @Override
   public List<CodingRange> ranges(TemporalQueryCondition condition) {
     List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
-    if (condition.getQueryWindows() == null) {
-      indexRangeList = XZTSFC.ranges(condition.getQueryWindow(),
-          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
-    } else {
-      indexRangeList = XZTSFC.ranges(condition.getQueryWindows(),
-          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
-    }
+    indexRangeList = XZTSFC.ranges(condition.getQueryWindows(), condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     return rangesToCodingRange(indexRangeList);
   }
 
   public List<CodingRange> rangesMerged(TemporalQueryCondition condition) {
     List<TimeIndexRange> indexRangeList = new ArrayList<>(500);
-    if (condition.getQueryWindows() == null) {
-      indexRangeList = XZTSFC.ranges(condition.getQueryWindow(),
-          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
-    } else {
-      indexRangeList = XZTSFC.ranges(condition.getQueryWindows(),
-          condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
-    }
+    indexRangeList = XZTSFC.ranges(condition.getQueryWindows(), condition.getTemporalQueryType() == TemporalQueryType.CONTAIN);
     List<TimeIndexRange> intervalKeyMerge = getIntervalKeyMerge(indexRangeList);
     return rangesToCodingRange(intervalKeyMerge);
   }
@@ -156,7 +140,7 @@ public class XZTCoding implements TimeCoding {
     return timePeriod;
   }
 
-  public Tuple2<Short, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
+  public static Tuple2<Short, Long> getExtractTimeKeyBytes(ByteArray timeBytes) {
     ByteBuffer byteBuffer1 = timeBytes.toByteBuffer();
     byteBuffer1.flip();
     short bin = byteBuffer1.getShort();
@@ -171,7 +155,7 @@ public class XZTCoding implements TimeCoding {
 
   public TimeBin epochSecondToBinnedTime(long time) {
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneOffset.UTC);
+        TIME_ZONE);
     return dateToBinnedTime(zonedDateTime);
   }
 
@@ -237,8 +221,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   public int timeToBin(long time) {
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneOffset.UTC);
+    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(time), TIME_ZONE);
     return dateToBin(zonedDateTime);
   }
 
@@ -248,8 +231,7 @@ public class XZTCoding implements TimeCoding {
   }
 
   public ZonedDateTime timeToZonedTime(long time) {
-    return ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneOffset.UTC);
+    return ZonedDateTime.ofInstant(Instant.ofEpochSecond(time), TIME_ZONE);
   }
 
 }

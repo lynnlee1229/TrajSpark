@@ -1,9 +1,10 @@
 package cn.edu.whu.trajspark.datatypes;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang Created on 2022/9/28
@@ -16,7 +17,7 @@ public class TimeBin {
   private final short bin;
   private final TimePeriod timePeriod;
   @SuppressWarnings("checkstyle:StaticVariableName")
-  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, TIME_ZONE);
 
   public TimeBin(short bin, TimePeriod timePeriod) {
     this.bin = bin;

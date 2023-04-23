@@ -1,13 +1,10 @@
-package cn.edu.whu.trajspark.database.util;
+package cn.edu.whu.trajspark.database.load.driver;
 
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+
+import java.io.*;
 
 /**
  * @author Xu Qi

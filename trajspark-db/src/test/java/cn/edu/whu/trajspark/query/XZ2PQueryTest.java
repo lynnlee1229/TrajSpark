@@ -3,15 +3,17 @@ package cn.edu.whu.trajspark.query;
 import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZ2PCoding;
+import cn.edu.whu.trajspark.core.util.DataBaseUtils;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
+import cn.edu.whu.trajspark.database.meta.IndexMeta;
+import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
 import cn.edu.whu.trajspark.index.spatial.XZ2PlusIndexStrategy;
+import cn.edu.whu.trajspark.query.basic.SpatialQuery;
+import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -24,6 +26,7 @@ import org.locationtech.jts.io.WKTReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,6 +44,10 @@ public class XZ2PQueryTest {
           "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
   static String QUERY_WKT_CONTAIN =
           "POLYGON((114.06266851544588 22.55279006251164,114.09511251569002 22.55263152858115,114.09631414532869 22.514023096146417,114.02833624005525 22.513705939082808,114.02799291730135 22.553107129826113,114.06266851544588 22.55279006251164))";
+
+  static IndexMeta indexMeta = new IndexMeta(true, new XZ2PlusIndexStrategy(), DATASET_NAME, "default");
+  static IndexTable indexTable;
+
   static {
     System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
     try {
@@ -57,58 +64,40 @@ public class XZ2PQueryTest {
   @Test
   public void testPutTrajectory() throws IOException, URISyntaxException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     // create dataset
     List<IndexMeta> list = new LinkedList<>();
-    list.add(new IndexMeta(
-        true,
-        new XZ2PlusIndexStrategy(),
-        DATASET_NAME
-    ));
+    list.add(indexMeta);
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
     // insert data
     List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
         new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     System.out.println("to put " + trips.size() + "trajectories");
     for (Trajectory t : trips) {
-      dataTable.put(t);
+      indexTable.putForMainTable(t);
     }
   }
 
   @Test
   public void testIndexTrajectory() throws IOException, URISyntaxException {
-    Database instance = Database.getInstance();
-    instance.openConnection();
-    // create dataset
-    List<IndexMeta> list = new LinkedList<>();
-    list.add(new IndexMeta(
-        true,
-        new XZ2PlusIndexStrategy(),
-        DATASET_NAME
-    ));
-    DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
-    instance.createDataSet(dataSetMeta);
+    DataBaseUtils.createDataSet(DATASET_NAME, Collections.singletonList(indexMeta));
     // insert data
     List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
         new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
     System.out.println("to put " + trips.size() + "trajectories");
     for (Trajectory trajectory : trips) {
-      System.out.println(list.get(0).getIndexStrategy().index(trajectory));
+      System.out.println(DataBaseUtils.getIndexMetaList(DATASET_NAME).get(0).getIndexStrategy().index(trajectory));
     }
   }
 
   @Test
   public void testExecuteIntersectQuery() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
-    SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialIntersectQueryCondition);
+    SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialIntersectQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     for (Trajectory result : results) {
-      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(result));
+      System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(result));
     }
     assertEquals(13, spatialQuery.executeQuery().size());
   }
@@ -116,12 +105,10 @@ public class XZ2PQueryTest {
   @Test
   public void testExecuteContainQuery() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
-    SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialContainedQueryCondition);
+    SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialContainedQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     for (Trajectory result : results) {
-      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(result));
+      System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(result));
     }
     assertEquals(19, spatialQuery.executeQuery().size());
   }
@@ -129,8 +116,6 @@ public class XZ2PQueryTest {
   @Test
   public void testGetAnswer() throws URISyntaxException, ParseException, IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
     List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
             new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
     WKTReader wktReader = new WKTReader();
@@ -138,7 +123,7 @@ public class XZ2PQueryTest {
     System.out.println(trips.size());
     for (Trajectory trajectory : trips) {
       if (envelope.contains(trajectory.getLineString())) {
-        System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(trajectory));
+        System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(trajectory));
         // System.out.println(trajectory);
       }
     }
@@ -147,23 +132,20 @@ public class XZ2PQueryTest {
   @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     instance.deleteDataSet(DATASET_NAME);
   }
 
   @org.junit.jupiter.api.Test
   public void testSingleGetTrajectory() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     byte[] target = Bytes.fromHex("000100000001000000012156ad340a4342514244533431");
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
-    Result result = dataTable.get(new Get(target));
+    Result result = indexTable.get(new Get(target));
     Envelope envelope = spatialContainedQueryCondition.getQueryWindow();
     Polygon queryPolygon = new MinimumBoundingBox(envelope.getMinX(), envelope.getMinY(), envelope.getMaxX(), envelope.getMaxY()).toPolygon(4326);
-    Trajectory t = TrajectorySerdeUtils.getTrajectory(result);
+    Trajectory t = TrajectorySerdeUtils.mainRowToTrajectory(result);
     System.out.println("Query polygon contains: " + queryPolygon.contains(t.getLineString()));
     System.out.println("Trajectory WKT: " + t.getLineString());
-    XZ2PlusIndexStrategy xz2PlusIndexStrategy = (XZ2PlusIndexStrategy) dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy();
+    XZ2PlusIndexStrategy xz2PlusIndexStrategy = (XZ2PlusIndexStrategy) indexTable.getIndexMeta().getIndexStrategy();
     ByteArray spatialCode = xz2PlusIndexStrategy.extractSpatialCode(new ByteArray(target));
     XZ2PCoding xz2PCoding = (XZ2PCoding) xz2PlusIndexStrategy.getSpatialCoding();
     long xz2Code = xz2PCoding.getXZ2Code(spatialCode);

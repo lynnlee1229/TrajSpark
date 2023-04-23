@@ -22,7 +22,7 @@ public class CodingConstants {
   public static final TimePeriod DEFAULT_TIME_PERIOD = TimePeriod.DAY;
   public static final double LOG_FIVE = Math.log(0.5);
   public static final int MAX_OID_LENGTH = 20;
-  public static final int MAX_TID_LENGTH = 10;
+  public static final int MAX_TID_LENGTH = 20;
 
   public static final short XZ2PLUS_POS_CELL_LEN = 2;
 }

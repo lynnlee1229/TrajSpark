@@ -71,6 +71,10 @@ public class GeoUtils implements Serializable {
         * DistanceUtils.EARTH_EQUATORIAL_RADIUS_KM * 1000;
   }
 
+  public static double getEuclideanDistanceM(BasePoint p1, BasePoint p2) {
+    return getEuclideanDistanceM(p1.getLng(), p1.getLat(), p2.getLat(), p2.getLng());
+  }
+
   public static double getGeoListLen(List<Geometry> geoList) {
     double len = 0.0;
     for (int i = 1; i < geoList.size(); i++) {

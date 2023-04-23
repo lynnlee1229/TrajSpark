@@ -1,9 +1,9 @@
 package cn.edu.whu.trajspark.coding.utils;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Xu Qi
@@ -18,6 +18,6 @@ public class DateTimeParse {
    */
   public static ZonedDateTime timeToZonedTime(long time) {
     return ZonedDateTime.ofInstant(Instant.ofEpochSecond(time),
-        ZoneId.systemDefault());
+        TIME_ZONE);
   }
 }

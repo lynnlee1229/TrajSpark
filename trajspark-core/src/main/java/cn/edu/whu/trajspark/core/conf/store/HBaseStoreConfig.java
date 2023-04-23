@@ -9,14 +9,16 @@ import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatial.XZ2PlusIndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
-import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
+import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import scala.NotImplementedError;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import scala.NotImplementedError;
 
 /**
  * @author Xu Qi
@@ -93,21 +95,33 @@ public class HBaseStoreConfig implements IStoreConfig {
       List<IndexMeta> otherIndexMeta = createOtherIndex(otherIndex, TextSplitType.CSV);
       indexMetaList.addAll(otherIndexMeta);
     }
+    checkIndexMeta(indexMetaList, mainIndexMeta);
     return indexMetaList;
+  }
+  private void checkIndexMeta(List<IndexMeta> indexMetaList, IndexMeta mainIndexMeta){
+    // 检查重复
+    HashSet<IndexMeta> hashSet = new HashSet<>(indexMetaList);
+    if (hashSet.size() != indexMetaList.size()) {
+      throw new IllegalArgumentException("found duplicate index meta in the list.");
+    }
+    //检查主索引
+    if(hashSet.contains(mainIndexMeta)){
+      hashSet.remove(mainIndexMeta);
+    }
   }
 
   private IndexMeta createIndexMeta(IndexType indexType, Boolean isMainIndex) {
     switch (indexType) {
       case XZ2:
-        return new IndexMeta(isMainIndex, new XZ2IndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new XZ2IndexStrategy(), dataSetName, "default");
       case XZ2Plus:
-        return new IndexMeta(isMainIndex, new XZ2PlusIndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new XZ2PlusIndexStrategy(), dataSetName, "default");
       case TXZ2:
-        return new IndexMeta(isMainIndex, new TXZ2IndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new TXZ2IndexStrategy(), dataSetName, "default");
       case XZ2T:
-        return new IndexMeta(isMainIndex, new XZ2TIndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new XZ2TIndexStrategy(), dataSetName, "default");
       case OBJECT_ID_T:
-        return new IndexMeta(isMainIndex, new TimeIndexStrategy(), dataSetName);
+        return new IndexMeta(isMainIndex, new IDTIndexStrategy(), dataSetName, "default");
       default:
         throw new NotImplementedError();
     }

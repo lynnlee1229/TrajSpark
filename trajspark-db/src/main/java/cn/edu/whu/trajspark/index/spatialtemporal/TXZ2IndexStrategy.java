@@ -1,11 +1,7 @@
 package cn.edu.whu.trajspark.index.spatialtemporal;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.coding.CodingRange;
-import cn.edu.whu.trajspark.coding.SpatialCoding;
-import cn.edu.whu.trajspark.coding.TimeCoding;
-import cn.edu.whu.trajspark.coding.XZ2Coding;
-import cn.edu.whu.trajspark.coding.XZTCoding;
+import cn.edu.whu.trajspark.coding.*;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
@@ -15,15 +11,19 @@ import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.apache.hadoop.hbase.util.Bytes;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.hadoop.hbase.util.Bytes;
+
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
+import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
 
 /**
- * row key: shard(short) + index type(int) + xztCoding(short + long) + xz2(long) +
- * oidAndTid(string)
+ * row key: shard(short) + xztCoding(short + long) + xz2(long) +
+ * oid(max_oid_length) + tid(max_tid_length)
  *
  * @author Xu Qi
  * @since 2022/11/30
@@ -44,40 +44,34 @@ public class TXZ2IndexStrategy extends IndexStrategy {
     this.xz2Coding = new XZ2Coding();
   }
 
-  // range key: shard(short) + index type(int) + xzt(long) + xz2(long)
-  private static final int KEY_BYTE_LEN =
-      Short.BYTES + Integer.BYTES + XZTCoding.BYTES + XZ2Coding.BYTES;
+  /**
+   * 作为行键时的字节数
+   */
+  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + XZTCoding.BYTES
+      + XZ2Coding.BYTES + MAX_OID_LENGTH + MAX_TID_LENGTH;
+  private static final int LOGICAL_KEY_BYTE_LEN = PHYSICAL_KEY_BYTE_LEN - Short.BYTES;
+  private static final int SCAN_RANGE_BYTE_LEN =  PHYSICAL_KEY_BYTE_LEN - MAX_OID_LENGTH - MAX_TID_LENGTH;
 
   @Override
-  public ByteArray index(Trajectory trajectory) {
-    short shard = (short) (Math.random() * shardNum);
+  protected ByteArray logicalIndex(Trajectory trajectory) {
     ByteArray spatialCoding = xz2Coding.code(trajectory.getLineString());
     TimeLine timeLine = new TimeLine(trajectory.getTrajectoryFeatures().getStartTime(),
         trajectory.getTrajectoryFeatures().getEndTime());
     ByteArray timeCode = xztCoding.code(timeLine);
-    String oid = trajectory.getObjectID();
-    String tid = trajectory.getTrajectoryID();
-    return toIndex(shard, timeCode, spatialCoding, oid + tid);
-  }
-
-  private ByteArray toIndex(short shard, ByteArray timeCoding, ByteArray xz2coding,
-      String oidAndTid) {
-    byte[] oidAndTidBytes = oidAndTid.getBytes();
-    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN + oidAndTidBytes.length);
-    byteBuffer.putShort(shard);
-    byteBuffer.putInt(indexType.getId());
-    byteBuffer.put(timeCoding.getBytes());
-    byteBuffer.put(xz2coding.getBytes());
-    byteBuffer.put(oidAndTidBytes);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(LOGICAL_KEY_BYTE_LEN);
+    byteBuffer.put(timeCode.getBytes());
+    byteBuffer.put(spatialCoding.getBytes());
+    byteBuffer.put(getObjectIDBytes(trajectory));
+    byteBuffer.put(getTrajectoryIDBytes(trajectory));
     return new ByteArray(byteBuffer);
   }
 
-  private ByteArray toIndex(short shard, ByteArray timeBytes, ByteArray xz2Bytes, Boolean flag) {
-    ByteBuffer byteBuffer = ByteBuffer.allocate(KEY_BYTE_LEN);
+
+  private ByteArray toRowKeyRangeBoundary(short shard, ByteArray timeBytes, ByteArray xz2Bytes, Boolean end) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(SCAN_RANGE_BYTE_LEN);
     byteBuffer.putShort(shard);
-    byteBuffer.putInt(indexType.getId());
     byteBuffer.put(timeBytes.getBytes());
-    if (flag) {
+    if (end) {
       long xz2code = Bytes.toLong(xz2Bytes.getBytes()) + 1;
       byteBuffer.putLong(xz2code);
     } else {
@@ -120,6 +114,9 @@ public class TXZ2IndexStrategy extends IndexStrategy {
   @Override
   public List<RowKeyRange> getScanRanges(
       SpatialTemporalQueryCondition spatialTemporalQueryCondition) {
+    if (spatialTemporalQueryCondition.getTemporalQueryCondition() == null) {
+      throw new UnsupportedOperationException();
+    }
     List<RowKeyRange> result = new ArrayList<>();
     SpatialQueryCondition spatialQueryCondition = spatialTemporalQueryCondition.getSpatialQueryCondition();
     TemporalQueryCondition temporalQueryCondition = spatialTemporalQueryCondition.getTemporalQueryCondition();
@@ -128,19 +125,14 @@ public class TXZ2IndexStrategy extends IndexStrategy {
     for (CodingRange temporalCodingRange : temporalCodingRanges) {
       // 2. get xz2 coding
       List<CodingRange> spatialCodingRanges = xz2Coding.ranges(spatialQueryCondition);
-      // 3. concat shard index
       for (CodingRange codingRange : spatialCodingRanges) {
+        // 3. concat shard index
         for (short shard = 0; shard < shardNum; shard++) {
-          ByteBuffer byteBuffer1 = ByteBuffer.allocate(KEY_BYTE_LEN);
-          ByteBuffer byteBuffer2 = ByteBuffer.allocate(KEY_BYTE_LEN);
-          ByteArray byteArray1 = toIndex(shard, temporalCodingRange.getLower(),
+          ByteArray byteArray1 = toRowKeyRangeBoundary(shard, temporalCodingRange.getLower(),
               codingRange.getLower(), false);
-          ByteArray byteArray2 = toIndex(shard, temporalCodingRange.getUpper(),
+          ByteArray byteArray2 = toRowKeyRangeBoundary(shard, temporalCodingRange.getUpper(),
               codingRange.getUpper(), true);
-          byteBuffer1.put(byteArray1.getBytes());
-          byteBuffer2.put(byteArray2.getBytes());
-          result.add(new RowKeyRange(new ByteArray(byteBuffer1), new ByteArray(byteBuffer2),
-              false));
+          result.add(new RowKeyRange(byteArray1, byteArray2, false));
         }
       }
     }
@@ -148,10 +140,10 @@ public class TXZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public String parseIndex2String(ByteArray byteArray) {
+  public String parsePhysicalIndex2String(ByteArray byteArray) {
     return "Row key index: {" + "shardNum=" + getShardNum(byteArray) + ", bin = " + getTimeBinVal(
         byteArray) + ", timeCoding = " + getTimeCodingVal(byteArray) + ", xz2="
-        + extractSpatialCode(byteArray) + ", oidAndTid=" + getObjectTrajId(byteArray) + '}';
+        + extractSpatialCode(byteArray) + ", oidAndTid=" + getObjectID(byteArray) + "-" + getTrajectoryID(byteArray) + '}';
   }
 
   @Override
@@ -163,10 +155,9 @@ public class TXZ2IndexStrategy extends IndexStrategy {
   public ByteArray extractSpatialCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
-    buffer.getShort();
-    buffer.getInt();
-    buffer.getShort();
-    buffer.getLong();
+    buffer.getShort(); // shard
+    buffer.getShort(); // time bin
+    buffer.getLong(); // time code
     byte[] bytes = new byte[Long.BYTES];
     buffer.get(bytes);
     return new ByteArray(bytes);
@@ -182,7 +173,6 @@ public class TXZ2IndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     return buffer.getShort();
   }
 
@@ -191,7 +181,6 @@ public class TXZ2IndexStrategy extends IndexStrategy {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     buffer.getShort();
     return buffer.getLong();
   }
@@ -204,16 +193,30 @@ public class TXZ2IndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public Object getObjectTrajId(ByteArray byteArray) {
+  public String getObjectID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
     buffer.flip();
     buffer.getShort();
-    buffer.getInt();
     buffer.getShort();
     buffer.getLong();
     buffer.getLong();
-    byte[] stringBytes = new byte[buffer.capacity() - KEY_BYTE_LEN];
+    byte[] stringBytes = new byte[MAX_OID_LENGTH];
     buffer.get(stringBytes);
     return new String(stringBytes, StandardCharsets.UTF_8);
+  }
+
+  @Override
+  public String getTrajectoryID(ByteArray byteArray) {
+    ByteBuffer buffer = byteArray.toByteBuffer();
+    buffer.flip();
+    buffer.getShort();
+    buffer.getShort();
+    buffer.getLong();
+    buffer.getLong();
+    byte[] oidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(oidBytes);
+    byte[] tidBytes = new byte[MAX_OID_LENGTH];
+    buffer.get(tidBytes);
+    return new String(tidBytes, StandardCharsets.UTF_8);
   }
 }

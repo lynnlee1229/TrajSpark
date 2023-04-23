@@ -4,7 +4,7 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
+import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.example.database.ExampleDataUtils;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 
@@ -23,27 +23,26 @@ public class DataSetManage {
   public static void insertData() throws IOException {
     // 1. get database instance
     Database instance = Database.getInstance();
-    instance.openConnection();
     // 2. create xz2 dataset
     List<IndexMeta> list = new LinkedList<>();
     list.add(new IndexMeta(
         true,
         new XZ2IndexStrategy(),
-        DATASET_NAME
+        DATASET_NAME,
+        "default"
     ));
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
     // 3. insert data
     List<Trajectory> trajectories =  ExampleDataUtils.parseFileToTrips();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    IndexTable indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory t : trajectories) {
-      dataTable.put(t);
+      indexTable.put(t, null);
     }
   }
 
   public static void deleteDataSet() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     instance.deleteDataSet(DATASET_NAME);
   }
 }

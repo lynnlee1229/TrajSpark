@@ -4,15 +4,13 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZTCoding;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import cn.edu.whu.trajspark.core.conf.load.HBaseLoadConfig;
-import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import cn.edu.whu.trajspark.index.RowKeyRange;
-import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
-import cn.edu.whu.trajspark.query.TemporalQuery;
+import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import com.fasterxml.jackson.core.JsonParseException;
 import org.apache.log4j.Logger;
@@ -21,7 +19,6 @@ import org.apache.spark.sql.SparkSession;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +27,7 @@ public class HBaseLoadScanExample {
 
     public static byte[][] init() {
         String Oid = "010";
-        TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
+        IDTIndexStrategy timeIndexStrategy = new IDTIndexStrategy(new XZTCoding());
         List<TimeLine> timeLineList = new ArrayList<>();
         ZonedDateTime start = ZonedDateTime.parse("2008-11-06T22:55+08:00");
         ZonedDateTime end = ZonedDateTime.parse("2008-11-08T11:09:21+08:00");
