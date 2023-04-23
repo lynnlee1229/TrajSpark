@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -28,16 +28,7 @@ class SpatialQueryControllerTest {
       "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
   static String QUERY_WKT_CONTAIN =
       "POLYGON((114.06266851544588 22.55279006251164,114.09511251569002 22.55263152858115,114.09631414532869 22.514023096146417,114.02833624005525 22.513705939082808,114.02799291730135 22.553107129826113,114.06266851544588 22.55279006251164))";
-  static {
-    System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
-    try {
-      WKTReader wktReader = new WKTReader();
-      Geometry envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT);
-      Geometry envelopeContained = wktReader.read(QUERY_WKT_CONTAIN);
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-  }
+
 
   @Test
   public void testTrajectoryToGeo() throws URISyntaxException {

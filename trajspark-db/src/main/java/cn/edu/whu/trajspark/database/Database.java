@@ -44,6 +44,7 @@ public final class Database {
       synchronized (Database.class) {
         if (instance == null) {
           instance = new Database();
+          instance.openConnection();
         }
       }
     }

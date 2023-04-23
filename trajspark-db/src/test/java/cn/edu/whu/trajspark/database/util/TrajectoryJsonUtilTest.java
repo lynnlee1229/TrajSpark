@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import java.util.List;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
@@ -38,5 +39,13 @@ class TrajectoryJsonUtilTest extends TestCase {
     JSONObject object = jsonObject.getJSONObject(0);
     Trajectory trajectory = TrajectoryJsonUtil.parseJsonToTrajectory(object.toString());
     System.out.println(trajectory);
+  }
+  @Test
+  public void testParseTrajectoryList() {
+    String path = Objects.requireNonNull(
+        this.getClass().getClassLoader().getResource("traj_json/test.json")).getPath();
+    String text = JSONUtil.readLocalTextFile(path);
+    List<Trajectory> trajectories = TrajectoryJsonUtil.parseGeoJsonToTrajectoryList(text);
+    System.out.println(trajectories);
   }
 }

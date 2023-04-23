@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.core.operator.store.convertor.basic;
 
+import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
@@ -26,7 +27,7 @@ public class GeoJsonConvertor {
       for (Trajectory trajectory : trajectoryList) {
         JSONObject feature = new JSONObject();
         JSONObject geometryObject = convertLineString(trajectory.getPointList());
-        JSONObject propertiesObject = convertFeatures(trajectory.getTrajectoryFeatures());
+        JSONObject propertiesObject = convertFeatures(trajectory);
         feature.put("type", "Feature");
         feature.put("geometry", geometryObject);
         feature.put("properties", propertiesObject);
@@ -53,8 +54,13 @@ public class GeoJsonConvertor {
     return geometryObject;
   }
 
-  public static JSONObject convertFeatures(TrajFeatures trajectoryFeatures) {
+  public static JSONObject convertFeatures(Trajectory trajectory) {
     JSONObject featuresObject = new JSONObject();
+    TrajFeatures trajectoryFeatures = trajectory.getTrajectoryFeatures();
+    featuresObject.put("oid", trajectory.getObjectID());
+    featuresObject.put("tid", trajectory.getTrajectoryID());
+    JSONArray timestampArray  = convertTrajPointTimestamp(trajectory.getPointList());
+    featuresObject.put("timestamp", timestampArray);
     featuresObject.put("startTime", trajectoryFeatures.getStartTime().toString());
     featuresObject.put("endTime", trajectoryFeatures.getEndTime().toString());
     JSONArray coordinateStartArray = convertCoordinate(trajectoryFeatures.getStartPoint());
@@ -62,7 +68,7 @@ public class GeoJsonConvertor {
     JSONArray coordinateEndArray = convertCoordinate(trajectoryFeatures.getEndPoint());
     featuresObject.put("endPoint", coordinateEndArray);
     featuresObject.put("pointNum", trajectoryFeatures.getPointNum());
-    featuresObject.put("mbr", trajectoryFeatures.getMbr().toString());
+    featuresObject.put("mbr", convertMbr(trajectoryFeatures.getMbr()));
     featuresObject.put("speed", trajectoryFeatures.getSpeed());
     featuresObject.put("len", trajectoryFeatures.getLen());
     return featuresObject;
@@ -71,6 +77,25 @@ public class GeoJsonConvertor {
     JSONArray coordinateArray = new JSONArray();
     coordinateArray.add(trajPoint.getLng());
     coordinateArray.add(trajPoint.getLat());
+    return coordinateArray;
+  }
+  public static JSONArray convertTrajPointTimestamp(List<TrajPoint> trajPoints){
+    JSONArray coordinateArray = new JSONArray();
+    for (TrajPoint trajPoint : trajPoints) {
+      coordinateArray.add(trajPoint.getTimestamp().toEpochSecond());
+    }
+    return coordinateArray;
+  }
+  public static JSONArray convertMbr (MinimumBoundingBox box){
+    JSONArray coordinateArray = new JSONArray();
+    List<Double> minCoord = new ArrayList<>();
+    List<Double> maxCoord = new ArrayList<>();
+    minCoord.add(box.getMinLng());
+    minCoord.add(box.getMinLat());
+    maxCoord.add(box.getMaxLng());
+    maxCoord.add(box.getMaxLat());
+    coordinateArray.add(minCoord);
+    coordinateArray.add(maxCoord);
     return coordinateArray;
   }
 
