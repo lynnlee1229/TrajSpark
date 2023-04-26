@@ -13,7 +13,8 @@ import java.util.Map;
  **/
 public class TrajectoryConvertor implements Serializable {
   public static String convert(Trajectory trajectory,
-                               String splitter) {
+                               String splitter,
+                               String timePattern) {
     if (trajectory.getPointList() == null) {
       return null;
     }
@@ -21,7 +22,7 @@ public class TrajectoryConvertor implements Serializable {
     String oid = trajectory.getObjectID();
     StringBuilder records = new StringBuilder();
     List<TrajPoint> pointList = trajectory.getPointList();
-    // 属性字段非空，则安装原始属性输出
+    // 属性字段非空，则按照原始属性输出
     if (pointList.get(0).getExtendedValues() != null) {
       for (TrajPoint tmpP : pointList) {
         StringBuilder record = new StringBuilder();
@@ -32,7 +33,7 @@ public class TrajectoryConvertor implements Serializable {
         records.append(record).append(System.lineSeparator());
       }
     } else {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timePattern);
       for (TrajPoint tmpP : pointList) {
         StringBuilder record = new StringBuilder();
         record.append(tid).append(splitter);
@@ -51,5 +52,10 @@ public class TrajectoryConvertor implements Serializable {
     }
 
     return records.toString();
+  }
+
+  public static String convert(Trajectory trajectory,
+                               String splitter) {
+    return convert(trajectory, splitter, "yyyy-MM-dd HH:mm:ss");
   }
 }

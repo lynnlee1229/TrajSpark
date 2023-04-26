@@ -8,6 +8,7 @@ import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.HDFSLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
+import cn.edu.whu.trajspark.core.operator.load.parser.basic.TrajectoryParser;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -41,9 +42,11 @@ public class HDFSLoader implements ILoader {
       }
     } else {
       LOGGER.error(
-          "This loadConfig is not a HDFSLoadConfig or this dataConfig is not a TrajectoryConfig！Please check your config file");
+          "This loadConfig is not a HDFSLoadConfig or this dataConfig is not a "
+              + "TrajectoryConfig！Please check your config file");
       throw new RuntimeException(
-          "loadConfig is not a HDFSLoadConfig or dataConfig is not a TrajectoryConfig in configuration json file");
+          "loadConfig is not a HDFSLoadConfig or dataConfig is not a TrajectoryConfig in "
+              + "configuration json file");
     }
   }
 
@@ -60,43 +63,17 @@ public class HDFSLoader implements ILoader {
     int partNum = hdfsLoadConfig.getPartNum();
     return sparkSession.sparkContext().wholeTextFiles(hdfsLoadConfig.getLocation(), partNum)
         .toJavaRDD().filter((s) -> {
-          return !((String) s._2).isEmpty();
+          return !(s._2).isEmpty();
         }).map((s) -> {
-          String[] points = ((String) s._2).split("\n");
-          List<TrajPoint> trajPoints = new ArrayList(points.length);
-
-          String[] strings;
-          String pStr;
-          try {
-            strings = points;
-            int n = points.length;
-
-            for (int i = 0; i < n; ++i) {
-              pStr = strings[i];
-              TrajPoint point =
-                  TrajPointParser.parse(pStr, trajectoryConfig.getTrajPointConfig(),
-                      hdfsLoadConfig.getSplitter());
-              trajPoints.add(point);
-            }
-          } catch (Exception var9) {
+          Trajectory trajectory = TrajectoryParser.multifileParse(s._2(), trajectoryConfig,
+              hdfsLoadConfig.getSplitter());
+          if (trajectory != null && trajectoryConfig.getTrajId().getIndex() < 0) {
+            String[] strings = (s._1).split("/");
+            String name = strings[strings.length - 1];
+            String trajId = name.substring(0, name.lastIndexOf("."));
+            trajectory.setTrajectoryID(trajId);
           }
-
-          strings = ((String) s._1).split("/");
-          String name = strings[strings.length - 1];
-          String trajId, objectId;
-          if (trajectoryConfig.getTrajId() != null) {
-            trajId = points[0].split(hdfsLoadConfig.getSplitter())[trajectoryConfig.getTrajId()
-                .getIndex()];
-          } else {
-            trajId = name.substring(0, name.lastIndexOf("."));
-          }
-          if (trajectoryConfig.getObjectId() != null) {
-            objectId = points[0].split(hdfsLoadConfig.getSplitter())[trajectoryConfig.getObjectId()
-                .getIndex()];
-          } else {
-            objectId = name.substring(0, name.lastIndexOf("."));
-          }
-          return trajPoints.isEmpty() ? null : new Trajectory(trajId, objectId, trajPoints);
+          return trajectory;
         }).filter(Objects::nonNull);
   }
 
@@ -118,14 +95,14 @@ public class HDFSLoader implements ILoader {
       String objectId = (String) ((Tuple2) groupLines._1)._1;
       String trajectoryId = (String) ((Tuple2) groupLines._1)._2;
       Iterator<String> iterator = ((Iterable) groupLines._2).iterator();
-      List<TrajPoint> trajPoints = new ArrayList();
+      List<TrajPoint> trajPoints = new ArrayList<>();
 
       while (iterator.hasNext()) {
         try {
-          TrajPoint point = TrajPointParser.parse((String) iterator.next(), trajPointConfig,
+          TrajPoint point = TrajPointParser.parse(iterator.next(), trajPointConfig,
               hdfsLoadConfig.getSplitter());
           trajPoints.add(point);
-        } catch (Exception var7) {
+        } catch (Exception ignored) {
         }
       }
 
