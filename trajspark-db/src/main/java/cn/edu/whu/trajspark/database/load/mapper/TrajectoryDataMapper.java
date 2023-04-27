@@ -109,18 +109,20 @@ public class TrajectoryDataMapper {
     } else {
       dataFrame = new String[]{
           TRAJECTORY_ID, OBJECT_ID, TRAJ_POINTS, MBR, START_TIME, END_TIME, START_POSITION,
-          END_POSITION, POINT_NUMBER, SPEED, LENGTH};
+          END_POSITION, POINT_NUMBER, SPEED, LENGTH, EXT_VALUES};
     }
     for (String frame : dataFrame) {
-      List<Cell> cells = put.get(COLUMN_FAMILY, Bytes.toBytes(frame));
-      Result result = Result.create(cells);
-      byte[] quaFilterValue = result.getValue(COLUMN_FAMILY, Bytes.toBytes(frame));
-      KeyValue keyValue = new KeyValue(put.getRow(), COLUMN_FAMILY, Bytes.toBytes(frame),
-          quaFilterValue);
-      byte[] row = result.getRow();
-      KeyFamilyQualifier keyFamilyQualifier = new KeyFamilyQualifier(result.getRow(), COLUMN_FAMILY,
-          Bytes.toBytes(frame));
-      value.add(new Tuple2<>(keyFamilyQualifier, keyValue));
+      if(put.has(COLUMN_FAMILY, Bytes.toBytes(frame))){
+        List<Cell> cells = put.get(COLUMN_FAMILY, Bytes.toBytes(frame));
+        Result result = Result.create(cells);
+        byte[] quaFilterValue = result.getValue(COLUMN_FAMILY, Bytes.toBytes(frame));
+        KeyValue keyValue = new KeyValue(put.getRow(), COLUMN_FAMILY, Bytes.toBytes(frame),
+            quaFilterValue);
+        byte[] row = result.getRow();
+        KeyFamilyQualifier keyFamilyQualifier = new KeyFamilyQualifier(result.getRow(), COLUMN_FAMILY,
+            Bytes.toBytes(frame));
+        value.add(new Tuple2<>(keyFamilyQualifier, keyValue));
+      }
     }
     return value;
   }

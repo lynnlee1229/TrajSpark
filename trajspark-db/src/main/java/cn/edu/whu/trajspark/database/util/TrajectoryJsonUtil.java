@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author Xu Qi
@@ -21,6 +23,7 @@ public class TrajectoryJsonUtil {
 
   /**
    * Turning GeoJson data into a memory Trajectory object
+   *
    * @param value json object
    * @return Trajectory trajectory
    */
@@ -29,13 +32,23 @@ public class TrajectoryJsonUtil {
     JSONObject properties = feature.getJSONObject("properties");
     String tid = properties.getString("tid");
     String oid = properties.getString("oid");
-    TrajFeatures trajFeatures = parseTraFeatures(properties);
     JSONObject geometry = feature.getJSONObject("geometry");
     JSONArray coordinates = geometry.getJSONArray("coordinates");
     List<TrajPoint> traPoints = parseTraPointList(coordinates, properties);
-    return new Trajectory(tid, oid, traPoints, trajFeatures);
+    if (properties.containsKey("trajectoryFeatures")) {
+      JSONObject trajectoryFeatures = (JSONObject) properties.get("trajectoryFeatures");
+      TrajFeatures trajFeatures = parseTraFeatures(trajectoryFeatures, properties);
+      if (properties.containsKey("extendedValues")) {
+        JSONObject extendedValues = (JSONObject) properties.get("extendedValues");
+        HashMap<String, Object> extendedValue = new HashMap<>(extendedValues);
+        return new Trajectory(tid, oid, traPoints, trajFeatures, extendedValue);
+      }
+      return new Trajectory(tid, oid, traPoints, trajFeatures);
+    }
+    return new Trajectory(tid, oid, traPoints);
   }
-  public static List<Trajectory> parseGeoJsonToTrajectoryList(String text){
+
+  public static List<Trajectory> parseGeoJsonToTrajectoryList(String text) {
     JSONObject feature = JSONObject.parseObject(text);
     JSONArray jsonObject = feature.getJSONArray("features");
     ArrayList<Trajectory> trajectories = new ArrayList<>();
@@ -47,26 +60,26 @@ public class TrajectoryJsonUtil {
     return trajectories;
   }
 
-  public static TrajFeatures parseTraFeatures(JSONObject properties) {
+  public static TrajFeatures parseTraFeatures(JSONObject featureProperties, JSONObject properties) {
     String oid = properties.getString("oid");
     String tid = properties.getString("tid");
-    JSONArray mbr = properties.getJSONArray("mbr");
+    JSONArray mbr = featureProperties.getJSONArray("mbr");
     MinimumBoundingBox box = parseMBR(mbr);
 
-    Long sTime = properties.getLong("startTime");
-    ZonedDateTime startTime = DateTimeParse.timeToZonedTime(sTime);
-    Long eTime = properties.getLong("endTime");
-    ZonedDateTime endTime = DateTimeParse.timeToZonedTime(eTime);
+    String sTime = featureProperties.getString("startTime");
+    ZonedDateTime startTime = ZonedDateTime.parse(sTime);
+    String eTime = featureProperties.getString("endTime");
+    ZonedDateTime endTime = ZonedDateTime.parse(eTime);
 
-    JSONArray startPoint = properties.getJSONArray("startPoint");
+    JSONArray startPoint = featureProperties.getJSONArray("startPoint");
     TrajPoint traStartPoint = parsePoint(startPoint, properties, true);
-    JSONArray endPoint = properties.getJSONArray("endPoint");
+    JSONArray endPoint = featureProperties.getJSONArray("endPoint");
     TrajPoint traEndPoint = parsePoint(endPoint, properties, false);
 
-    Integer pointNumber = properties.getInteger("pointNum");
-    Double traSpeed = properties.getDouble("speed");
+    Integer pointNumber = featureProperties.getInteger("pointNum");
+    Double traSpeed = featureProperties.getDouble("speed");
 
-    Double length = properties.getDouble("length");
+    Double length = featureProperties.getDouble("len");
     return new TrajFeatures(startTime, endTime, traStartPoint,
         traEndPoint, pointNumber, box, traSpeed, length);
   }

@@ -65,6 +65,7 @@ public class SpatialQueryTest extends TestCase {
     IndexTable indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     System.out.println("to put " + trips.size() + "trajectories");
     for (Trajectory t : trips) {
+      t.getTrajectoryFeatures();
       indexTable.putForMainTable(t);
     }
   }

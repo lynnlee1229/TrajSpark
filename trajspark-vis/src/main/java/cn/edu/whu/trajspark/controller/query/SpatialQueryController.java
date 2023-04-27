@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import org.locationtech.jts.io.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class SpatialQueryController {
 
 
-  QueryConditionService queryConditionService;
+  private final QueryConditionService queryConditionService = new QueryConditionService();
 
-  QueryService queryService;
+  private final QueryService queryService = new QueryService();
 
   @ResponseBody
   @GetMapping (value = "/query/test")
@@ -39,24 +40,24 @@ public class SpatialQueryController {
     return geoJson;
   }
   @ResponseBody
-  @PostMapping(value = "/SpatialQuery/Intersect")
-  public JSONObject SpatialIntersectQuery(@RequestParam String dataSetName,
-      @RequestParam String queryWindow)
+  @GetMapping(value = "/SpatialQuery/Intersect")
+  public JSONObject SpatialIntersectQuery(@RequestParam(value = "dataSetName") String dataSetName,
+      @RequestParam(value = "spatialWindow") String spatialWindow)
       throws ParseException, IOException {
     SpatialQueryCondition spatialQueryCondition = queryConditionService.creatIntersectSpatialCondition(
-        queryWindow);
+        spatialWindow);
     List<Trajectory> trajectories = queryService.executeSpatialQuery(dataSetName,
         spatialQueryCondition);
     return GeoJsonConvertor.convertGeoJson(trajectories);
   }
 
   @ResponseBody
-  @PostMapping(value = "/SpatialQuery/Contained")
-  public JSONObject SpatialContainedQuery(@RequestParam String dataSetName,
-      @RequestParam String queryWindow)
+  @GetMapping (value = "/SpatialQuery/Contained")
+  public JSONObject SpatialContainedQuery(@RequestParam(value = "dataSetName") String dataSetName,
+      @RequestParam(value = "spatialWindow") String spatialWindow)
       throws ParseException, IOException {
     SpatialQueryCondition spatialQueryCondition = queryConditionService.creatContainedSpatialCondition(
-        queryWindow);
+        spatialWindow);
     List<Trajectory> trajectories = queryService.executeSpatialQuery(dataSetName,
         spatialQueryCondition);
     return GeoJsonConvertor.convertGeoJson(trajectories);

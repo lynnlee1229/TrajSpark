@@ -104,10 +104,6 @@ public class HBaseStoreConfig implements IStoreConfig {
     if (hashSet.size() != indexMetaList.size()) {
       throw new IllegalArgumentException("found duplicate index meta in the list.");
     }
-    //检查主索引
-    if(hashSet.contains(mainIndexMeta)){
-      hashSet.remove(mainIndexMeta);
-    }
   }
 
   private IndexMeta createIndexMeta(IndexType indexType, Boolean isMainIndex) {

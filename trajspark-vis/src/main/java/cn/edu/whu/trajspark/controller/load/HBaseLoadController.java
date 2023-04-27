@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.controller.load;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
+import cn.edu.whu.trajspark.conf.sparkConfBuild;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.GeoJsonConvertor;
@@ -29,12 +30,7 @@ public class HBaseLoadController {
   public JSONObject StoreDataToHBase(@RequestBody String loadConfig)
       throws IOException {
     ExampleConfig exampleConfig = ExampleConfig.parse(loadConfig);
-    SparkConf sparkConf = new SparkConf().setMaster("local[*]").setAppName("HBaseLoader");
-    SparkSession sparkSession = SparkSession
-        .builder()
-        .appName("HBaseLoad" + "_" + System.currentTimeMillis())
-        .config(sparkConf)
-        .getOrCreate();
+    SparkSession sparkSession = sparkConfBuild.createSession("HBaseLoad", true);
     ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
     JavaRDD<Trajectory> trajRDD =
         iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig());

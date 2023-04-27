@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import org.locationtech.jts.io.ParseException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,13 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class STQueryController {
-  QueryConditionService queryConditionService;
 
-  QueryService queryService;
+  private final QueryConditionService queryConditionService = new QueryConditionService();
+
+  private final QueryService queryService = new QueryService();
+
   @ResponseBody
-  @PostMapping(value = "/STQuery/Intersect")
-  public JSONObject STIntersectQuery(@RequestParam String dataSetName,
-      @RequestParam String spatialWindow, @RequestParam String startWindow, @RequestParam String endWindow)
+  @GetMapping(value = "/STQuery/Intersect")
+  public JSONObject STIntersectQuery(@RequestParam(value = "dataSetName") String dataSetName,
+      @RequestParam(value = "spatialWindow") String spatialWindow,
+      @RequestParam(value = "startWindow") String startWindow,
+      @RequestParam(value = "endWindow") String endWindow)
       throws ParseException, IOException {
     SpatialTemporalQueryCondition spatialTemporalQueryCondition = queryConditionService.creatIntersectSTCondition(
         spatialWindow, startWindow, endWindow);
@@ -34,9 +39,11 @@ public class STQueryController {
   }
 
   @ResponseBody
-  @PostMapping(value = "/STQuery/Contained")
-  public JSONObject STContainedQuery(@RequestParam String dataSetName,
-      @RequestParam String spatialWindow, @RequestParam String startWindow, @RequestParam String endWindow)
+  @GetMapping(value = "/STQuery/Contained")
+  public JSONObject STContainedQuery(@RequestParam(value = "dataSetName") String dataSetName,
+      @RequestParam(value = "spatialWindow") String spatialWindow,
+      @RequestParam(value = "startWindow") String startWindow,
+      @RequestParam(value = "endWindow") String endWindow)
       throws ParseException, IOException {
     SpatialTemporalQueryCondition spatialTemporalQueryCondition = queryConditionService.creatContainedSTCondition(
         spatialWindow, startWindow, endWindow);

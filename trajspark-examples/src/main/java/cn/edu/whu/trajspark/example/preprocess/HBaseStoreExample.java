@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.example.preprocess;
 
+import cn.edu.whu.trajspark.base.trajectory.TrajFeatures;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
@@ -21,6 +22,7 @@ import java.util.Objects;
  * @since 2022/12/30
  */
 public class HBaseStoreExample {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(HBaseStoreExample.class);
 
   public static void main(String[] args) throws IOException {
@@ -36,20 +38,24 @@ public class HBaseStoreExample {
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
-      trajRDD.collect().forEach(System.out::println);
+//      JavaRDD<Trajectory> featuresJavaRDD = trajRDD.map(trajectory -> {
+//        trajectory.getTrajectoryFeatures();
+//        return trajectory;
+//      });
 //      ISegmenter mySegmenter;
 //      mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
 //      JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(trajRDD);
 //      segmentedRDD.collect().forEach(System.out::println);
 //      myDector.detect(segmentedRDD).collect().forEach(System.out::println);
       IStore iStore =
-          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
+          IStore.getStore(exampleConfig.getStoreConfig());
       iStore.storeTrajectory(trajRDD);
       LOGGER.info("Finished!");
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
+
   @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();

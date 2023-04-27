@@ -64,7 +64,8 @@ public class XZ2IndexStrategyTest extends TestCase {
       XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
       List<RowKeyRange> list = XZ2IndexStrategy.getScanRanges(spatialQueryCondition);
       for (RowKeyRange range : list) {
-        System.out.println("start:" + XZ2IndexStrategy.parsePhysicalIndex2String(range.getStartKey()) + "end: " + XZ2IndexStrategy.parsePhysicalIndex2String(range.getEndKey()));
+        System.out.println(range);
+//        System.out.println("start:" + XZ2IndexStrategy.parsePhysicalIndex2String(range.getStartKey()) + "end: " + XZ2IndexStrategy.parsePhysicalIndex2String(range.getEndKey()));
       }
     } catch (ParseException e) {
       e.printStackTrace();

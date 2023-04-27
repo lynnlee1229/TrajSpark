@@ -20,8 +20,11 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.springframework.stereotype.Service;
 
-@Service
+
 public class QueryConditionService {
+
+  public QueryConditionService() {
+  }
 
   public SpatialQueryCondition creatIntersectSpatialCondition(String queryWindow) throws ParseException {
     WKTReader wktReader = new WKTReader();

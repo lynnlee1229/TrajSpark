@@ -26,7 +26,8 @@ class TrajectoryJsonUtilTest extends TestCase {
     JSONArray jsonObject = feature.getJSONArray("features");
     JSONObject object = jsonObject.getJSONObject(0);
     JSONObject properties = object.getJSONObject("properties");
-    TrajFeatures trajFeatures = TrajectoryJsonUtil.parseTraFeatures(properties);
+    JSONObject features= object.getJSONObject("trajectoryFeatures");
+    TrajFeatures trajFeatures = TrajectoryJsonUtil.parseTraFeatures(features, properties);
     System.out.println(trajFeatures);
   }
   @Test

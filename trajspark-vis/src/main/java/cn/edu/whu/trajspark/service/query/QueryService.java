@@ -14,8 +14,12 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
-@Service
+
 public class QueryService {
+
+  public QueryService() {
+  }
+
   public List<Trajectory> executeSpatialQuery(String dataSetName, SpatialQueryCondition spatialQueryCondition) throws IOException {
     Database instance = Database.getInstance();
     SpatialQuery spatialQuery = new SpatialQuery(instance.getDataSet(dataSetName), spatialQueryCondition);

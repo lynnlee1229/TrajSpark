@@ -25,7 +25,7 @@ public interface IStore extends Serializable {
   void storeStayPointList(JavaRDD<List<StayPoint>> spList);
   void storeStayPointASTraj(JavaRDD<StayPoint> sp);
 
-  static IStore getStore(IStoreConfig storeConfig, IDataConfig dataConfig) {
+  static IStore getStore(IStoreConfig storeConfig) {
     switch (storeConfig.getStoreType()) {
       case HDFS:
         if (storeConfig instanceof HDFSStoreConfig) {
