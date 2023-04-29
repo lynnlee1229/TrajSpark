@@ -14,6 +14,7 @@
         <module>trajspark-core</module>
         <module>trajspark-db</module>
         <module>trajspark-base</module>
+        <module>trajspark-vis</module>
     </modules>
 
     <properties>

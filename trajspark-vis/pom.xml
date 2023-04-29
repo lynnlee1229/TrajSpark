@@ -4,28 +4,29 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.10-SNAPSHOT</version>
-    <relativePath/> <!-- lookup parent from repository -->
+    <artifactId>TrajSpark</artifactId>
+    <groupId>cn.edu.whu.trajspark</groupId>
+    <version>1.0-SNAPSHOT</version>
   </parent>
-  <groupId>cn.edu.whu.trajspark</groupId>
+
   <artifactId>trajspark-vis</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>trajspark-vis</name>
-  <description>trajspark-vis</description>
+
   <properties>
-    <java.version>1.8</java.version>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <version>2.7.10-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <version>2.7.10-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
 
@@ -44,15 +45,13 @@
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_2.12</artifactId>
-      <version>3.0.0</version>
-      <scope>compile</scope>
+      <artifactId>spark-core_${scala.version}</artifactId>
+      <version>${spark.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-sql_2.12</artifactId>
-      <version>3.0.0</version>
-      <scope>compile</scope>
+      <artifactId>spark-sql_${scala.version}</artifactId>
+      <version>${spark.version}</version>
     </dependency>
   </dependencies>
 
