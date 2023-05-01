@@ -25,6 +25,8 @@
         <scala.version>2.12</scala.version>
         <spark.version>3.0.0</spark.version>
 
+        <spring.version>2.7.10-SNAPSHOT</spring.version>
+
         <geotools.version>24.0</geotools.version>
         <spatial4j.version>0.8</spatial4j.version>
         <jts.version>1.19.0</jts.version>
