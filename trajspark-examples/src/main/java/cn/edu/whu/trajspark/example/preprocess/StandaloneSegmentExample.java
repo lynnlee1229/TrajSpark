@@ -47,7 +47,7 @@ public class StandaloneSegmentExample {
 
       // 存储
       IStore iStore =
-          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
+          IStore.getStore(exampleConfig.getStoreConfig());
       iStore.storeTrajectory(segmentedRDD);
     } catch (Exception e) {
       throw new RuntimeException(e);

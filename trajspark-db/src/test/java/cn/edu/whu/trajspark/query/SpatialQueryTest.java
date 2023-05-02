@@ -43,8 +43,8 @@ public class SpatialQueryTest extends TestCase {
     System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
     try {
       WKTReader wktReader = new WKTReader();
-      Envelope envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT).getEnvelopeInternal();
-      Envelope envelopeContained = wktReader.read(QUERY_WKT_CONTAIN).getEnvelopeInternal();
+      Geometry envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT);
+      Geometry envelopeContained = wktReader.read(QUERY_WKT_CONTAIN);
       spatialIntersectQueryCondition = new SpatialQueryCondition(envelopeIntersect, SpatialQueryCondition.SpatialQueryType.INTERSECT);
       spatialContainedQueryCondition = new SpatialQueryCondition(envelopeContained, SpatialQueryCondition.SpatialQueryType.CONTAIN);
     } catch (ParseException e) {
@@ -65,6 +65,7 @@ public class SpatialQueryTest extends TestCase {
     IndexTable indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     System.out.println("to put " + trips.size() + "trajectories");
     for (Trajectory t : trips) {
+      t.getTrajectoryFeatures();
       indexTable.putForMainTable(t);
     }
   }

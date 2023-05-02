@@ -19,6 +19,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -52,8 +53,8 @@ public class XZ2PQueryTest {
     System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
     try {
       WKTReader wktReader = new WKTReader();
-      Envelope envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT).getEnvelopeInternal();
-      Envelope envelopeContained = wktReader.read(QUERY_WKT_CONTAIN).getEnvelopeInternal();
+      Geometry envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT);
+      Geometry envelopeContained = wktReader.read(QUERY_WKT_CONTAIN);
       spatialIntersectQueryCondition = new SpatialQueryCondition(envelopeIntersect, SpatialQueryCondition.SpatialQueryType.INTERSECT);
       spatialContainedQueryCondition = new SpatialQueryCondition(envelopeContained, SpatialQueryCondition.SpatialQueryType.CONTAIN);
     } catch (ParseException e) {
