@@ -131,6 +131,7 @@ public class HBaseStore extends Configured implements IStore {
         String location = storeConfig.getLocation();
         conf.set(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY, location);
         for (IndexMeta im : dataSetMeta.getIndexMetaList()) {
+            if(im == dataSetMeta.getCoreIndexMeta()) continue;
             String indexTableName = im.getIndexTableName();
             conf.set(DBConstants.BULKLOAD_TARGET_INDEX_NAME, indexTableName);
             BulkLoadDriverUtils.createIndexFromTable(conf, im, dataSetMeta);
