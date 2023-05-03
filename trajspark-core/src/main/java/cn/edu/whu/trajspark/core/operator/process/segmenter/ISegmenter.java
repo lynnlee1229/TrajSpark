@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.BasicSegmenterConfig;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.CountSegmenterConfig;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.ISegmenterConfig;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.UserDefinedSegmenterConfig;
@@ -46,6 +47,11 @@ public interface ISegmenter extends Serializable {
       case USERDEFINED_SEGMENTER:
         if (config instanceof UserDefinedSegmenterConfig) {
           return new UserDefinedSegmenter((UserDefinedSegmenterConfig) config);
+        }
+        throw new NoSuchMethodError();
+      case COUNT_SEGMENTER:
+        if (config instanceof CountSegmenterConfig) {
+          return new CountSegmenter((CountSegmenterConfig) config);
         }
         throw new NoSuchMethodError();
       default:

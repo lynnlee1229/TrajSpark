@@ -36,6 +36,9 @@ public class HDFSLoader implements ILoader {
           return this.loadTrajectoryFromMultiFile(sparkSession, hdfsLoadConfig, trajectoryConfig);
         case SINGLE_FILE:
           return this.loadTrajectoryFromSingleFile(sparkSession, hdfsLoadConfig, trajectoryConfig);
+        case MULTI_SINGLE_FILE:
+          return this.loadTrajectoryFromMultiSingleFile(sparkSession, hdfsLoadConfig,
+              trajectoryConfig);
         default:
           throw new NotSupportedException(
               "can't support fileMode " + hdfsLoadConfig.getFileMode().getMode());
@@ -116,4 +119,19 @@ public class HDFSLoader implements ILoader {
       }
     }).filter(Objects::nonNull);
   }
+
+  private JavaRDD<Trajectory> loadTrajectoryFromMultiSingleFile(SparkSession sparkSession,
+                                                                HDFSLoadConfig hdfsLoadConfig,
+                                                                TrajectoryConfig trajectoryConfig) {
+    LOGGER.info(
+        "Loading trajectories from multi_files in folder: " + hdfsLoadConfig.getLocation());
+    int partNum = hdfsLoadConfig.getPartNum();
+    return sparkSession.sparkContext().wholeTextFiles(hdfsLoadConfig.getLocation(), partNum)
+        .toJavaRDD()
+        .filter((s) -> !(s._2).isEmpty())
+        .flatMap((s) -> TrajectoryParser.singlefileParse(s._2, trajectoryConfig,
+                hdfsLoadConfig.getSplitter())
+            .iterator()).filter(Objects::nonNull);
+  }
 }
+
