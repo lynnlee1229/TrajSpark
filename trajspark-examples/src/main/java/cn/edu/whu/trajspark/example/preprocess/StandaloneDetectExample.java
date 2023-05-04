@@ -52,7 +52,7 @@ public class StandaloneDetectExample {
       JavaRDD<StayPoint> detectRDD = myDector.detect(segmentedTraj);
       // 存储
       IStore iStore =
-          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
+          IStore.getStore(exampleConfig.getStoreConfig());
       iStore.storeStayPointList(stayPointList);
 //      iStore.storeStayPointASTraj(detectRDD);
     }

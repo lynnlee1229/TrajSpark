@@ -46,7 +46,7 @@ public class StandaloneFilterExample {
 
       // 存储
       IStore iStore =
-          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
+          IStore.getStore(exampleConfig.getStoreConfig());
       iStore.storeTrajectory(filteredRDD);
     }
   }

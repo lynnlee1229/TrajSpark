@@ -5,20 +5,20 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
+import cn.edu.whu.trajspark.database.meta.IndexMeta;
+import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
-import java.time.ZonedDateTime;
+import cn.edu.whu.trajspark.query.basic.SpatialQuery;
+import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import junit.framework.TestCase;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -42,70 +42,64 @@ public class XZ2QueryTest extends TestCase {
       "POLYGON((114.05185384869783 22.535191684309407,114.07313985944002 22.535191684309407,114.07313985944002 22.51624317521578,114.05185384869783 22.51624317521578,114.05185384869783 22.535191684309407))";
   static String QUERY_WKT_CONTAIN =
           "POLYGON((114.06266851544588 22.55279006251164,114.09511251569002 22.55263152858115,114.09631414532869 22.514023096146417,114.02833624005525 22.513705939082808,114.02799291730135 22.553107129826113,114.06266851544588 22.55279006251164))";
+  static Database instance;
+  static IndexMeta indexMeta = new IndexMeta(true, new XZ2IndexStrategy(), DATASET_NAME, "default");
+  static IndexTable indexTable;
 
   static {
     System.setProperty("hadoop.home.dir", "/usr/local/hadoop-2.7.7");
     try {
+      instance = Database.getInstance();
       WKTReader wktReader = new WKTReader();
-      Envelope envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT).getEnvelopeInternal();
-      Envelope envelopeContained = wktReader.read(QUERY_WKT_CONTAIN).getEnvelopeInternal();
+      Geometry envelopeIntersect = wktReader.read(QUERY_WKT_INTERSECT);
+      Geometry envelopeContained = wktReader.read(QUERY_WKT_CONTAIN);
       spatialIntersectQueryCondition = new SpatialQueryCondition(envelopeIntersect, SpatialQueryCondition.SpatialQueryType.INTERSECT);
       spatialContainedQueryCondition = new SpatialQueryCondition(envelopeContained, SpatialQueryCondition.SpatialQueryType.CONTAIN);
-    } catch (ParseException e) {
+    } catch (ParseException | IOException e) {
       e.printStackTrace();
     }
   }
+
 @Test
   public void testPutTrajectory() throws IOException, URISyntaxException {
-    Database instance = Database.getInstance();
-    instance.openConnection();
     // create dataset
     List<IndexMeta> list = new LinkedList<>();
-    list.add(new IndexMeta(
-        true,
-        new XZ2IndexStrategy(),
-        DATASET_NAME
-    ));
+    list.add(indexMeta);
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
     // insert data
     List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
         new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     System.out.println("to put " + trips.size() + "trajectories");
     for (Trajectory t : trips) {
-      dataTable.put(t);
+      indexTable.putForMainTable(t);
     }
   }
 
  @Test
   public void testExecuteIntersectQuery() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
-    SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialIntersectQueryCondition);
+    SpatialQuery spatialQuery = new SpatialQuery(instance.getDataSet(DATASET_NAME), spatialIntersectQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     System.out.println(results.size());
+   indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory result : results) {
-      ByteArray index = dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy()
+      ByteArray index = indexTable.getIndexMeta().getIndexStrategy()
           .index(result);
-      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().parseIndex2String(index));
-      ZonedDateTime startTime = result.getTrajectoryFeatures().getStartTime();
-      ZonedDateTime endTime = result.getTrajectoryFeatures().getEndTime();
-      System.out.println(new TimeLine(startTime, endTime));
+      System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
     }
-    assert spatialQuery.executeQuery().size() == 13;
+   assertEquals(spatialQuery.executeQuery().size(), 13);
   }
 
   @Test
   public void testExecuteContainedQuery() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
-    SpatialQuery spatialQuery = new SpatialQuery(dataTable, spatialContainedQueryCondition);
+    SpatialQuery spatialQuery = new SpatialQuery(instance.getDataSet(DATASET_NAME), spatialContainedQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory result : results) {
-      System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(result));
+      System.out.println(indexTable.getIndexMeta().getIndexStrategy().index(result));
     }
     assertEquals(spatialQuery.executeQuery().size(), 19);
   }
@@ -113,15 +107,12 @@ public class XZ2QueryTest extends TestCase {
   @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     instance.deleteDataSet(DATASET_NAME);
   }
 
   @Test
   public void testGetAnswer() throws URISyntaxException, ParseException, IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
     List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
         new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
     WKTReader wktReader = new WKTReader();
@@ -130,18 +121,19 @@ public class XZ2QueryTest extends TestCase {
     System.out.println(trips.size());
     int i = 0;
     int j = 0;
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory trajectory : trips) {
       if (envelope.contains(trajectory.getLineString())) {
-        System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(trajectory));
-        // System.out.println(trajectory);
+        ByteArray index = indexTable.getIndexMeta().getIndexStrategy().index(trajectory);
+        System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
         i++;
       }
     }
     System.out.println("CONTAIN: " + i);
     for (Trajectory trajectory : trips) {
       if (envelope1.intersects(trajectory.getLineString())) {
-        System.out.println(dataTable.getDataSetMeta().getIndexMetaList().get(0).getIndexStrategy().index(trajectory));
-        // System.out.println(trajectory);
+        ByteArray index = indexTable.getIndexMeta().getIndexStrategy().index(trajectory);
+        System.out.println(indexTable.getIndexMeta().getIndexStrategy().parsePhysicalIndex2String(index));
         j++;
       }
     }
@@ -183,14 +175,11 @@ public class XZ2QueryTest extends TestCase {
 //  }
 @Test
   public void testSingleGetTrajectory() throws IOException {
-    Database instance = Database.getInstance();
-    instance.openConnection();
     byte[] target = Bytes.fromHex("000000000000000000012156ad414342514244533537");
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
-    Result result = dataTable.get(new Get(target));
+    Result result = indexTable.get(new Get(target));
     Envelope envelope = spatialContainedQueryCondition.getQueryWindow();
     Polygon queryPolygon = new MinimumBoundingBox(envelope.getMinX(), envelope.getMinY(), envelope.getMaxX(), envelope.getMaxY()).toPolygon(4326);
-    Trajectory t = TrajectorySerdeUtils.getTrajectory(result);
+    Trajectory t = TrajectorySerdeUtils.mainRowToTrajectory(result);
     System.out.println(queryPolygon.contains(t.getLineString()));
   }
 }

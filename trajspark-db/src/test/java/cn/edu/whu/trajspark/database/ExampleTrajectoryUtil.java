@@ -3,12 +3,16 @@ package cn.edu.whu.trajspark.database;
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang
@@ -36,7 +40,7 @@ public class ExampleTrajectoryUtil {
           isFirst = false;
           Instant instant = Instant.ofEpochSecond(Long.parseLong(tokens[6]));
           trajPointList.add(new TrajPoint(
-              ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()),
+              ZonedDateTime.ofInstant(instant, TIME_ZONE),
               Double.parseDouble(tokens[3]),
               Double.parseDouble(tokens[2])));
         } else if (status == 1) {
@@ -49,7 +53,7 @@ public class ExampleTrajectoryUtil {
             emptyBefore = false;
           }
           trajPointList.add(new TrajPoint(
-              ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()),
+              ZonedDateTime.ofInstant(instant, TIME_ZONE),
               Double.parseDouble(tokens[3]),
               Double.parseDouble(tokens[2])));
         } else {
@@ -62,7 +66,7 @@ public class ExampleTrajectoryUtil {
             emptyBefore = true;
           }
           trajPointList.add(new TrajPoint(
-              ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()),
+              ZonedDateTime.ofInstant(instant, TIME_ZONE),
               Double.parseDouble(tokens[3]),
               Double.parseDouble(tokens[2])));
         }

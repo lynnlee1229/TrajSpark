@@ -6,6 +6,7 @@ import cn.edu.whu.trajspark.core.conf.load.HBaseLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.HDFSLoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.conf.load.StandaloneLoadConfig;
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.spark.api.java.JavaRDD;
@@ -20,7 +21,7 @@ import java.io.Serializable;
  **/
 public interface ILoader extends Serializable {
   JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig, IDataConfig dataConfig);
-  JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig);
+  JavaRDD<Trajectory> loadTrajectory(SparkSession ss, ILoadConfig loadConfig) throws IOException;
 
   static ILoader getLoader(ILoadConfig loadConfig) {
     switch (loadConfig.getInputType()) {

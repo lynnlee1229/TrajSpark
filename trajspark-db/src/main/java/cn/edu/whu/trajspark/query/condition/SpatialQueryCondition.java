@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.query.condition;
 
 import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
 
 /**
@@ -10,16 +11,18 @@ import org.locationtech.jts.io.WKTWriter;
  * @author Haocheng Wang
  * Created on 2022/9/27
  */
-public class SpatialQueryCondition {
+public class SpatialQueryCondition extends AbstractQueryCondition{
   /**
    * Spatial query window geometry, may be geometry collection
    */
   private Envelope queryWindow;
+  private Geometry geometryWindow;
 
   private SpatialQueryType queryType;
 
-  public SpatialQueryCondition(Envelope queryWindow, SpatialQueryType queryType) {
-    this.queryWindow = queryWindow;
+  public SpatialQueryCondition(Geometry geometryWindow, SpatialQueryType queryType) {
+    this.geometryWindow = geometryWindow;
+    this.queryWindow = geometryWindow.getEnvelopeInternal();
     this.queryType = queryType;
   }
 
@@ -29,11 +32,15 @@ public class SpatialQueryCondition {
 
   public String getQueryWindowWKT() {
     WKTWriter writer = new WKTWriter();
-    MinimumBoundingBox mbr = new MinimumBoundingBox(queryWindow.getMinX(),
-        queryWindow.getMinY(),
-        queryWindow.getMaxX(),
-        queryWindow.getMaxY());
-    return writer.write(mbr.toPolygon(4326));
+    return writer.write(geometryWindow);
+  }
+
+  public Geometry getGeometryWindow() {
+    return geometryWindow;
+  }
+
+  public void setGeometryWindow(Geometry geometryWindow) {
+    this.geometryWindow = geometryWindow;
   }
 
   public void setQueryWindow(Envelope queryWindow) {
@@ -48,6 +55,13 @@ public class SpatialQueryCondition {
     this.queryType = queryType;
   }
 
+  @Override
+  public String getConditionInfo() {
+     return "SpatialQueryCondition{" +
+        "queryWindow=" + queryWindow +
+        ", queryType=" + queryType +
+        '}';
+  }
 
   /**
    * @author Haocheng Wang

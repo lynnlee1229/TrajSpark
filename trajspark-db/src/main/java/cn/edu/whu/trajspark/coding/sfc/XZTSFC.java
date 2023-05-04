@@ -1,23 +1,20 @@
 package cn.edu.whu.trajspark.coding.sfc;
 
-import static cn.edu.whu.trajspark.constant.CodingConstants.LOG_FIVE;
-
+import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeElement;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
+
+import static cn.edu.whu.trajspark.constant.CodingConstants.LOG_FIVE;
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Xu Qi
@@ -29,7 +26,7 @@ public class XZTSFC implements Serializable {
   private final TimePeriod timePeriod;
   private static final Logger LOGGER = LoggerFactory.getLogger(XZTSFC.class);
 
-  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+  static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, TIME_ZONE);
   private final TimeElement initializeTime = new TimeElement(0, 1);
   TimeElement levelSeparator = new TimeElement(-1, -1);
 

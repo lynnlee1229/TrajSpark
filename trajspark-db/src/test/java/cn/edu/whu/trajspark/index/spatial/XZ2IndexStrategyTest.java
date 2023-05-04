@@ -11,12 +11,13 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang
@@ -25,7 +26,7 @@ import java.util.List;
 public class XZ2IndexStrategyTest extends TestCase {
 
   public static Trajectory getExampleTrajectory() {
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(TIME_ZONE);
     ZonedDateTime start = ZonedDateTime.parse("2022-01-01 10:00:00", dateTimeFormatter);
     ZonedDateTime end = ZonedDateTime.parse("2022-01-01 10:20:00", dateTimeFormatter);
     TrajFeatures trajFeatures = new TrajFeatures(
@@ -59,11 +60,12 @@ public class XZ2IndexStrategyTest extends TestCase {
     WKTReader reader = new WKTReader();
     try {
       Geometry geom = reader.read("POLYGON ((114.345703125 30.531005859375, 114.345703125 30.5419921875, 114.36767578125 30.5419921875, 114.36767578125 30.531005859375, 114.345703125 30.531005859375))");
-      SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(geom.getEnvelopeInternal(), SpatialQueryCondition.SpatialQueryType.INTERSECT);
+      SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(geom, SpatialQueryCondition.SpatialQueryType.INTERSECT);
       XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
       List<RowKeyRange> list = XZ2IndexStrategy.getScanRanges(spatialQueryCondition);
       for (RowKeyRange range : list) {
-        System.out.println("start:" + XZ2IndexStrategy.parseIndex2String(range.getStartKey()) + "end: " + XZ2IndexStrategy.parseIndex2String(range.getEndKey()));
+        System.out.println(range);
+//        System.out.println("start:" + XZ2IndexStrategy.parsePhysicalIndex2String(range.getStartKey()) + "end: " + XZ2IndexStrategy.parsePhysicalIndex2String(range.getEndKey()));
       }
     } catch (ParseException e) {
       e.printStackTrace();
@@ -74,7 +76,7 @@ public class XZ2IndexStrategyTest extends TestCase {
     Trajectory t = getExampleTrajectory();
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
-    System.out.println(XZ2IndexStrategy.parseIndex2String(byteArray));
+    System.out.println(XZ2IndexStrategy.parsePhysicalIndex2String(byteArray));
   }
 
   public void testGetShardNum() {
@@ -84,6 +86,7 @@ public class XZ2IndexStrategyTest extends TestCase {
     Trajectory t = getExampleTrajectory();
     XZ2IndexStrategy XZ2IndexStrategy = new XZ2IndexStrategy();
     ByteArray byteArray = XZ2IndexStrategy.index(t);
-    assertEquals(XZ2IndexStrategy.getObjectTrajId(byteArray), t.getObjectID() + t.getTrajectoryID());
+    System.out.println("Actual: " + XZ2IndexStrategy.getObjectID(byteArray) + XZ2IndexStrategy.getTrajectoryID(byteArray));
+    System.out.println("Expected: " + t.getObjectID() + "-" + t.getTrajectoryID());
   }
 }

@@ -1,26 +1,27 @@
 package cn.edu.whu.trajspark.query.coprocessor;
 
-import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.addCoprocessor;
-import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.deleteCoprocessor;
-
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.XZTCoding;
 import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
-import cn.edu.whu.trajspark.index.time.TimeIndexStrategy;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.DataTable;
+import cn.edu.whu.trajspark.database.table.IndexTable;
+import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
+import junit.framework.TestCase;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.TestCase;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.jupiter.api.Test;
+
+import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.addCoprocessor;
+import static cn.edu.whu.trajspark.query.coprocessor.CoprocessorLoader.deleteCoprocessor;
 
 /**
  * @author Xu Qi
@@ -28,27 +29,27 @@ import org.junit.jupiter.api.Test;
  */
 class CoprocessorLoaderTest extends TestCase {
   static String DATASET_NAME = "xz2_intersect_query_test";
-  static TimeIndexStrategy timeIndexStrategy = new TimeIndexStrategy(new XZTCoding());
+  static IDTIndexStrategy IDTIndexStrategy = new IDTIndexStrategy(new XZTCoding());
 
   @Test
   public void testPutTrajectory() throws IOException, URISyntaxException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     // create dataset
     List<IndexMeta> list = new LinkedList<>();
     list.add(new IndexMeta(
         true,
-        timeIndexStrategy,
-        DATASET_NAME
+        IDTIndexStrategy,
+        DATASET_NAME,
+        "default"
     ));
     DataSetMeta dataSetMeta = new DataSetMeta(DATASET_NAME, list);
     instance.createDataSet(dataSetMeta);
     // insert data
     List<Trajectory> trips = ExampleTrajectoryUtil.parseFileToTrips(
         new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
-    DataTable dataTable = instance.getDataTable(DATASET_NAME);
+    IndexTable indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     for (Trajectory t : trips) {
-      dataTable.put(t);
+      indexTable.putForMainTable(t);
     }
     instance.closeConnection();
   }
@@ -72,7 +73,6 @@ class CoprocessorLoaderTest extends TestCase {
   @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();
-    instance.openConnection();
     instance.deleteDataSet(DATASET_NAME);
   }
 }

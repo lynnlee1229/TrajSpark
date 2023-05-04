@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.database.meta;
 
+import cn.edu.whu.trajspark.base.util.SerializerUtils;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import junit.framework.TestCase;
 
@@ -13,9 +14,10 @@ public class IndexMetaTest extends TestCase {
 
   public void testSerialize() throws IOException {
     XZ2IndexStrategy indexStrategy = new XZ2IndexStrategy();
-    IndexMeta indexMeta = new IndexMeta(true, indexStrategy, "data_set_name");
-    byte[] bytes = IndexMeta.serialize(indexMeta);
-    IndexMeta indexMeta1 = IndexMeta.deserialize(bytes);
+    IndexMeta indexMeta = new IndexMeta(true, indexStrategy,
+        "data_set_name", "defaule_index_name");
+    byte[] bytes = SerializerUtils.serializeObject(indexMeta);
+    IndexMeta indexMeta1 = (IndexMeta) SerializerUtils.deserializeObject(bytes, IndexMeta.class);
     assert indexMeta.equals(indexMeta1);
   }
 

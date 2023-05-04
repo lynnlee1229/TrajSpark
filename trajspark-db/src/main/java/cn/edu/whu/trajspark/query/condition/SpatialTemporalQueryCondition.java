@@ -22,14 +22,12 @@ public class SpatialTemporalQueryCondition {
   public TemporalQueryCondition getTemporalQueryCondition() {
     return temporalQueryCondition;
   }
-  public enum STQueryType {
-    /**
-     * Query all data that may INTERSECT with query window.
-     */
-    CONTAIN,
-    /**
-     * Query all data that is totally contained in query window.
-     */
-    INTERSECT;
+
+  @Override
+  public String toString() {
+    return "SpatialTemporalQueryCondition{" +
+        "spatialQueryCondition=" + spatialQueryCondition +
+        ", temporalQueryCondition=" + temporalQueryCondition +
+        '}';
   }
 }
