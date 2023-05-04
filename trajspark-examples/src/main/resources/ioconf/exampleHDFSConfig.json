@@ -1,9 +1,10 @@
 {
   "loadConfig": {
-    "@type": "standalone",
+    "@type": "hdfs",
     "master": "local[*]",
-    "location": "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/data/geolife",
-    "fileMode": "multi_file",
+    "location": "hdfs://localhost:9000/cars.csv",
+    "fsDefaultName": "hdfs://localhost:9000",
+    "fileMode": "single_file",
     "partNum": 8,
     "splitter": ","
   },
@@ -17,46 +18,38 @@
     "objectId": {
       "sourceName": "object_id",
       "dataType": "String",
-      "index": 0
+      "index": 1
     },
     "trajPointConfig": {
       "@type": "traj_point",
       "pointId": {
         "sourceName": "point_id",
         "dataType": "String",
-        "index": 2
+        "index": -1
       },
       "lng": {
         "sourceName": "lng",
         "dataType": "Double",
-        "index": 4
+        "index": 3
       },
       "lat": {
         "sourceName": "lat",
         "dataType": "Double",
-        "index": 3
+        "index": 2
       },
       "time": {
         "sourceName": "time",
         "dataType": "Date",
-        "index": 5,
+        "index": 4,
         "format": "yyyy-MM-dd HH:mm:ss"
       }
     }
   },
-  "filterConfig": {
-    "@type": "USERDEFINED_FILTER",
-    "filterConfigList": [
-      {
-        "@type": "BASIC_FILTER",
-        "maxSpeed": 150.0,
-        "minTrajLength": 0.05
-      }
-    ]
-  },
   "storeConfig": {
-    "@type": "standalone",
-    "location": "/Users/lynnlee/Downloads/tmp/filtered",
+    "@type": "hdfs",
+    "ip": "localhost",
+    "port": "9000",
+    "location": "hdfs://localhost:9000/test",
     "schema": "POINT_BASED_TRAJECTORY",
     "splitter": ",",
     "filePostFix": ".csv"

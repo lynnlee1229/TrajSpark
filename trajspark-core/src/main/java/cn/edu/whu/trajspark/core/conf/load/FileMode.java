@@ -8,9 +8,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
  **/
 public enum FileMode {
   MULTI_FILE("multi_file"),
-  SINGLE_FILE("single_file");
+  SINGLE_FILE("single_file"),
+  MULTI_SINGLE_FILE("multi_single_file");
 
-  private String mode;
+  private final String mode;
 
   FileMode(String mode) {
     this.mode = mode;

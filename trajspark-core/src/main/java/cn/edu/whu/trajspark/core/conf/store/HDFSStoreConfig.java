@@ -9,17 +9,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @date 2022/9/22
  **/
 public class HDFSStoreConfig implements IStoreConfig {
+  private final String splitter;
+  private final String filePostFix;
   private String ip;
   private int port;
   private String location;
+
+  public String getSplitter() {
+    return splitter;
+  }
+
+  public String getFilePostFix() {
+    return filePostFix;
+  }
+
   private StoreSchemaEnum schema;
 
   @JsonCreator
-  public HDFSStoreConfig(@JsonProperty("ip") String ip, @JsonProperty("port") int port, @JsonProperty("location") String location, @JsonProperty("schema") StoreSchemaEnum schema) {
+  public HDFSStoreConfig(@JsonProperty("ip") String ip,
+                         @JsonProperty("port") int port,
+                         @JsonProperty("location") String location,
+                         @JsonProperty("schema") StoreSchemaEnum schema,
+                         @JsonProperty("splitter") String splitter,
+                         @JsonProperty("filePostFix") String filePostFix) {
     this.ip = ip;
     this.port = port;
     this.location = location;
     this.schema = schema;
+    this.splitter = splitter;
+    this.filePostFix = filePostFix;
   }
 
   public StoreType getStoreType() {
@@ -41,4 +59,5 @@ public class HDFSStoreConfig implements IStoreConfig {
   public StoreSchemaEnum getSchema() {
     return this.schema;
   }
+
 }

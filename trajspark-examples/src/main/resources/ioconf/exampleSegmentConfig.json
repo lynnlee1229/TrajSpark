@@ -2,7 +2,7 @@
   "loadConfig": {
     "@type": "standalone",
     "master": "local[*]",
-    "location": "/Users/lynnlee/Downloads/tmp/filtered",
+    "location": "/Users/lynnlee/Code/practice/TrajSpark/trajspark-examples/src/main/resources/data/geolife",
     "fileMode": "multi_file",
     "partNum": 8,
     "splitter": ","
@@ -49,20 +49,10 @@
     "segmenterConfigList": [
       {
         "@type": "BASIC_SEGMENTER",
-        "maxDis": 10000,
-        "maxTimeInterval":1800,
+        "maxDis": 1000,
+        "maxTimeInterval":600,
         "minTrajLength": 0.05
-      },
-      {
-        "@type": "STAYPOINTBASED_SEGMENTER",
-        "minTrajLength": 0.05,
-        "detectorConfig": {
-          "@type": "BASIC_DETECTOR",
-          "maxStayDistInMeter": 300,
-          "maxStayTimeInSecond": 900
-        }
-      }
-    ]
+      }]
   },
   "storeConfig": {
     "@type": "standalone",
