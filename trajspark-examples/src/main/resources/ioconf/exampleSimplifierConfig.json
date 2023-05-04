@@ -44,21 +44,16 @@
       }
     }
   },
-  "filterConfig": {
-    "@type": "USERDEFINED_FILTER",
-    "filterConfigList": [
-      {
-        "@type": "BASIC_FILTER",
-        "maxSpeed": 150.0,
-        "minTrajLength": 0.05
-      }
-    ]
-  },
-  "storeConfig": {
-    "@type": "standalone",
-    "location": "/Users/lynnlee/Downloads/tmp/filtered",
-    "schema": "POINT_BASED_TRAJECTORY",
-    "splitter": ",",
-    "filePostFix": ".csv"
-  }
+  "simplifierConfig": {
+    "@type": "DP_SIMPLIFIER",
+    "epsilon": 150,
+    "minTrajLength": 0.05
+},
+"storeConfig": {
+"@type": "standalone",
+"location": "/Users/lynnlee/Downloads/tmp/simplified",
+"schema": "POINT_BASED_TRAJECTORY",
+"splitter": ",",
+"filePostFix": ".csv"
+}
 }

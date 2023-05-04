@@ -47,13 +47,13 @@
   "segmenterConfig": {
     "@type": "BASIC_SEGMENTER",
     "maxDis": 10000,
-    "maxTimeInterval": 1800,
+    "maxTimeInterval": 1000,
     "minTrajLength": 0.05
   },
   "detectorConfig": {
     "@type": "BASIC_DETECTOR",
-    "maxStayDistInMeter": 300,
-    "maxStayTimeInSecond": 900
+    "maxStayDistInMeter": 100,
+    "maxStayTimeInSecond": 60
   },
   "storeConfig": {
     "@type": "standalone",

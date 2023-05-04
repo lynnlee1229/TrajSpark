@@ -31,7 +31,7 @@ public class HDFSStore implements IStore {
     JavaPairRDD<String, String> cachedRDD = trajectoryJavaRDD.mapToPair(
         item -> {
           String fileName;
-          if (item.getObjectID().length() == 0) {
+          if (item.getObjectID() == null) {
             fileName =
                 String.format("%s%s",
                     item.getTrajectoryID(),

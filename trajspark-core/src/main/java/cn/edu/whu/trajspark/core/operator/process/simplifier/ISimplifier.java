@@ -21,7 +21,7 @@ public interface ISimplifier extends Serializable {
   Trajectory simplifyFunction(Trajectory rawTrajectory);
 
   /**
-   * 化简函数，适用.filter(RDD)形式调用
+   * 化简函数，适用.simplify(RDD)形式调用
    *
    * @param rawTrajectoryRDD RDD<未化简轨迹>
    * @return RDD<过滤后轨迹>

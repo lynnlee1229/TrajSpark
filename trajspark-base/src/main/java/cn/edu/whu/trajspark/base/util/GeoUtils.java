@@ -79,7 +79,7 @@ public class GeoUtils implements Serializable {
   }
 
   public static double getEuclideanDistanceM(BasePoint p1, BasePoint p2) {
-    return getEuclideanDistanceM(p1.getLng(), p1.getLat(), p2.getLat(), p2.getLng());
+    return getEuclideanDistanceM(p1.getLng(), p1.getLat(), p2.getLng(), p2.getLat());
   }
 
   public static double getGeoListLen(List<Geometry> geoList) {
