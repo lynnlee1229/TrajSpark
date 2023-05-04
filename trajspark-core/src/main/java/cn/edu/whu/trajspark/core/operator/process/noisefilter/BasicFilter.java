@@ -2,8 +2,8 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.conf.process.noisefilter.BasicFilterConfig;
 import cn.edu.whu.trajspark.base.util.GeoUtils;
+import cn.edu.whu.trajspark.core.conf.process.noisefilter.BasicFilterConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,6 +32,7 @@ public class BasicFilter implements IFilter {
 
   /**
    * 使用配置文件构造
+   *
    * @param config
    */
   public BasicFilter(BasicFilterConfig config) {
@@ -64,4 +65,5 @@ public class BasicFilter implements IFilter {
   public JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD) {
     return rawTrajectoryRDD.map(this::filterFunction);
   }
+
 }
