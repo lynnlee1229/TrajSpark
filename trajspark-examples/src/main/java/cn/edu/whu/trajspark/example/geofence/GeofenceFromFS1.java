@@ -1,14 +1,12 @@
 package cn.edu.whu.trajspark.example.geofence;
 
-import static cn.edu.whu.trajspark.example.geofence.GeoFenceConf.getConf;
+import static cn.edu.whu.trajspark.example.geofence.GeoFenceConf.getConf1;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.common.index.STRTreeIndex;
 import cn.edu.whu.trajspark.core.common.index.TreeIndex;
 import cn.edu.whu.trajspark.core.operator.analysis.geofence.Geofence;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
-import cn.edu.whu.trajspark.core.operator.process.segmenter.CountSegmenter;
-import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import java.io.Serializable;
@@ -26,7 +24,7 @@ import scala.Tuple2;
  * @date 2023/04/14
  **/
 
-public class GeofenceFromFS implements Serializable {
+public class GeofenceFromFS1 implements Serializable {
 
   public static void main(String[] args) throws Exception {
     String fileStr;
@@ -38,19 +36,16 @@ public class GeofenceFromFS implements Serializable {
 //          .getResourceAsStream("ioconf/exampleFilterConfig.json");
 //      fileStr = IOUtils.readFileToString(resourceAsStream);
 //    }
-    fileStr = getConf();
+    fileStr = getConf1();
     ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
     boolean isLocal = false;
     try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
-        GeofenceFromFS.class.getName(), isLocal)) {
+        GeofenceFromFS1.class.getName(), isLocal)) {
       ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
-      ISegmenter mySegmenter = new CountSegmenter(30, 50, 3600);
-      JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(trajRDD);
-      List<Geometry> geofenceList =
-          GeofenceUtils.readGeoFence("/home/cluster/Data/GeoFenceOneKilo.csv");
+      List<Geometry> geofenceList = GeofenceUtils.readGeoFence("/home/cluster/Data/GeoFenceOneKilo.csv");
       TreeIndex<Geometry> treeIndex = new STRTreeIndex<Geometry>();
       treeIndex.insert(geofenceList);
 
@@ -59,10 +54,9 @@ public class GeofenceFromFS implements Serializable {
       Broadcast<TreeIndex<Geometry>> treeIndexBroadcast = javaSparkContext.broadcast(treeIndex);
       Geofence<Geometry> geofenceFunc = new Geofence<>();
       JavaRDD<Tuple2<String, String>> res =
-          segmentedRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue()))
-              .filter(Objects::nonNull);
+          trajRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue())).filter(Objects::nonNull);
       res.count();
-
+      
 //      // 从配置文件初始化预处理算子
 //      IFilter myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
 //
