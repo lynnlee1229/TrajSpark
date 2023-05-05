@@ -39,8 +39,7 @@ public class FilterController {
       try (JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext())) {
         JavaRDD<Trajectory> trajRDD = sc.parallelize(trajectories);
         JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
-        JavaRDD<Trajectory> filter = filteredRDD.filter(Objects::nonNull);
-        List<Trajectory> trajectoryList = filter.collect();
+        List<Trajectory> trajectoryList = filteredRDD.collect();
         return GeoJsonConvertor.convertGeoJson(trajectoryList);
       }
     } catch (IOException e) {

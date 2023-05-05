@@ -36,8 +36,7 @@ public class OperateToHBaseController {
 
     try {
       JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
-      JavaRDD<Trajectory> filter = filteredRDD.filter(Objects::nonNull);
-      JavaRDD<Trajectory> segmentRDD = segmenter.segment(filter);
+      JavaRDD<Trajectory> segmentRDD = segmenter.segment(filteredRDD);
 
       JavaRDD<Trajectory> featuresJavaRDD = segmentRDD.map(trajectory -> {
         trajectory.getTrajectoryFeatures();
