@@ -7,6 +7,7 @@ import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 
 /**
@@ -118,6 +119,6 @@ public class StayPointBasedSegmenter implements ISegmenter {
 
   @Override
   public JavaRDD<Trajectory> segment(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.flatMap(item -> segmentFunction(item).iterator());
+    return rawTrajectoryRDD.flatMap(item -> segmentFunction(item).iterator()).filter(Objects::nonNull);
   }
 }

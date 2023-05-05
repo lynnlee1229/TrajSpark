@@ -8,6 +8,7 @@ import cn.edu.whu.trajspark.core.conf.process.detector.BasicDetectorConfig;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 
 /**
@@ -137,7 +138,7 @@ public class BasicDector implements IDetector {
 
   @Override
   public JavaRDD<StayPoint> detect(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.flatMap(item -> detectFunction(item).iterator());
+    return rawTrajectoryRDD.flatMap(item -> detectFunction(item).iterator()).filter(Objects::nonNull);
   }
 
   @Override

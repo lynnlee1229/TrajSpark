@@ -7,6 +7,7 @@ import cn.edu.whu.trajspark.base.util.GeoUtils;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 
 /**
@@ -78,6 +79,6 @@ public class BasicSegmenter implements ISegmenter {
 
   @Override
   public JavaRDD<Trajectory> segment(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.flatMap(item -> segmentFunction(item).iterator());
+    return rawTrajectoryRDD.flatMap(item -> segmentFunction(item).iterator()).filter(Objects::nonNull);
   }
 }
