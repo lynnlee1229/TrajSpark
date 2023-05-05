@@ -3,6 +3,7 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.UserDefinedFilterConfig;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaRDD;
 
@@ -42,6 +43,6 @@ public class UserDefinedFilter implements IFilter {
 
   @Override
   public JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(this::filterFunction);
+    return rawTrajectoryRDD.map(this::filterFunction).filter(Objects::nonNull);
   }
 }

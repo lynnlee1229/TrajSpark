@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.core.conf.process.segmenter.UserDefinedSegmenterConf
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaRDD;
@@ -46,6 +47,6 @@ public class UserDefinedSegmenter implements ISegmenter {
 
   @Override
   public JavaRDD<Trajectory> segment(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.flatMap(item -> segmentFunction(item).iterator());
+    return rawTrajectoryRDD.flatMap(item -> segmentFunction(item).iterator()).filter(Objects::nonNull);
   }
 }
