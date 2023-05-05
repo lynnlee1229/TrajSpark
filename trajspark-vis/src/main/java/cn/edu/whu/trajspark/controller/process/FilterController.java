@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -38,7 +39,8 @@ public class FilterController {
       try (JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext())) {
         JavaRDD<Trajectory> trajRDD = sc.parallelize(trajectories);
         JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
-        List<Trajectory> trajectoryList = filteredRDD.collect();
+        JavaRDD<Trajectory> filter = filteredRDD.filter(Objects::nonNull);
+        List<Trajectory> trajectoryList = filter.collect();
         return GeoJsonConvertor.convertGeoJson(trajectoryList);
       }
     } catch (IOException e) {

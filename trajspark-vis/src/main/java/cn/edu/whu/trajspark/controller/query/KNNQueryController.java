@@ -23,7 +23,7 @@ public class KNNQueryController {
 
   @ResponseBody
   @GetMapping(value = "/KNNQuery")
-  public JSONObject SpatialIntersectQuery(@RequestParam(value = "dataSetName") String dataSetName,
+  public JSONObject KNNQuery(@RequestParam(value = "dataSetName") String dataSetName,
       @RequestParam(value = "Center_lng") String center_lng,
       @RequestParam(value = "Center_lat") String center_lat,
       @RequestParam(value = "startWindow") String startWindow,

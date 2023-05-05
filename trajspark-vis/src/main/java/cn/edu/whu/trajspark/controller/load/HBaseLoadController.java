@@ -27,7 +27,7 @@ public class HBaseLoadController {
 
   @ResponseBody
   @PostMapping (value = "/Load/HBase",produces = "application/json;charset=UTF-8")
-  public JSONObject StoreDataToHBase(@RequestBody String loadConfig)
+  public JSONObject LoadDataFromHBase(@RequestBody String loadConfig)
       throws IOException {
     ExampleConfig exampleConfig = ExampleConfig.parse(loadConfig);
     SparkSession sparkSession = sparkConfBuild.createSession("HBaseLoad", true);

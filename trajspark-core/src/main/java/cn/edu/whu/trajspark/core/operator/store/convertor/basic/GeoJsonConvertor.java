@@ -51,7 +51,7 @@ public class GeoJsonConvertor {
       JSONArray featureList = new JSONArray();
       for (StayPoint stayPoint : stayPoints) {
         JSONObject feature = new JSONObject();
-        JSONObject geometryObject = convertLineString(stayPoint.getPlist());
+        JSONObject geometryObject = convertMultiPoint(stayPoint.getPlist());
         JSONObject propertiesObject = convertStayPointFeatures(stayPoint);
         feature.put("type", "Feature");
         feature.put("geometry", geometryObject);
@@ -76,6 +76,20 @@ public class GeoJsonConvertor {
     }
     geometryObject.put("coordinates", coordinateArray);
     geometryObject.put("type", "LineString");
+    return geometryObject;
+  }
+
+  public static JSONObject convertMultiPoint(List<TrajPoint> pointList) {
+    JSONObject geometryObject = new JSONObject();
+    JSONArray coordinateArray = new JSONArray();
+    for (TrajPoint trajPoint : pointList) {
+      List<Double> coordtemp = new ArrayList<>();
+      coordtemp.add(trajPoint.getLng());
+      coordtemp.add(trajPoint.getLat());
+      coordinateArray.add(coordtemp);
+    }
+    geometryObject.put("coordinates", coordinateArray);
+    geometryObject.put("type", "MultiPoint");
     return geometryObject;
   }
 

@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SimplifierController {
 
-  // TODO: 2023/4/28 add simplifier rest
   @ResponseBody
   @PostMapping(value = "/Preprocess/Simplifier")
   public JSONObject getSimplifier(@RequestBody String simplifierConfig) {
@@ -34,8 +33,7 @@ public class SimplifierController {
     try {
       ExampleConfig exampleConfig = ExampleConfig.parse(configJson.toString());
       SparkSession sparkSession = sparkConfBuild.createSession("DataSimplifier", true);
-      ISimplifier mySimplifier = ISimplifier.getSimplifier(
-          (ISimplifierConfig) exampleConfig.getFilterConfig());
+      ISimplifier mySimplifier = ISimplifier.getSimplifier(exampleConfig.getSimplifierConfig());
       List<Trajectory> trajectories = TrajectoryJsonUtil.parseGeoJsonToTrajectoryList(
           trajectoryJson);
       try (JavaSparkContext sc = new JavaSparkContext(sparkSession.sparkContext())) {

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DataLoadController {
   @ResponseBody
   @PostMapping(value = "/Load",produces = "application/json;charset=UTF-8")
-  public JSONObject StoreData(@RequestBody String loadConfig)
+  public JSONObject LoadData(@RequestBody String loadConfig)
       throws IOException {
     ExampleConfig exampleConfig = ExampleConfig.parse(loadConfig);
     SparkSession sparkSession = sparkConfBuild.createSession("DataLoad", true);
