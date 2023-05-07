@@ -7,6 +7,7 @@ import cn.edu.whu.trajspark.base.util.GeoUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.spark.api.java.JavaRDD;
@@ -87,6 +88,6 @@ public class DriftFilter implements IFilter {
 
   @Override
   public JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(this::filterFunction);
+    return rawTrajectoryRDD.map(this::filterFunction).filter(Objects::nonNull);
   }
 }

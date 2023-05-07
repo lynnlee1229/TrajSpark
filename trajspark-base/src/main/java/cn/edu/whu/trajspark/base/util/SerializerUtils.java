@@ -102,6 +102,9 @@ public class SerializerUtils implements Serializable {
   public static List deserializeList(byte[] tarList, Class tarClass, Serializer serializer)
       throws IOException {
     Kryo kryo = new Kryo();
+    if (tarClass.getClassLoader() != null) {
+      kryo.setClassLoader(tarClass.getClassLoader());
+    }
     kryo.setReferences(false);
     kryo.setRegistrationRequired(true);
     CollectionSerializer collectionSerializer = new CollectionSerializer();
@@ -110,6 +113,7 @@ public class SerializerUtils implements Serializable {
     kryo.register(tarClass, serializer);
     kryo.register(ArrayList.class, collectionSerializer);
     kryo.register(LinkedList.class, collectionSerializer);
+
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(tarList);
     Throwable exception = null;
     boolean hasInputProblem = false;
@@ -222,6 +226,9 @@ public class SerializerUtils implements Serializable {
   public static Serializable deserializeObject(byte[] tarObjectByteList, Class tarClass,
                                                Serializer serializer) {
     Kryo kryo = new Kryo();
+    if (tarClass.getClassLoader() != null) {
+      kryo.setClassLoader(tarClass.getClassLoader());
+    }
     kryo.setReferences(false);
     kryo.register(tarClass, serializer);
     kryo.setRegistrationRequired(true);

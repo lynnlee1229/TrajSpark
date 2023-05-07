@@ -7,6 +7,7 @@ import cn.edu.whu.trajspark.core.conf.store.HBaseStoreConfig;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
 import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
+import cn.edu.whu.trajspark.database.load.mapper.datatypes.KeyFamilyQualifier;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import org.apache.hadoop.conf.Configuration;
@@ -32,8 +33,6 @@ import scala.Tuple2;
 
 import java.io.IOException;
 import java.util.List;
-
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 
 /**
  *
@@ -104,16 +103,19 @@ public class HBaseStore extends Configured implements IStore {
         Table table = instance.getTable(mainTableName);
         RegionLocator locator = instance.getConnection().getRegionLocator(TableName.valueOf(mainTableName));
         JavaRDD<Put> putJavaRDD = trajectoryJavaRDD.map(trajectory -> TrajectoryDataMapper.mapTrajectoryToSingleRow(trajectory, mainIndexMeta));
-        JavaPairRDD<ImmutableBytesWritable, KeyValue> putJavaPairRDD = putJavaRDD
-                .mapToPair(
-                        put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put))
-                .reduceByKey((key, value) -> value)
-                .flatMapToPair(putpair -> TrajectoryDataMapper.mapPutToKeyValue(putpair._2).iterator())
-                .sortByKey(true)
-                .mapToPair(cell -> new Tuple2<>(new ImmutableBytesWritable(cell._1.getRowKey()), cell._2));
+        JavaPairRDD<KeyFamilyQualifier, KeyValue> putJavaKeyValueRDD = putJavaRDD
+            .mapToPair(
+                put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put))
+//                .reduceByKey((key, value) -> value)
+            .flatMapToPair(putpair -> TrajectoryDataMapper.mapPutToKeyValue(putpair._2).iterator())
+            .cache();
+        JavaPairRDD<ImmutableBytesWritable, KeyValue> putJavaPairRDD = putJavaKeyValueRDD
+            .sortByKey(true)
+            .mapToPair(cell -> new Tuple2<>(new ImmutableBytesWritable(cell._1.getRowKey()), cell._2));
+
         putJavaPairRDD.saveAsNewAPIHadoopFile(storeConfig.getLocation(),
-                ImmutableBytesWritable.class,
-                KeyValue.class, HFileOutputFormat2.class);
+            ImmutableBytesWritable.class,
+            KeyValue.class, HFileOutputFormat2.class);
 //  修改权限：否则可能会卡住
         FsShell shell = new FsShell(getConf());
         int setPermissionfalg = -1;

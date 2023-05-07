@@ -6,6 +6,7 @@ import cn.edu.whu.trajspark.core.common.constant.PreProcessDefaultConstant;
 import cn.edu.whu.trajspark.core.conf.process.simplifier.DPSimplifierConfig;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 
 /**
@@ -97,6 +98,6 @@ public class DPSimplifier implements ISimplifier {
 
   @Override
   public JavaRDD<Trajectory> simplify(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(this::simplifyFunction);
+    return rawTrajectoryRDD.map(this::simplifyFunction).filter(Objects::nonNull);
   }
 }
