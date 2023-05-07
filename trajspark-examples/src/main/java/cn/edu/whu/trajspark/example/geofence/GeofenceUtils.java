@@ -1,6 +1,6 @@
 package cn.edu.whu.trajspark.example.geofence;
 
-import static cn.edu.whu.trajspark.example.geofence.GeoFenceConf.getConf;
+import static cn.edu.whu.trajspark.core.util.FSUtils.readFromFS;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,8 +70,31 @@ public class GeofenceUtils {
     }
     return polygons;
   }
-@Test
-    public void test() {
-  System.out.println(getConf());
+
+  public static List<Geometry> readGeoFence(String fs, String path) throws ParseException {
+      String content = readFromFS(fs, path);
+    List<Geometry> polygons = new ArrayList<>(16);
+    int idx = 0;
+    String[] lines = content.split("\n");
+    for (String line : lines) {
+        if (idx == 0) {
+          idx++;
+          continue;
+        }
+        String[] items = line.split(",");
+        String id = line.split(",")[0];
+        String wkt = line.split("\"")[1];
+        Geometry polygon = wktReader.read(wkt);
+        polygon.setUserData(id);
+        polygons.add(polygon);
+      }
+    return polygons;
+  }
+
+  @Test
+  public void test() throws ParseException {
+    for (Geometry geometry : readGeoFence("hdfs://localhost:9000", "/geofence/GeoFenceOneKilo.csv")) {
+      System.out.println(geometry);
     }
+  }
 }

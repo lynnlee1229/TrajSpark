@@ -117,9 +117,11 @@ public class GeoFenceConf {
       "    \"mainIndex\": \"OBJECT_ID_T\"\n" +
       "  }\n" +
       "}";
+
   public static String getConf() {
     return Conf;
   }
+
   public static String getConf1() {
     return Conf1;
   }

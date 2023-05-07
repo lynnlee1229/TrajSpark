@@ -91,11 +91,11 @@ public class TrajStore2HBase {
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
 //      trajRDD.collect().forEach(System.out::println);
-      ISegmenter mySegmenter = new CountSegmenter();
+      ISegmenter mySegmenter = new CountSegmenter(30, 50, 3600);
       JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(trajRDD);
       segmentedRDD.count();
       IStore iStore =
-          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
+          IStore.getStore(exampleConfig.getStoreConfig());
 //      iStore.storeTrajectory(segmentedRDD);
 //      LOGGER.info("Finished!");
     } catch (Exception e) {

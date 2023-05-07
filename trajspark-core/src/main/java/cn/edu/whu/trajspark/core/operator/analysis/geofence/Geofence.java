@@ -27,7 +27,6 @@ public class Geofence<T extends Geometry> implements Serializable {
     LineString trajLine = traj.getLineString();
     Tuple2<String, String> res = null;
     List<TrajPoint> rawPointList = traj.getPointList();
-    for (TrajPoint point : rawPointList) {
       List<T> result = treeIndex.query(trajLine);
       if (result.size() == 0) {
         return null;
@@ -38,7 +37,6 @@ public class Geofence<T extends Geometry> implements Serializable {
               (String) polygon.getUserData());
         }
       }
-    }
     return null;
   }
 }

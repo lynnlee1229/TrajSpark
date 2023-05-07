@@ -4,6 +4,9 @@ import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeImpl;
+import org.locationtech.jts.index.strtree.STRtree;
 
 /**
  * @author Lynn Lee
@@ -29,7 +32,9 @@ public class SparkSessionUtils {
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
     sparkConf.set("spark.kryoserializer.buffer.max", "512m");
     sparkConf.set("spark.kryoserializer.buffer", "64m");
-    sparkConf.set("spark.default.parallelism","24");
+    sparkConf.set("spark.default.parallelism", "24");
+    sparkConf.registerKryoClasses(
+        new Class[] {STRtree.class, SimpleFeatureTypeImpl.class, SimpleFeatureBuilder.class});
     if (isLocal) {
       sparkConf.setMaster("local[*]");
     }
