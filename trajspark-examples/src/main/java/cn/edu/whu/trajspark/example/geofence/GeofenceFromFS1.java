@@ -57,9 +57,9 @@ public class GeofenceFromFS1 implements Serializable {
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
-//      List<Geometry> geofenceList = GeofenceUtils.readGeoFence("/home/cluster/Data/GeoFenceOneKilo.csv");
+      List<Geometry> geofenceList = GeofenceUtils.readGeoFence("/home/cluster/Data/GeoFenceOneKilo.csv");
 //      List<Geometry> geofenceList = GeofenceUtils.readGeoFence("hdfs://u0:9000", "/geofence/GeoFenceOneKilo.csv");
-      List<Geometry> geofenceList = GeofenceUtils.readGeoFence("hdfs://localhost:9000", "/geofence/GeoFenceOneKilo.csv");
+//      List<Geometry> geofenceList = GeofenceUtils.readGeoFence("hdfs://localhost:9000", "/geofence/GeoFenceOneKilo.csv");
       TreeIndex<Geometry> treeIndex = new STRTreeIndex<Geometry>();
       treeIndex.insert(geofenceList);
 
