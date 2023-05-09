@@ -1,7 +1,10 @@
 package cn.edu.whu.trajspark.example.geofence;
 
-import static cn.edu.whu.trajspark.core.util.FSUtils.readFromFS;
-
+import cn.edu.whu.trajspark.core.common.index.STRTreeIndex;
+import cn.edu.whu.trajspark.core.common.index.TreeIndex;
+import cn.edu.whu.trajspark.core.common.indexedgeom.MultiPolygonWithIndex;
+import cn.edu.whu.trajspark.core.common.indexedgeom.PolygonWithIndex;
+import cn.edu.whu.trajspark.example.util.FileSystemUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,6 +14,7 @@ import java.util.List;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.slf4j.Logger;
@@ -64,7 +68,7 @@ public class GeofenceUtils {
         polygons.add(polygon);
       }
     } catch (IOException e) {
-      LOGGER.error("Cannot read Beijing district file from {}", path, e);
+      LOGGER.error("Cannot read file from {}", path, e);
     } catch (ParseException e) {
       LOGGER.error("Parse exception", e);
     }
@@ -72,29 +76,57 @@ public class GeofenceUtils {
   }
 
   public static List<Geometry> readGeoFence(String fs, String path) throws ParseException {
-      String content = readFromFS(fs, path);
+    String content = FileSystemUtils.readFully(fs, path);
     List<Geometry> polygons = new ArrayList<>(16);
     int idx = 0;
+    assert content != null;
     String[] lines = content.split("\n");
     for (String line : lines) {
-        if (idx == 0) {
-          idx++;
-          continue;
-        }
+      if (idx == 0) {
+        idx++;
+        continue;
+      }
+      try {
         String[] items = line.split(",");
         String id = line.split(",")[0];
         String wkt = line.split("\"")[1];
         Geometry polygon = wktReader.read(wkt);
         polygon.setUserData(id);
         polygons.add(polygon);
+      } catch (Exception e) {
+        LOGGER.error("Parse exception", e);
       }
+    }
     return polygons;
   }
 
+  public static TreeIndex<Geometry> getIndexedGeoFence(List<Geometry> geofenceList) {
+    TreeIndex<Geometry> treeIndex = new STRTreeIndex<Geometry>();
+    for (Geometry geometry : geofenceList) {
+      if (geometry instanceof Polygon) {
+        treeIndex.insert(PolygonWithIndex.fromPolygon((Polygon) geometry));
+      } else if (geometry instanceof MultiPolygonWithIndex) {
+        treeIndex.insert(MultiPolygonWithIndex.fromMultiPolygon((MultiPolygonWithIndex) geometry));
+      } else {
+        treeIndex.insert(geometry);
+      }
+    }
+    return treeIndex;
+  }
+
+  public static TreeIndex<Geometry> getIndexedGeoFence(String fs, String path)
+      throws ParseException {
+    List<Geometry> geofenceList = readGeoFence(fs, path);
+    return getIndexedGeoFence(geofenceList);
+  }
+  public static TreeIndex<Geometry> getIndexedGeoFence(String path) {
+    List<Geometry> geofenceList = readGeoFence(path);
+    return getIndexedGeoFence(geofenceList);
+  }
   @Test
   public void test() throws ParseException {
-    for (Geometry geometry : readGeoFence("hdfs://localhost:9000", "/geofence/GeoFenceOneKilo.csv")) {
-      System.out.println(geometry);
-    }
+    TreeIndex<Geometry> indexedGeoFence =
+        getIndexedGeoFence("hdfs://localhost:9000", "/geofence/shenzhen_landuse.csv");
+    System.out.println(indexedGeoFence.size());
   }
 }

@@ -1,6 +1,5 @@
 package cn.edu.whu.trajspark.core.operator.analysis.geofence;
 
-import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.common.index.TreeIndex;
 import cn.edu.whu.trajspark.core.enums.TopologyTypeEnum;
@@ -25,8 +24,6 @@ public class Geofence<T extends Geometry> implements Serializable {
 
   public Tuple2<String, String> geofence(Trajectory traj, TreeIndex<T> treeIndex) {
     LineString trajLine = traj.getLineString();
-    Tuple2<String, String> res = null;
-    List<TrajPoint> rawPointList = traj.getPointList();
       List<T> result = treeIndex.query(trajLine);
       if (result.size() == 0) {
         return null;
