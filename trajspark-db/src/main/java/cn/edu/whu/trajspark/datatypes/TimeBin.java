@@ -14,18 +14,18 @@ public class TimeBin {
   /**
    * 将连续时间分割为多个紧密相连的bucket, 单位为 day, week, month, year
    */
-  private final short bin;
+  private final int binID;
   private final TimePeriod timePeriod;
   @SuppressWarnings("checkstyle:StaticVariableName")
   static ZonedDateTime Epoch = ZonedDateTime.ofInstant(Instant.EPOCH, TIME_ZONE);
 
-  public TimeBin(short bin, TimePeriod timePeriod) {
-    this.bin = bin;
+  public TimeBin(int binID, TimePeriod timePeriod) {
+    this.binID = binID;
     this.timePeriod = timePeriod;
   }
 
-  public short getBin() {
-    return bin;
+  public int getBinID() {
+    return binID;
   }
 
   public TimePeriod getTimePeriod() {
@@ -36,18 +36,23 @@ public class TimeBin {
    * @return min date time of the bin (inclusive)
    */
   public ZonedDateTime getBinStartTime() {
-    return timePeriod.getChronoUnit().addTo(Epoch, bin);
+    return timePeriod.getChronoUnit().addTo(Epoch, binID);
   }
 
   /**
    * @return max date time of the bin(exculsive)
    */
   public ZonedDateTime getBinEndTime() {
-    return timePeriod.getChronoUnit().addTo(Epoch, bin + 1);
+    return timePeriod.getChronoUnit().addTo(Epoch, binID + 1);
   }
 
-  public long getRefTime(ZonedDateTime refTime) {
-    return refTime.toEpochSecond() - getBinStartTime().toEpochSecond();
+  /**
+   * 获取refTime相对当前Bin起始时间的相对值（秒）
+   * @param time 任意时间
+   * @return time相对当前Bin起始时间的秒数
+   */
+  public long getRefTime(ZonedDateTime time) {
+    return time.toEpochSecond() - getBinStartTime().toEpochSecond();
   }
 
   @Override
@@ -59,16 +64,16 @@ public class TimeBin {
       return false;
     }
     TimeBin timeBin = (TimeBin) o;
-    return bin == timeBin.bin && timePeriod == timeBin.timePeriod;
+    return binID == timeBin.binID && timePeriod == timeBin.timePeriod;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(bin, timePeriod);
+    return Objects.hash(binID, timePeriod);
   }
 
   @Override
   public String toString() {
-    return "TimeBin{" + "bin=" + bin + ", timePeriod=" + timePeriod + '}';
+    return "TimeBin{" + "start=" + getBinStartTime() + ", timePeriod=" + timePeriod + '}';
   }
 }

@@ -1,9 +1,9 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import cn.edu.whu.trajspark.datatypes.TimeBin;
+import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
+import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -18,7 +18,7 @@ public interface TimeCoding extends Serializable {
 
   TimeBin dateToBinnedTime(ZonedDateTime zonedDateTime);
 
-  TimeLine getTimeLine(long coding, TimeBin timeBin);
+  TimeLine getXZTElementTimeLine(long coding);
 
   TimePeriod getTimePeriod();
 

@@ -46,10 +46,11 @@ public class TrajectorySerdeUtils {
    * Get a secondary index put, so TRAJ_POINTS is null, but PTR points to a main index row key byte
    * array.
    */
-  public static Put getPutForSecondaryIndex(IndexMeta indexMeta, Trajectory trajectory, byte[] ptr)
-      throws IOException {
+  public static Put getPutForSecondaryIndex(IndexMeta indexMeta, Trajectory trajectory, byte[] ptr,  boolean includePreFilterColumns) throws IOException {
     Put put = new Put(indexMeta.getIndexStrategy().index(trajectory).getBytes());
-    addBasicTrajectoryInfos(put, trajectory);
+    if (!includePreFilterColumns) {
+      addBasicTrajectoryInfos(put, trajectory);
+    }
     put.addColumn(COLUMN_FAMILY, PTR_QUALIFIER, ptr);
     return put;
   }

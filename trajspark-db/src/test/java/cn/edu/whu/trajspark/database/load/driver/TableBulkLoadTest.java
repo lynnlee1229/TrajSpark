@@ -1,13 +1,12 @@
 package cn.edu.whu.trajspark.database.load.driver;
 
-import cn.edu.whu.trajspark.database.DataSet;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 

@@ -67,7 +67,6 @@ public class DataTableTest extends TestCase {
     Scan scan = new Scan();
     scan.addColumn(COLUMN_FAMILY, MBR_QUALIFIER);
     scan.addColumn(COLUMN_FAMILY, OBJECT_ID_QUALIFIER);
-    scan.addColumn(COLUMN_FAMILY, SIGNATURE_QUALIFIER);
     scan.addColumn(COLUMN_FAMILY, TRAJ_POINTS_QUALIFIER);
     scan.addColumn(COLUMN_FAMILY, PTR_QUALIFIER);
 

@@ -1,17 +1,14 @@
 package cn.edu.whu.trajspark.database.load.driver;
 
 import cn.edu.whu.trajspark.database.Database;
-import cn.edu.whu.trajspark.database.ExampleTrajectoryUtil;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
+import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.spatialtemporal.XZ2TIndexStrategy;
-import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,12 +19,12 @@ import java.util.List;
  */
 public class TextBulkloadTest {
   static DataSetMeta dataSetMeta;
-  public static String DATABASE_NAME = "bulkLoadTest2";
+  public static String DATABASE_NAME = "xzst";
 
   static {
     List<IndexMeta> list = new LinkedList<>();
-    list.add(new IndexMeta(true, new XZ2IndexStrategy(), DATABASE_NAME, "default"));
-    list.add(new IndexMeta(false, new IDTIndexStrategy(), DATABASE_NAME, "default"));
+    list.add(new IndexMeta(true, new TXZ2IndexStrategy(), DATABASE_NAME, "main"));
+    list.add(new IndexMeta(false, new TXZ2IndexStrategy(), DATABASE_NAME, "secondary-simple"));
     dataSetMeta = new DataSetMeta(DATABASE_NAME, list);
   }
 

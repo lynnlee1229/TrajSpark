@@ -6,6 +6,7 @@ import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.coding.XZ2PCoding;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
@@ -15,6 +16,7 @@ import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -72,7 +74,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
     for (CodingRange xz2PRange : keyScanRange) {
       for (short shard = 0; shard < shardNum; shard++) {
         result.add(new RowKeyRange(new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getLower().getBytes())),
-            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getUpper().getBytes())), xz2PRange.isContained()));
+            new ByteArray(Arrays.asList(Bytes.toBytes(shard), xz2PRange.getUpper().getBytes())), xz2PRange.isValidated()));
       }
     }
     return result;
@@ -114,7 +116,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   @Override
   public ByteArray extractSpatialCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
@@ -127,26 +129,26 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public short getTimeBinVal(ByteArray byteArray) {
+  public TimeBin getTimeBin(ByteArray byteArray) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public long getTimeCodingVal(ByteArray byteArray) {
+  public long getTimeElementCode(ByteArray byteArray) {
     return 0;
   }
 
   @Override
   public short getShardNum(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     return buffer.getShort();
   }
 
   @Override
   public String getObjectID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
@@ -158,7 +160,7 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
   @Override
   public String getTrajectoryID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     byte[] codingByteArray = new byte[XZ2PCoding.BYTES];
     buffer.get(codingByteArray);
@@ -175,26 +177,31 @@ public class XZ2PlusIndexStrategy extends IndexStrategy {
       ByteArray lower = codingRange.getLower();
       ByteArray upper = codingRange.getUpper();
       // 被包含的索引区间，只精确到xz2编码即可
-      if (codingRange.isContained()) {
+      if (codingRange.isValidated()) {
         ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES);
         ByteBuffer byteBuffer = upper.toByteBuffer();
-        byteBuffer.flip();
+        ((Buffer)byteBuffer).flip();
         long xz2Coding = byteBuffer.getLong() + 1;
         byteBufferTemp.putLong(xz2Coding);
         ByteArray newUpper = new ByteArray(byteBufferTemp);
-        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
+        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isValidated()));
       } else { // 待精过滤的索引区间，xz2编码后还需要添加posCode。
         ByteBuffer byteBufferTemp = ByteBuffer.allocate(Long.BYTES + Byte.BYTES);
         ByteBuffer byteBuffer = upper.toByteBuffer();
-        byteBuffer.flip();
+        ((Buffer)byteBuffer).flip();
         long xz2Coding = byteBuffer.getLong();
         // TODO： bug， poscode = 15时，会越出范围，变为0。
         // TODO： 下面的这种情况，应该将xz2Coding增大1，posCode为0。
-        byte posCode = (byte) (byteBuffer.get() + 1);
-        byteBufferTemp.putLong(xz2Coding);
-        byteBufferTemp.put(posCode);
+        byte posCode = byteBuffer.get();
+        if (posCode == 15) {
+          byteBufferTemp.putLong(xz2Coding + 1);
+          byteBufferTemp.put((byte) 0);
+        } else {
+          byteBufferTemp.putLong(xz2Coding);
+          byteBufferTemp.put((byte) (posCode + 1));
+        }
         ByteArray newUpper = new ByteArray(byteBufferTemp);
-        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isContained()));
+        codingRangesList.add(new CodingRange(lower, newUpper, codingRange.isValidated()));
       }
     }
     return codingRangesList;

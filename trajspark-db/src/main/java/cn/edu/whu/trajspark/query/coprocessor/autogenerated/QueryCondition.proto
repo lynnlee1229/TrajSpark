@@ -38,6 +38,7 @@ message QueryRequest {
   optional QueryType temporalQueryType = 4;
   optional TemporalQueryWindows temporalQueryWindows = 5;
   optional string oid = 6;
+  optional bool filterBeforeLookFullRow = 7;
 }
 
 message QueryResponse {

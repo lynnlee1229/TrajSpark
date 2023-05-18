@@ -9,5 +9,5 @@ public class IndexConstants {
   /**
    * 集群核数的整数倍
    */
-  public static short DEFAULT_SHARD_NUM = 3;
+  public static short DEFAULT_SHARD_NUM = 12;
 }

@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Executors;
 
 import static cn.edu.whu.trajspark.constant.DBConstants.*;
 
@@ -172,7 +172,7 @@ public final class Database {
 
   public void openConnection() throws IOException {
     int threads = Runtime.getRuntime().availableProcessors() * 4;
-    ExecutorService service = new ForkJoinPool(threads);
+    ExecutorService service = Executors.newScheduledThreadPool(threads);
     connection = ConnectionFactory.createConnection(configuration, service);
   }
 

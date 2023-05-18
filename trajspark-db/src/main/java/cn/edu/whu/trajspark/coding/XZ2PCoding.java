@@ -12,6 +12,7 @@ import org.locationtech.jts.geom.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -73,7 +74,7 @@ public class XZ2PCoding implements SpatialCoding {
     // 以上为xz2的索引范围, 接下来需要串接PosCode
     for (SFCRange sfcRange : rawSFCRange) {
       // contained, 该Index range的所有轨迹都位于查询范围内部
-      if (sfcRange.contained) {
+      if (sfcRange.validated) {
         CodingRange codingRange = new CodingRange();
         codingRange.concatSfcRange(sfcRange);
         res.add(codingRange);
@@ -100,7 +101,7 @@ public class XZ2PCoding implements SpatialCoding {
 
   private long extractXZ2CodingVal(ByteArray xz2pCode) {
     ByteBuffer br = xz2pCode.toByteBuffer();
-    br.flip();
+    ((Buffer) br).flip();
     return br.getLong();
   }
 
@@ -124,13 +125,13 @@ public class XZ2PCoding implements SpatialCoding {
 
   public long getXZ2Code(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     return buffer.getLong();
   }
 
   public PosCode getPosCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getLong();
     return new PosCode(buffer.get());
   }

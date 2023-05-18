@@ -12,7 +12,7 @@ import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.query.basic.SpatialQuery;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;

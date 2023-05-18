@@ -21,4 +21,11 @@ public enum TimePeriod {
   public ChronoUnit getChronoUnit() {
     return chronoUnit;
   }
+
+  @Override
+  public String toString() {
+    return "TimePeriod{" +
+        "chronoUnit=" + chronoUnit +
+        '}';
+  }
 }

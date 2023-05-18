@@ -31,7 +31,6 @@ public class DBConstants {
   public static final byte[] START_TIME_QUALIFIER = Bytes.toBytes(START_TIME);
   public static final byte[] END_TIME_QUALIFIER = Bytes.toBytes(END_TIME);
   public static final byte[] TRAJ_POINTS_QUALIFIER = Bytes.toBytes(TRAJ_POINTS);
-  public static final byte[] SIGNATURE_QUALIFIER = Bytes.toBytes(SIGNATURE);
   public static final byte[] PTR_QUALIFIER = Bytes.toBytes(PTR);
   public static final byte[] POINT_NUMBER_QUALIFIER = Bytes.toBytes(POINT_NUMBER);
   public static final byte[] SPEED_QUALIFIER = Bytes.toBytes(SPEED);
@@ -42,6 +41,7 @@ public class DBConstants {
   public static final String BULK_LOAD_INPUT_FILE_PATH_KEY = "import.process.input.path";
   public static final String BULKLOAD_TARGET_INDEX_NAME = "bulkload.target.index.name";
   public static final String BULKLOAD_TEXT_PARSER_CLASS = "bulkload.parser.class";
+  public static final String ENABLE_SIMPLE_SECONDARY_INDEX = "enable.simple.secondary.index";
 
   // Connection
   public static final String OPEN_CONNECTION_FAILED = "Cannot connect to data base.";
