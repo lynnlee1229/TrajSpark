@@ -27,16 +27,16 @@ public class SpatialQueryController {
 
   private final QueryService queryService = new QueryService();
 
-  @ResponseBody
-  @GetMapping (value = "/query/test")
-  public JSONObject testTrajectoryToGeo() throws URISyntaxException {
-    List<Trajectory> trajectories = ExampleTrajectoryUtil.parseFileToTrips(
-        new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
-    List<Trajectory> trajectories1 = new ArrayList<>();
-    trajectories1.add(trajectories.get(0));
-    JSONObject geoJson = GeoJsonConvertor.convertGeoJson(trajectories);
-    return geoJson;
-  }
+//  @ResponseBody
+//  @GetMapping (value = "/query/test")
+//  public JSONObject testTrajectoryToGeo() throws URISyntaxException {
+//    List<Trajectory> trajectories = ExampleTrajectoryUtil.parseFileToTrips(
+//        new File(ExampleTrajectoryUtil.class.getResource("/CBQBDS").toURI()));
+//    List<Trajectory> trajectories1 = new ArrayList<>();
+//    trajectories1.add(trajectories.get(0));
+//    JSONObject geoJson = GeoJsonConvertor.convertGeoJson(trajectories);
+//    return geoJson;
+//  }
   @ResponseBody
   @GetMapping(value = "/SpatialQuery/Intersect")
   public JSONObject SpatialIntersectQuery(@RequestParam(value = "dataSetName") String dataSetName,

@@ -108,10 +108,10 @@ public class HBaseStore extends Configured implements IStore {
 //            .mapToPair(
 //                put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put))
 //                .reduceByKey((key, value) -> value)
-            .flatMapToPair(output -> TrajectoryDataMapper.mapPutToKeyValue(output).iterator())
-            .persist(StorageLevels.MEMORY_AND_DISK);
+            .flatMapToPair(output -> TrajectoryDataMapper.mapPutToKeyValue(output).iterator());
+//            .persist(StorageLevels.MEMORY_AND_DISK);
 
-        putJavaKeyValueRDD.collect();
+//        putJavaKeyValueRDD.collect();
 
         JavaPairRDD<ImmutableBytesWritable, KeyValue> putJavaPairRDD = putJavaKeyValueRDD
             .sortByKey(true)
@@ -121,7 +121,7 @@ public class HBaseStore extends Configured implements IStore {
             ImmutableBytesWritable.class,
             KeyValue.class, HFileOutputFormat2.class);
         
-        putJavaKeyValueRDD.unpersist();
+//        putJavaKeyValueRDD.unpersist();
 
         //  修改权限：否则可能会卡住
         FsShell shell = new FsShell(getConf());
