@@ -35,6 +35,7 @@ public class DBConstants {
   public static final byte[] POINT_NUMBER_QUALIFIER = Bytes.toBytes(POINT_NUMBER);
   public static final byte[] SPEED_QUALIFIER = Bytes.toBytes(SPEED);
   public static final byte[] LENGTH_QUALIFIER = Bytes.toBytes(LENGTH);
+  public static final byte[] EXT_VALUES_QUALIFIER = Bytes.toBytes(EXT_VALUES);
 
   // Bulk load
   public static final String BULK_LOAD_TEMP_FILE_PATH_KEY = "import.file.output.path";

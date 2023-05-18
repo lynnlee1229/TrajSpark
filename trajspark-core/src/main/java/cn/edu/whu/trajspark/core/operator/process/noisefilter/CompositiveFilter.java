@@ -4,6 +4,8 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.CompositiveFilterConfig;
 import org.apache.spark.api.java.JavaRDD;
 
+import java.util.Objects;
+
 /**
  * @author Lynn Lee
  * @date 2022/10/29
@@ -59,6 +61,6 @@ public class CompositiveFilter implements IFilter {
 
   @Override
   public JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(this::filterFunction);
+    return rawTrajectoryRDD.map(this::filterFunction).filter(Objects::nonNull);
   }
 }

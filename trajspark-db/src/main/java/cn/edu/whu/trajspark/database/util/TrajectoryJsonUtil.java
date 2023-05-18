@@ -21,6 +21,7 @@ public class TrajectoryJsonUtil {
 
   /**
    * Turning GeoJson data into a memory Trajectory object
+   *
    * @param value json object
    * @return Trajectory trajectory
    */
@@ -29,34 +30,54 @@ public class TrajectoryJsonUtil {
     JSONObject properties = feature.getJSONObject("properties");
     String tid = properties.getString("tid");
     String oid = properties.getString("oid");
-    TrajFeatures trajFeatures = parseTraFeatures(properties);
     JSONObject geometry = feature.getJSONObject("geometry");
     JSONArray coordinates = geometry.getJSONArray("coordinates");
     List<TrajPoint> traPoints = parseTraPointList(coordinates, properties);
-    return new Trajectory(tid, oid, traPoints, trajFeatures);
+    if (properties.containsKey("trajectoryFeatures")) {
+      JSONObject trajectoryFeatures = (JSONObject) properties.get("trajectoryFeatures");
+      TrajFeatures trajFeatures = parseTraFeatures(trajectoryFeatures, properties);
+      if (properties.containsKey("extendedValues")) {
+        JSONObject extendedValues = (JSONObject) properties.get("extendedValues");
+        HashMap<String, Object> extendedValue = new HashMap<>(extendedValues);
+        return new Trajectory(tid, oid, traPoints, trajFeatures, extendedValue);
+      }
+      return new Trajectory(tid, oid, traPoints, trajFeatures);
+    }
+    return new Trajectory(tid, oid, traPoints);
   }
 
-  public static TrajFeatures parseTraFeatures(JSONObject properties) {
+  public static List<Trajectory> parseGeoJsonToTrajectoryList(String text) {
+    JSONObject feature = JSONObject.parseObject(text);
+    JSONArray jsonObject = feature.getJSONArray("features");
+    ArrayList<Trajectory> trajectories = new ArrayList<>();
+    for (int i = 0; i < jsonObject.size(); i++) {
+      JSONObject object = jsonObject.getJSONObject(i);
+      Trajectory trajectory = TrajectoryJsonUtil.parseJsonToTrajectory(object.toString());
+      trajectories.add(trajectory);
+    }
+    return trajectories;
+  }
+
+  public static TrajFeatures parseTraFeatures(JSONObject featureProperties, JSONObject properties) {
     String oid = properties.getString("oid");
     String tid = properties.getString("tid");
-    JSONArray mbr = properties.getJSONArray("mbr");
+    JSONArray mbr = featureProperties.getJSONArray("mbr");
     MinimumBoundingBox box = parseMBR(mbr);
 
-    Long sTime = properties.getLong("start_time");
-    ZonedDateTime startTime = DateTimeParse.timeToZonedTime(sTime);
-    Long eTime = properties.getLong("end_time");
-    ZonedDateTime endTime = DateTimeParse.timeToZonedTime(eTime);
+    String sTime = featureProperties.getString("startTime");
+    ZonedDateTime startTime = ZonedDateTime.parse(sTime);
+    String eTime = featureProperties.getString("endTime");
+    ZonedDateTime endTime = ZonedDateTime.parse(eTime);
 
-    JSONArray startPoint = properties.getJSONArray("start_point");
+    JSONArray startPoint = featureProperties.getJSONArray("startPoint");
     TrajPoint traStartPoint = parsePoint(startPoint, properties, true);
-    JSONArray endPoint = properties.getJSONArray("end_point");
+    JSONArray endPoint = featureProperties.getJSONArray("endPoint");
     TrajPoint traEndPoint = parsePoint(endPoint, properties, false);
 
-    Integer pointNumber = properties.getInteger("pointNumber");
-    JSONArray speedArray = properties.getJSONArray("speed");
-    Double traSpeed = parseTraSpeed(speedArray);
+    Integer pointNumber = featureProperties.getInteger("pointNum");
+    Double traSpeed = featureProperties.getDouble("speed");
 
-    Double length = properties.getDouble("length");
+    Double length = featureProperties.getDouble("len");
     return new TrajFeatures(startTime, endTime, traStartPoint,
         traEndPoint, pointNumber, box, traSpeed, length);
   }
@@ -65,27 +86,19 @@ public class TrajectoryJsonUtil {
     JSONArray timestamp = properties.getJSONArray("timestamp");
     int pid;
     Long sTime;
-    Double speed;
-    HashMap<String, Object> stringObjectMap = new HashMap<>();
-    JSONArray speedArray = properties.getJSONArray("speed");
     if (isSTPoint) {
       sTime = timestamp.getLong(0);
-      speed = speedArray.getDouble(0);
       pid = 0;
     } else {
       sTime = timestamp.getLong(timestamp.size() - 1);
-      speed = speedArray.getDouble(timestamp.size() - 1);
       pid = timestamp.size() - 1;
     }
-    stringObjectMap.put("Time", sTime);
-    stringObjectMap.put("Speed", speed);
 
     return new TrajPoint(
         Integer.toString(pid),
         DateTimeParse.timeToZonedTime(sTime),
         point.getDouble(0),
-        point.getDouble(1),
-        stringObjectMap);
+        point.getDouble(1));
   }
 
   public static MinimumBoundingBox parseMBR(JSONArray mbr) {
@@ -108,19 +121,13 @@ public class TrajectoryJsonUtil {
   public static List<TrajPoint> parseTraPointList(JSONArray coordinates, JSONObject properties) {
     ArrayList<TrajPoint> traPointsList = new ArrayList<>();
     JSONArray timestamp = properties.getJSONArray("timestamp");
-    JSONArray speedArray = properties.getJSONArray("speed");
     for (int i = 0; i < coordinates.size(); i++) {
       Long sTime = timestamp.getLong(i);
-      Double speed = speedArray.getDouble(i);
-      HashMap<String, Object> stringObjectMap = new HashMap<>();
-      stringObjectMap.put("Time", sTime);
-      stringObjectMap.put("Speed", speed);
       TrajPoint trajPoint = new TrajPoint(
           Integer.toString(i),
           DateTimeParse.timeToZonedTime(sTime),
           coordinates.getJSONArray(i).getDouble(0),
-          coordinates.getJSONArray(i).getDouble(1),
-          stringObjectMap);
+          coordinates.getJSONArray(i).getDouble(1));
       traPointsList.add(trajPoint);
     }
     return traPointsList;

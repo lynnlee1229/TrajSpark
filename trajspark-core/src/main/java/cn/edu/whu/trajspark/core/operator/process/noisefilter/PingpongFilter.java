@@ -3,9 +3,11 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.PingpongFilterConfig;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.apache.spark.api.java.JavaRDD;
+import java.util.Objects;
 
 /**
  * @author Lynn Lee
@@ -141,6 +143,6 @@ public class PingpongFilter implements IFilter {
 
   @Override
   public JavaRDD<Trajectory> filter(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(this::filterFunction);
+    return rawTrajectoryRDD.map(this::filterFunction).filter(Objects::nonNull);
   }
 }

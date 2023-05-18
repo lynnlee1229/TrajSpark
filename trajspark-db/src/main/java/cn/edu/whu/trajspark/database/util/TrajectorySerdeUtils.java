@@ -13,7 +13,9 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 import static cn.edu.whu.trajspark.constant.DBConstants.*;
@@ -30,9 +32,7 @@ public class TrajectorySerdeUtils {
    */
   public static Put getPutForMainIndex(IndexMeta indexMeta, Trajectory trajectory)
       throws IOException {
-    Put put = new Put(indexMeta.getIndexStrategy().index(trajectory).getBytes());
-    addBasicTrajectoryInfos(put, trajectory);
-    addExtendTrajectoryInfos(put, trajectory);
+    Put put = addBasicTrajectoryInfos(indexMeta, trajectory);
     put.addColumn(COLUMN_FAMILY, OBJECT_ID_QUALIFIER,
         SerializerUtils.serializeObject(trajectory.getObjectID()));
     put.addColumn(COLUMN_FAMILY, TRAJECTORY_ID_QUALIFIER,
@@ -49,7 +49,7 @@ public class TrajectorySerdeUtils {
   public static Put getPutForSecondaryIndex(IndexMeta indexMeta, Trajectory trajectory, byte[] ptr,  boolean includePreFilterColumns) throws IOException {
     Put put = new Put(indexMeta.getIndexStrategy().index(trajectory).getBytes());
     if (!includePreFilterColumns) {
-      addBasicTrajectoryInfos(put, trajectory);
+      put = addBasicTrajectoryInfos(indexMeta, trajectory);
     }
     put.addColumn(COLUMN_FAMILY, PTR_QUALIFIER, ptr);
     return put;
@@ -79,9 +79,20 @@ public class TrajectorySerdeUtils {
     addFeaturesToTrajectory(trajectory, result);
     return trajectory;
   }
-  public static void addFeaturesToTrajectory(Trajectory trajectory, Result result){
-    TrajFeatures trajectoryFeaturesFromResult = getTrajectoryFeaturesFromResult(result);
-    trajectory.setTrajectoryFeatures(trajectoryFeaturesFromResult);
+
+  public static void addFeaturesToTrajectory(Trajectory trajectory, Result result) {
+
+    if (result.containsColumn(COLUMN_FAMILY, START_TIME_QUALIFIER)) {
+      TrajFeatures trajectoryFeaturesFromResult = getTrajectoryFeaturesFromResult(result);
+      trajectory.setTrajectoryFeatures(trajectoryFeaturesFromResult);
+    }
+    if (result.containsColumn(COLUMN_FAMILY, EXT_VALUES_QUALIFIER)) {
+      byte[] extendValue = result.getValue(COLUMN_FAMILY, EXT_VALUES_QUALIFIER);
+      HashMap<String, Object> extendValueStr =
+          (HashMap<String, Object>) SerializerUtils.deserializeObject(extendValue,
+              HashMap.class);
+      trajectory.setExtendedValues(extendValueStr);
+    }
   }
 
   private static TrajFeatures getTrajectoryFeaturesFromResult(Result result) {
@@ -98,24 +109,29 @@ public class TrajectorySerdeUtils {
   }
 
   private static TrajFeatures bytesToTrajFeatures(byte[] startTime, byte[] endTime,
-      byte[] startPoint, byte[] endPoint, byte[] pointNum, byte[] mbr, byte[] speed,
-      byte[] length) {
-    ZonedDateTime startTimeStr = (ZonedDateTime) SerializerUtils.deserializeObject(startTime, ZonedDateTime.class);
-    ZonedDateTime endTimeStr = (ZonedDateTime) SerializerUtils.deserializeObject(endTime, ZonedDateTime.class);
+                                                  byte[] startPoint, byte[] endPoint,
+                                                  byte[] pointNum, byte[] mbr, byte[] speed,
+                                                  byte[] length) {
+    ZonedDateTime startTimeStr =
+        (ZonedDateTime) SerializerUtils.deserializeObject(startTime, ZonedDateTime.class);
+    ZonedDateTime endTimeStr =
+        (ZonedDateTime) SerializerUtils.deserializeObject(endTime, ZonedDateTime.class);
     TrajPoint startPointStr = (TrajPoint) SerializerUtils.deserializeObject(startPoint,
         TrajPoint.class);
     TrajPoint endPointStr = (TrajPoint) SerializerUtils.deserializeObject(endPoint,
         TrajPoint.class);
-    int pointNumStr = (int) SerializerUtils.deserializeObject(pointNum, Integer.class);
-    MinimumBoundingBox mbrStr = (MinimumBoundingBox) SerializerUtils.deserializeObject(mbr, MinimumBoundingBox.class);
+    Integer pointNumStr = (Integer) SerializerUtils.deserializeObject(pointNum, Integer.class);
+    MinimumBoundingBox mbrStr =
+        (MinimumBoundingBox) SerializerUtils.deserializeObject(mbr, MinimumBoundingBox.class);
     Double speedStr = (Double) SerializerUtils.deserializeObject(speed, Double.class);
     Double lengthStr = (Double) SerializerUtils.deserializeObject(length, Double.class);
-    return new TrajFeatures(startTimeStr, endTimeStr, startPointStr, endPointStr, pointNumStr, mbrStr,
+    return new TrajFeatures(startTimeStr, endTimeStr, startPointStr, endPointStr, pointNumStr,
+        mbrStr,
         speedStr, lengthStr);
   }
 
   private static Trajectory bytesToTrajectory(byte[] trajPointByteArray, byte[] objectID,
-      byte[] tID) throws IOException {
+                                              byte[] tID) throws IOException {
     List<TrajPoint> trajPointList = SerializerUtils.deserializeList(trajPointByteArray,
         TrajPoint.class);
     String objectStr = (String) SerializerUtils.deserializeObject(objectID, String.class);
@@ -126,28 +142,33 @@ public class TrajectorySerdeUtils {
   /**
    * Add basic columns (except for TRAJ_POINTS, PTR, SIGNATURE) into put object
    */
-  private static void addBasicTrajectoryInfos(Put put, Trajectory trajectory) throws IOException {
-    TrajFeatures trajectoryFeatures = trajectory.getTrajectoryFeatures();
-    put.addColumn(COLUMN_FAMILY, MBR_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getMbr()));
-    put.addColumn(COLUMN_FAMILY, START_POINT_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getStartPoint()));
-    put.addColumn(COLUMN_FAMILY, END_POINT_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getEndPoint()));
-  }
-
-  private static void addExtendTrajectoryInfos(Put put, Trajectory trajectory) throws IOException {
-    TrajFeatures trajectoryFeatures = trajectory.getTrajectoryFeatures();
-    put.addColumn(COLUMN_FAMILY, START_TIME_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getStartTime()));
-    put.addColumn(COLUMN_FAMILY, END_TIME_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getEndTime()));
-    put.addColumn(COLUMN_FAMILY, POINT_NUMBER_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getPointNum()));
-    put.addColumn(COLUMN_FAMILY, SPEED_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getSpeed()));
-    put.addColumn(COLUMN_FAMILY, LENGTH_QUALIFIER,
-        SerializerUtils.serializeObject(trajectoryFeatures.getLen()));
+  private static Put addBasicTrajectoryInfos(IndexMeta indexMeta, Trajectory trajectory)
+      throws IOException {
+    Put put = new Put(indexMeta.getIndexStrategy().index(trajectory).getBytes());
+    if (!trajectory.isUpdateFeatures()) {
+      TrajFeatures trajectoryFeatures = trajectory.getTrajectoryFeatures();
+      put.addColumn(COLUMN_FAMILY, MBR_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getMbr()));
+      put.addColumn(COLUMN_FAMILY, START_POINT_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getStartPoint()));
+      put.addColumn(COLUMN_FAMILY, END_POINT_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getEndPoint()));
+      put.addColumn(COLUMN_FAMILY, START_TIME_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getStartTime()));
+      put.addColumn(COLUMN_FAMILY, END_TIME_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getEndTime()));
+      put.addColumn(COLUMN_FAMILY, POINT_NUMBER_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getPointNum()));
+      put.addColumn(COLUMN_FAMILY, SPEED_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getSpeed()));
+      put.addColumn(COLUMN_FAMILY, LENGTH_QUALIFIER,
+          SerializerUtils.serializeObject(trajectoryFeatures.getLen()));
+    }
+    if (trajectory.getExtendedValues() != null) {
+      put.addColumn(COLUMN_FAMILY, EXT_VALUES_QUALIFIER,
+          SerializerUtils.serializeObject((Serializable) trajectory.getExtendedValues()));
+    }
+    return put;
   }
 
   /**

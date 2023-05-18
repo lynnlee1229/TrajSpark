@@ -5,11 +5,13 @@ import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.ISegmenterConfig;
+import cn.edu.whu.trajspark.core.conf.process.simplifier.ISimplifierConfig;
 import cn.edu.whu.trajspark.core.conf.store.IStoreConfig;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URL;
 
@@ -53,6 +55,12 @@ public class ExampleConfig {
    */
   @JsonProperty
   private IDetectorConfig detectorConfig;
+  @JsonProperty
+  private ISimplifierConfig simplifierConfig;
+
+  public ISimplifierConfig getSimplifierConfig() {
+    return simplifierConfig;
+  }
 
   public ILoadConfig getLoadConfig() {
     return loadConfig;

@@ -77,6 +77,10 @@ public class Trajectory implements Serializable {
     }
   }
 
+  public boolean isUpdateFeatures() {
+    return this.updateFeatures;
+  }
+
   public void addPoint(TrajPoint point) {
     if (this.pointList == null || this.pointList.isEmpty()) {
       this.pointList = new ArrayList();
@@ -98,6 +102,7 @@ public class Trajectory implements Serializable {
 
   public void setTrajectoryFeatures(TrajFeatures trajectoryFeatures) {
     this.trajectoryFeatures = trajectoryFeatures;
+    this.updateFeatures = false;
   }
 
   public void setTrajectoryID(String trajectoryID) {
@@ -273,6 +278,7 @@ public class Trajectory implements Serializable {
     public static final String LENGTH = "length";
     public static final String SIGNATURE = "signature";
     public static final String PTR = "PTR";
+    public static final String EXT_VALUES = "extendedValues";
 
     public Schema() {
     }

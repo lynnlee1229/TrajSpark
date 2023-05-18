@@ -7,6 +7,7 @@ import cn.edu.whu.trajspark.core.conf.store.HBaseStoreConfig;
 import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
 import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
+import cn.edu.whu.trajspark.database.load.mapper.datatypes.KeyFamilyQualifier;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import org.apache.hadoop.conf.Configuration;
@@ -25,6 +26,7 @@ import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.StorageLevels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.NotImplementedError;
@@ -32,8 +34,6 @@ import scala.Tuple2;
 
 import java.io.IOException;
 import java.util.List;
-
-import static cn.edu.whu.trajspark.constant.DBConstants.DATA_TABLE_SUFFIX;
 
 /**
  *
@@ -104,17 +104,26 @@ public class HBaseStore extends Configured implements IStore {
         Table table = instance.getTable(mainTableName);
         RegionLocator locator = instance.getConnection().getRegionLocator(TableName.valueOf(mainTableName));
         JavaRDD<Put> putJavaRDD = trajectoryJavaRDD.map(trajectory -> TrajectoryDataMapper.mapTrajectoryToSingleRow(trajectory, mainIndexMeta));
-        JavaPairRDD<ImmutableBytesWritable, KeyValue> putJavaPairRDD = putJavaRDD
-                .mapToPair(
-                        put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put))
-                .reduceByKey((key, value) -> value)
-                .flatMapToPair(putpair -> TrajectoryDataMapper.mapPutToKeyValue(putpair._2).iterator())
-                .sortByKey(true)
-                .mapToPair(cell -> new Tuple2<>(new ImmutableBytesWritable(cell._1.getRowKey()), cell._2));
+        JavaPairRDD<KeyFamilyQualifier, KeyValue> putJavaKeyValueRDD = putJavaRDD
+//            .mapToPair(
+//                put -> new Tuple2<>(new ImmutableBytesWritable(put.getRow()), put))
+//                .reduceByKey((key, value) -> value)
+            .flatMapToPair(output -> TrajectoryDataMapper.mapPutToKeyValue(output).iterator())
+            .persist(StorageLevels.MEMORY_AND_DISK);
+
+        putJavaKeyValueRDD.collect();
+
+        JavaPairRDD<ImmutableBytesWritable, KeyValue> putJavaPairRDD = putJavaKeyValueRDD
+            .sortByKey(true)
+            .mapToPair(cell -> new Tuple2<>(new ImmutableBytesWritable(cell._1.getRowKey()), cell._2));
+
         putJavaPairRDD.saveAsNewAPIHadoopFile(storeConfig.getLocation(),
-                ImmutableBytesWritable.class,
-                KeyValue.class, HFileOutputFormat2.class);
-//  修改权限：否则可能会卡住
+            ImmutableBytesWritable.class,
+            KeyValue.class, HFileOutputFormat2.class);
+        
+        putJavaKeyValueRDD.unpersist();
+
+        //  修改权限：否则可能会卡住
         FsShell shell = new FsShell(getConf());
         int setPermissionfalg = -1;
         setPermissionfalg = shell.run(new String[]{"-chmod", "-R", "777", storeConfig.getLocation()});
@@ -122,6 +131,7 @@ public class HBaseStore extends Configured implements IStore {
             System.out.println("Set Permission failed");
             return;
         }
+
         LoadIncrementalHFiles loader = new LoadIncrementalHFiles(getConf());
         loader.doBulkLoad(new Path(storeConfig.getLocation()), instance.getAdmin(), table, locator);
     }
@@ -131,6 +141,7 @@ public class HBaseStore extends Configured implements IStore {
         String location = storeConfig.getLocation();
         conf.set(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY, location);
         for (IndexMeta im : dataSetMeta.getIndexMetaList()) {
+            if(im == dataSetMeta.getCoreIndexMeta()) continue;
             String indexTableName = im.getIndexTableName();
             conf.set(DBConstants.BULKLOAD_TARGET_INDEX_NAME, indexTableName);
             BulkLoadDriverUtils.createIndexFromTable(conf, im, dataSetMeta);

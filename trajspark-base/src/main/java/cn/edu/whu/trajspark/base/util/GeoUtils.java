@@ -3,10 +3,6 @@ package cn.edu.whu.trajspark.base.util;
 import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
 import cn.edu.whu.trajspark.base.point.BasePoint;
 import cn.edu.whu.trajspark.base.point.TrajPoint;
-import java.io.Serializable;
-import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
-import java.util.List;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -16,6 +12,11 @@ import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.Point;
 import org.locationtech.spatial4j.shape.Rectangle;
 import org.locationtech.spatial4j.shape.ShapeFactory;
+
+import java.io.Serializable;
+import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Lynn Lee
@@ -72,7 +73,7 @@ public class GeoUtils implements Serializable {
   }
 
   public static double getEuclideanDistanceM(BasePoint p1, BasePoint p2) {
-    return getEuclideanDistanceM(p1.getLng(), p1.getLat(), p2.getLat(), p2.getLng());
+    return getEuclideanDistanceM(p1.getLng(), p1.getLat(), p2.getLng(), p2.getLat());
   }
 
   public static double getGeoListLen(List<Geometry> geoList) {

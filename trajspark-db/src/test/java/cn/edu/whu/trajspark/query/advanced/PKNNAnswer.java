@@ -7,7 +7,7 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public class PKNNAnswer {
       List<Trajectory> result = new LinkedList<>();
       while (result.size() < k && getSearchRadiusKM(stage) <= maxDistKM) {
         logger.info("KNN query stage {}, current search radius is {}.", stage, getSearchRadiusKM(stage));
-        Envelope queryEnvelop = queryPoint.buffer(GeoUtils.getDegreeFromKm(getSearchRadiusKM(stage))).getEnvelopeInternal();
+        Geometry queryEnvelop = queryPoint.buffer(GeoUtils.getDegreeFromKm(getSearchRadiusKM(stage)));
         SpatialQueryCondition sqc = new SpatialQueryCondition(queryEnvelop, SpatialQueryCondition.SpatialQueryType.INTERSECT);
         SpatialTemporalQueryCondition stqc = new SpatialTemporalQueryCondition(sqc, tqc);
         result = queryOnRTree(stRtree, stqc);

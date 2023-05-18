@@ -4,9 +4,11 @@ import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.common.constant.PreProcessDefaultConstant;
 import cn.edu.whu.trajspark.core.conf.process.simplifier.DPSimplifierConfig;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.spark.api.java.JavaRDD;
+import java.util.Objects;
 
 /**
  * @author Lynn Lee
@@ -37,7 +39,7 @@ public class DPSimplifier implements ISimplifier {
 
   @Override
   public Trajectory simplifyFunction(Trajectory rawTrajectory) {
-    List<TrajPoint> tmpPointList = dpRecursion(rawTrajectory.getPointList());
+    List<TrajPoint> tmpPointList = dpFunc(rawTrajectory.getPointList());
     Trajectory processedTrajtroy =
         new Trajectory(rawTrajectory.getTrajectoryID(), rawTrajectory.getObjectID(),
             tmpPointList, rawTrajectory.getExtendedValues());
@@ -45,7 +47,7 @@ public class DPSimplifier implements ISimplifier {
         : null;
   }
 
-  private List<TrajPoint> dpRecursion(List<TrajPoint> points) {
+  private List<TrajPoint> dpFunc(List<TrajPoint> points) {
     // 找到最大阈值点
     double maxH = 0;
     int index = 0;
@@ -60,8 +62,10 @@ public class DPSimplifier implements ISimplifier {
     // 如果存在最大阈值点，就进行递归遍历出所有最大阈值点
     List<TrajPoint> result = new ArrayList<>();
     if (maxH > epsilon) {
-      List<TrajPoint> leftPoints = new ArrayList<>();// 左曲线
-      List<TrajPoint> rightPoints = new ArrayList<>();// 右曲线
+      // 左曲线
+      List<TrajPoint> leftPoints = new ArrayList<>();
+      // 右曲线
+      List<TrajPoint> rightPoints = new ArrayList<>();
       // 分别提取出左曲线和右曲线的坐标点
       for (int i = 0; i < end; i++) {
         if (i <= index) {
@@ -75,10 +79,10 @@ public class DPSimplifier implements ISimplifier {
       }
 
       // 分别保存两边遍历的结果
-      List<TrajPoint> leftResult = new ArrayList<>();
-      List<TrajPoint> rightResult = new ArrayList<>();
-      leftResult = dpRecursion(leftPoints);
-      rightResult = dpRecursion(rightPoints);
+      List<TrajPoint> leftResult;
+      List<TrajPoint> rightResult;
+      leftResult = dpFunc(leftPoints);
+      rightResult = dpFunc(rightPoints);
 
       // 将两边的结果整合
       rightResult.remove(0);
@@ -95,6 +99,6 @@ public class DPSimplifier implements ISimplifier {
 
   @Override
   public JavaRDD<Trajectory> simplify(JavaRDD<Trajectory> rawTrajectoryRDD) {
-    return rawTrajectoryRDD.map(this::simplifyFunction);
+    return rawTrajectoryRDD.map(this::simplifyFunction).filter(Objects::nonNull);
   }
 }

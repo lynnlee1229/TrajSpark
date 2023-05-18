@@ -1,17 +1,16 @@
 package cn.edu.whu.trajspark.core.operator.store;
 
-import static cn.edu.whu.trajspark.core.enums.StoreSchemaEnum.POINT_BASED_TRAJECTORY;
-
 import cn.edu.whu.trajspark.base.point.StayPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.StandaloneStoreConfig;
-import cn.edu.whu.trajspark.core.enums.StoreSchemaEnum;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.StayPointConvertor;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.TrajectoryConvertor;
 import cn.edu.whu.trajspark.core.util.IOUtils;
-import java.util.List;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Lynn Lee
@@ -26,27 +25,29 @@ public class StandaloneStore implements IStore {
   }
 
   public void storePointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) {
-    trajectoryJavaRDD.foreach(
-        item -> {
-          String fileName;
-          if (item.getObjectID().length() == 0) {
-            fileName =
-                String.format("%s/%s%s",
-                    storeConfig.getLocation(),
-                    item.getTrajectoryID(),
-                    storeConfig.getFilePostFix());
-          } else {
-            fileName =
-                String.format("%s/%s-%s%s",
-                    storeConfig.getLocation(),
-                    item.getObjectID(),
-                    item.getTrajectoryID(),
-                    storeConfig.getFilePostFix());
-          }
-          String outputString = TrajectoryConvertor.convert(item, storeConfig.getSplitter());
-          IOUtils.writeStringToFile(fileName, outputString);
-        }
-    );
+    trajectoryJavaRDD
+        .filter(Objects::nonNull)
+        .foreach(
+            item -> {
+              String fileName;
+              if (item.getObjectID() == null) {
+                fileName =
+                    String.format("%s/%s%s",
+                        storeConfig.getLocation(),
+                        item.getTrajectoryID(),
+                        storeConfig.getFilePostFix());
+              } else {
+                fileName =
+                    String.format("%s/%s-%s%s",
+                        storeConfig.getLocation(),
+                        item.getObjectID(),
+                        item.getTrajectoryID(),
+                        storeConfig.getFilePostFix());
+              }
+              String outputString = TrajectoryConvertor.convert(item, storeConfig.getSplitter());
+              IOUtils.writeStringToFile(fileName, outputString);
+            }
+        );
   }
 
 

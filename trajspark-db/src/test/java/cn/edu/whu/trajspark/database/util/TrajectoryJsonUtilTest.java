@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,7 +26,8 @@ class TrajectoryJsonUtilTest extends TestCase {
     JSONArray jsonObject = feature.getJSONArray("features");
     JSONObject object = jsonObject.getJSONObject(0);
     JSONObject properties = object.getJSONObject("properties");
-    TrajFeatures trajFeatures = TrajectoryJsonUtil.parseTraFeatures(properties);
+    JSONObject features= object.getJSONObject("trajectoryFeatures");
+    TrajFeatures trajFeatures = TrajectoryJsonUtil.parseTraFeatures(features, properties);
     System.out.println(trajFeatures);
   }
   @Test
@@ -38,5 +40,13 @@ class TrajectoryJsonUtilTest extends TestCase {
     JSONObject object = jsonObject.getJSONObject(0);
     Trajectory trajectory = TrajectoryJsonUtil.parseJsonToTrajectory(object.toString());
     System.out.println(trajectory);
+  }
+  @Test
+  public void testParseTrajectoryList() {
+    String path = Objects.requireNonNull(
+        this.getClass().getClassLoader().getResource("traj_json/test.json")).getPath();
+    String text = JSONUtil.readLocalTextFile(path);
+    List<Trajectory> trajectories = TrajectoryJsonUtil.parseGeoJsonToTrajectoryList(text);
+    System.out.println(trajectories);
   }
 }

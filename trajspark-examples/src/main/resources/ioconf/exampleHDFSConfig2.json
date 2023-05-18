@@ -1,0 +1,69 @@
+{
+  "loadConfig": {
+    "@type": "hdfs",
+    "master": "local[*]",
+    "location": "hdfs://localhost:9000/geofence/newcars",
+    "fsDefaultName": "hdfs://localhost:9000",
+    "fileMode": "multi_single_file",
+    "partNum": 8,
+    "splitter": ","
+  },
+  "dataConfig": {
+    "@type": "trajectory",
+    "trajId": {
+      "sourceName": "traj_id",
+      "dataType": "String",
+      "index": 1
+    },
+    "objectId": {
+      "sourceName": "object_id",
+      "dataType": "String",
+      "index": 1
+    },
+    "trajPointConfig": {
+      "@type": "traj_point",
+      "pointId": {
+        "sourceName": "point_id",
+        "dataType": "String",
+        "index": -1
+      },
+      "lng": {
+        "sourceName": "lng",
+        "dataType": "Double",
+        "index": 3
+      },
+      "lat": {
+        "sourceName": "lat",
+        "dataType": "Double",
+        "index": 2
+      },
+      "time": {
+        "sourceName": "time",
+        "dataType": "Date",
+        "index": 4,
+        "format": "yyyy-MM-dd HH:mm:ss"
+      }
+    }
+  },
+  "segmenterConfig": {
+    "@type": "USERDEFINED_SEGMENTER",
+    "segmenterConfigList": [
+      {
+        "@type": "COUNT_SEGMENTER",
+        "minSegNum": 30,
+        "maxSegNum": 50,
+        "maxTimeInterval": 3600,
+        "seed": 1229
+      }
+    ]
+  },
+  "storeConfig": {
+    "@type": "hdfs",
+    "ip": "localhost",
+    "port": "9000",
+    "location": "hdfs://localhost:9000/test",
+    "schema": "POINT_BASED_TRAJECTORY",
+    "splitter": ",",
+    "filePostFix": ".csv"
+  }
+}

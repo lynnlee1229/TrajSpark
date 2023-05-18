@@ -48,16 +48,8 @@
     "@type": "USERDEFINED_FILTER",
     "filterConfigList": [
       {
-        "@type": "DRIFT_FILTER",
+        "@type": "BASIC_FILTER",
         "maxSpeed": 150.0,
-        "minAlpha": 15,
-        "maxRatio": 3.0,
-        "minTrajLength": 0.05
-      },
-      {
-        "@type": "PINGPONG_FILTER",
-        "baseStationIndex": "bsid",
-        "maxPingpongTime": 60,
         "minTrajLength": 0.05
       }
     ]

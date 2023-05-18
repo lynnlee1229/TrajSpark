@@ -4,7 +4,7 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.query.basic.SpatialQuery;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
@@ -23,7 +23,7 @@ public class DataSetQuery {
     // 1. get database instance
     Database instance = Database.getInstance();
     // 2. create SpatialQuery
-    SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(wkt2Envelope(QUERY_WKT),
+    SpatialQueryCondition spatialQueryCondition = new SpatialQueryCondition(wkt2Geometry(QUERY_WKT),
         SpatialQueryCondition.SpatialQueryType.INTERSECT);
     IndexTable indexTable = instance.getDataSet(DataSetManage.DATASET_NAME).getCoreIndexTable();
     SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialQueryCondition);
@@ -31,8 +31,8 @@ public class DataSetQuery {
     System.out.println(spatialQuery.executeQuery());
   }
 
-  private static Envelope wkt2Envelope(String wkt) throws ParseException {
+  private static Geometry wkt2Geometry(String wkt) throws ParseException {
     WKTReader wktReader = new WKTReader();
-    return wktReader.read(wkt).getEnvelopeInternal();
+    return wktReader.read(wkt);
   }
 }

@@ -1,14 +1,9 @@
 package cn.edu.whu.trajspark.core.operator.store;
 
 import cn.edu.whu.trajspark.base.point.StayPoint;
-import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.store.HDFSStoreConfig;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import cn.edu.whu.trajspark.core.operator.store.convertor.basic.TrajectoryConvertor;
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 import org.apache.log4j.Logger;
 import org.apache.spark.HashPartitioner;
@@ -17,7 +12,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.StorageLevels;
 import scala.NotImplementedError;
 import scala.Tuple2;
-import scala.Tuple3;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lynn Lee
@@ -32,49 +29,31 @@ public class HDFSStore implements IStore {
   }
 
   public void storePointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) {
-    LOGGER.info("Storing BasePointTrajectory into location : " + this.storeConfig.getLocation());
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    JavaPairRDD<String, String> cachedRDD = trajectoryJavaRDD.flatMap((traj) -> {
-      List<Tuple3<String, String, TrajPoint>>
-          trajIdAndTrajPoint = new ArrayList(traj.getPointList().size());
-      Iterator plistIter = traj.getPointList().iterator();
-
-      while (plistIter.hasNext()) {
-        TrajPoint p = (TrajPoint) plistIter.next();
-        trajIdAndTrajPoint.add(new Tuple3(traj.getTrajectoryID(), traj.getObjectID(), p));
-      }
-
-      return trajIdAndTrajPoint.iterator();
-    }).mapToPair((trajIdAndGpsPoint) -> {
-      String tid = trajIdAndGpsPoint._1();
-      String oid = trajIdAndGpsPoint._2();
-      TrajPoint tmpP = trajIdAndGpsPoint._3();
-      StringBuilder record = new StringBuilder();
-      record.append(tid).append(",");
-      record.append(oid).append(",");
-      record.append(tmpP.getPid()).append(",");
-      record.append(tmpP.getLat()).append(",");
-      record.append(tmpP.getLng()).append(",");
-      record.append(tmpP.getTimestamp().format(formatter).toString());
-      if (null != tmpP.getExtendedValues()) {
-        Iterator pointIter =
-            tmpP.getExtendedValues().entrySet().iterator();
-
-        while (pointIter.hasNext()) {
-          Map.Entry<String, Object> set = (Map.Entry) pointIter.next();
-          record.append(",").append(set.getValue());
+    JavaPairRDD<String, String> cachedRDD = trajectoryJavaRDD.mapToPair(
+        item -> {
+          String fileName;
+          if (item.getObjectID() == null) {
+            fileName =
+                String.format("%s%s",
+                    item.getTrajectoryID(),
+                    storeConfig.getFilePostFix());
+          } else {
+            fileName =
+                String.format("%s/%s%s",
+                    item.getObjectID(),
+                    item.getTrajectoryID(),
+                    storeConfig.getFilePostFix());
+          }
+          String outputString = TrajectoryConvertor.convert(item, storeConfig.getSplitter());
+          return new Tuple2<>(fileName, outputString);
         }
-      }
-
-      return new Tuple2(oid + "/" + oid + "-" + tid, record.toString());
-    }).persist(StorageLevels.MEMORY_AND_DISK);
-    Map<String, Long> keyCountResult = cachedRDD.countByKey();
-    cachedRDD.partitionBy(new HashPartitioner(keyCountResult.size()))
-        .saveAsHadoopFile(this.storeConfig.getLocation(), String.class, String.class,
+    ).persist(StorageLevels.MEMORY_AND_DISK);
+    Map<String, Long> keyCountedResult = cachedRDD.countByKey();
+    cachedRDD.partitionBy(new HashPartitioner(keyCountedResult.size()))
+        .saveAsHadoopFile(storeConfig.getLocation(), String.class, String.class,
             RDDMultipleTextOutputFormat.class);
     cachedRDD.unpersist();
   }
-
 
   public void storeTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) {
     switch (this.storeConfig.getSchema()) {
@@ -85,6 +64,7 @@ public class HDFSStore implements IStore {
         throw new NotImplementedError();
     }
   }
+
 
   @Override
   public void storeStayPointList(JavaRDD<List<StayPoint>> spList) {
@@ -110,11 +90,11 @@ public class HDFSStore implements IStore {
     }
 
     public String generateFileNameForKeyValue(String key, String value, String name) {
-      return key + ".csv";
+      return key;
     }
 
     protected String generateActualKey(String key, String value) {
-      return (String) super.generateActualKey(null, value);
+      return super.generateActualKey(null, value);
     }
   }
 }

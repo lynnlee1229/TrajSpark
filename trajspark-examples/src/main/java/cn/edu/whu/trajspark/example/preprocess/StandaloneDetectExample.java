@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.example.preprocess;
 
-import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.base.point.StayPoint;
+import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
@@ -9,11 +9,12 @@ import cn.edu.whu.trajspark.core.operator.store.IStore;
 import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.SparkSession;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.sql.SparkSession;
 
 /**
  * @author Lynn Lee
@@ -52,7 +53,7 @@ public class StandaloneDetectExample {
       JavaRDD<StayPoint> detectRDD = myDector.detect(segmentedTraj);
       // 存储
       IStore iStore =
-          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
+          IStore.getStore(exampleConfig.getStoreConfig());
       iStore.storeStayPointList(stayPointList);
 //      iStore.storeStayPointASTraj(detectRDD);
     }
