@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.core.operator.store;
 
+import avro.shaded.com.google.common.collect.Iterators;
 import cn.edu.whu.trajspark.base.point.StayPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.constant.DBConstants;
@@ -10,6 +11,10 @@ import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
 import cn.edu.whu.trajspark.database.load.mapper.datatypes.KeyFamilyQualifier;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
+import cn.edu.whu.trajspark.database.table.IndexTable;
+import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
+import java.util.ArrayList;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -64,10 +69,42 @@ public class HBaseStore extends Configured implements IStore {
             case POINT_BASED_TRAJECTORY:
                 this.storePointBasedTrajectory(trajectoryJavaRDD);
                 return;
+            case POINT_BASED_TRAJECTORY_SLOWPUT:
+                this.storePutPointBasedTrajectory(trajectoryJavaRDD);
+                return;
             default:
                 throw new NotImplementedError();
         }
     }
+
+    public void storePutPointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) throws Exception {
+        DataSetMeta dataSetMeta = storeConfig.getDataSetMeta();
+        LOGGER.info("Starting store dataset {}", dataSetMeta.getDataSetName());
+        long startLoadTime = System.currentTimeMillis();
+        initDataSetTest(storeConfig.getDataSetMeta());
+        IndexMeta coreIndexMeta = storeConfig.getDataSetMeta().getCoreIndexMeta();
+//        IndexTable coreIndexTable = instance.getDataSet(dataSetMeta.getDataSetName())
+//            .getCoreIndexTable();
+        trajectoryJavaRDD.foreachPartition(item -> {
+            ArrayList<Put> puts = new ArrayList<>();
+            while(item.hasNext()){
+                puts.add(TrajectorySerdeUtils.getPutForMainIndex(coreIndexMeta, item.next()));
+            }
+            instance.getTable(coreIndexMeta.getIndexTableName()).put(puts);
+        });
+        LOGGER.info("Successfully store to main index, meta: {}", coreIndexMeta);
+        try {
+            bulkLoadToSecondaryIndexTable(dataSetMeta);
+        } catch (Exception e) {
+            LOGGER.error("Failed to finish bulk load second index {}", dataSetMeta.getIndexMetaList(), e);
+            throw e;
+        }
+        LOGGER.info("Successfully bulkLoad to second index, meta: {}", dataSetMeta.getIndexMetaList());
+        long endLoadTime = System.currentTimeMillis();
+        LOGGER.info("DataSet {} load finished, cost time: {}ms.", dataSetMeta.getDataSetName(), (endLoadTime - startLoadTime));
+        instance.closeConnection();
+    }
+
 
     public void storePointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) throws Exception {
         DataSetMeta dataSetMeta = storeConfig.getDataSetMeta();
