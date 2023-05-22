@@ -74,7 +74,7 @@ public class TrajStore2HBase {
         "  \"storeConfig\": {\n" +
         "    \"@type\": \"hbase\",\n" +
         "    \"location\": \"hdfs://u0:9000/geofence_traj/\",\n" +
-        "    \"schema\": \"POINT_BASED_TRAJECTORY_SLOWPUT\",\n" +
+        "    \"schema\": \"POINT_BASED_TRAJECTORY\",\n" +
         "    \"dataSetName\": \"DataStore_100millon\",\n" +
         "    \"mainIndex\": \"XZ2\"\n" +
         "  }\n" +
@@ -92,17 +92,19 @@ public class TrajStore2HBase {
       // TODO can shu pei zhi
       ISegmenter mySegmenter = new CountSegmenter(10, 20, 3600);
       JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(trajRDD);
-      int weeks = 3;
-      ISegmenter simuSegmenter = new SimuSegmenter(weeks);
-      JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(segmentedRDD);
-      JavaRDD<Trajectory> featuresJavaRDD = simuSegmentRDD.map(trajectory -> {
-        trajectory.getTrajectoryFeatures();
-        return trajectory;
-      });
-//      segmentedRDD.count();
+
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig());
-      iStore.storeTrajectory(featuresJavaRDD);
+      int weeks = 3;
+      for (int i = 0; i < weeks; i++) {
+        ISegmenter simuSegmenter = new SimuSegmenter(i);
+        JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(trajRDD);
+        JavaRDD<Trajectory> featuresJavaRDD = simuSegmentRDD.map(trajectory -> {
+          trajectory.getTrajectoryFeatures();
+          return trajectory;
+        });
+        iStore.storeTrajectory(featuresJavaRDD);
+      }
       LOGGER.info("Finished!");
     } catch (Exception e) {
       throw new RuntimeException(e);

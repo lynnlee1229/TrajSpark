@@ -91,6 +91,7 @@ public class HBaseStore extends Configured implements IStore {
                 puts.add(TrajectorySerdeUtils.getPutForMainIndex(coreIndexMeta, item.next()));
             }
             instance.getTable(coreIndexMeta.getIndexTableName()).put(puts);
+            puts.clear();
         });
         LOGGER.info("Successfully store to main index, meta: {}", coreIndexMeta);
         try {
@@ -129,7 +130,7 @@ public class HBaseStore extends Configured implements IStore {
         }
         LOGGER.info("Successfully bulkLoad to second index, meta: {}", dataSetMeta.getIndexMetaList());
         long endLoadTime = System.currentTimeMillis();
-        LOGGER.info("DataSet {} load finished, cost time: {}ms.", dataSetMeta.getDataSetName(), (endLoadTime - startLoadTime));
+        LOGGER.info("DataSet {} store finished, cost time: {}ms.", dataSetMeta.getDataSetName(), (endLoadTime - startLoadTime));
         deleteHFile(storeConfig.getLocation(), getConf());
         instance.closeConnection();
     }
