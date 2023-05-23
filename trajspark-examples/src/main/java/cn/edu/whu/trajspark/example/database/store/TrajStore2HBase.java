@@ -17,6 +17,7 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.Test;
 
 public class TrajStore2HBase {
+
   private static final Logger LOGGER = Logger.getLogger(TrajStore2HBase.class);
 
   @SuppressWarnings("checkstyle:OperatorWrap")
@@ -31,7 +32,7 @@ public class TrajStore2HBase {
         "    \"location\": \"hdfs://u0:9000/geofence/newcars/\",\n" +
         "    \"fsDefaultName\": \"hdfs://u0:9000\",\n" +
         "    \"fileMode\": \"multi_file\",\n" +
-        "    \"partNum\": 8,\n" +
+        "    \"partNum\": 72,\n" +
         "    \"splitter\": \",\"\n" +
         "  },\n" +
         "  \"dataConfig\": {\n" +
@@ -95,21 +96,20 @@ public class TrajStore2HBase {
 
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig());
-      int weeks = 3;
-      for (int i = 0; i < weeks; i++) {
-        ISegmenter simuSegmenter = new SimuSegmenter(i);
-        JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(trajRDD);
-        JavaRDD<Trajectory> featuresJavaRDD = simuSegmentRDD.map(trajectory -> {
-          trajectory.getTrajectoryFeatures();
-          return trajectory;
-        });
-        iStore.storeTrajectory(featuresJavaRDD);
-      }
+      int weeks = 2;
+      ISegmenter simuSegmenter = new SimuSegmenter(weeks);
+      JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(trajRDD);
+      JavaRDD<Trajectory> featuresJavaRDD = simuSegmentRDD.map(trajectory -> {
+        trajectory.getTrajectoryFeatures();
+        return trajectory;
+      });
+      iStore.storeTrajectory(featuresJavaRDD);
       LOGGER.info("Finished!");
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
+
   @Test
   public void testDeleteDataSet() throws IOException {
     Database instance = Database.getInstance();

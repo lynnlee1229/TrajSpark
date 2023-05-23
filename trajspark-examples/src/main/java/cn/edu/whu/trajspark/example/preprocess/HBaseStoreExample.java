@@ -37,10 +37,10 @@ public class HBaseStoreExample {
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
-//      JavaRDD<Trajectory> featuresJavaRDD = trajRDD.map(trajectory -> {
-//        trajectory.getTrajectoryFeatures();
-//        return trajectory;
-//      });
+      JavaRDD<Trajectory> featuresJavaRDD = trajRDD.map(trajectory -> {
+        trajectory.getTrajectoryFeatures();
+        return trajectory;
+      });
 //      ISegmenter mySegmenter;
 //      mySegmenter = ISegmenter.getSegmenter(exampleConfig.getSegmenterConfig());
 //      JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(trajRDD);
@@ -48,7 +48,7 @@ public class HBaseStoreExample {
 //      myDector.detect(segmentedRDD).collect().forEach(System.out::println);
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig());
-      iStore.storeTrajectory(trajRDD);
+      iStore.storeTrajectory(featuresJavaRDD);
       LOGGER.info("Finished!");
     } catch (Exception e) {
       throw new RuntimeException(e);

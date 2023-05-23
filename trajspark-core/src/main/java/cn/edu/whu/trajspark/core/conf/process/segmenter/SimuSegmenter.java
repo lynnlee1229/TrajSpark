@@ -23,17 +23,19 @@ public class SimuSegmenter implements ISegmenter {
   public List<Trajectory> segmentFunction(Trajectory rawTrajectory) {
     List<Trajectory> res = new ArrayList<>();
     List<TrajPoint> tmpPointList = FilterUtils.sortPointList(rawTrajectory.getPointList());
-    for (int j = 0; j < tmpPointList.size(); j++) {
-      TrajPoint tmpP = tmpPointList.get(j);
-      tmpPointList.get(j).setTimestamp(tmpP.getTimestamp().plusWeeks(simuTimes));
+    for (int i = 0; i < simuTimes; i++) {
+      for (int j = 0; j < tmpPointList.size(); j++) {
+        TrajPoint tmpP = tmpPointList.get(j);
+        tmpPointList.get(j).setTimestamp(tmpP.getTimestamp().plusWeeks(2));
+      }
+      Trajectory tmp = SegmentUtils.genNewTrajectory(
+          rawTrajectory.getTrajectoryID(),
+          rawTrajectory.getObjectID(),
+          tmpPointList,
+          rawTrajectory.getExtendedValues(),
+          PreProcessDefaultConstant.DEFAULT_MIN_TRAJECTORY_LEN);
+      res.add(tmp);
     }
-    Trajectory tmp = SegmentUtils.genNewTrajectory(
-        rawTrajectory.getTrajectoryID(),
-        rawTrajectory.getObjectID(),
-        tmpPointList,
-        rawTrajectory.getExtendedValues(),
-        PreProcessDefaultConstant.DEFAULT_MIN_TRAJECTORY_LEN);
-    res.add(tmp);
     return res;
   }
 
