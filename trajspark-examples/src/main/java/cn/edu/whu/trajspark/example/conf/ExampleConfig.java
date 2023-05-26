@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.example.conf;
 
+import cn.edu.whu.trajspark.core.conf.analysis.geofence.GeofenceConfig;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
@@ -56,6 +57,13 @@ public class ExampleConfig {
   private IDetectorConfig detectorConfig;
   @JsonProperty
   private ISimplifierConfig simplifierConfig;
+
+  @JsonProperty
+  private GeofenceConfig geofenceConfig;
+
+  public GeofenceConfig getGeofenceConfig() {
+    return geofenceConfig;
+  }
 
   public ISimplifierConfig getSimplifierConfig() {
     return simplifierConfig;
