@@ -1,4 +1,4 @@
-package cn.edu.whu.trajspark.core.conf.process.segmenter;
+package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
@@ -14,22 +14,24 @@ import org.apache.spark.api.java.JavaRDD;
 public class SimuSegmenter implements ISegmenter {
 
   private final int simuTimes;
+  private final int plusTimes;
 
-  public SimuSegmenter(int simuTimes) {
+  public SimuSegmenter(int simuTimes, int plusTimes) {
     this.simuTimes = simuTimes;
+    this.plusTimes = plusTimes;
   }
 
   @Override
   public List<Trajectory> segmentFunction(Trajectory rawTrajectory) {
-    List<Trajectory> res = new ArrayList<>();
-    List<TrajPoint> tmpPointList = FilterUtils.sortPointList(rawTrajectory.getPointList());
+    List<Trajectory> res = new ArrayList<>();;
     for (int i = 0; i < simuTimes; i++) {
+      List<TrajPoint> tmpPointList = FilterUtils.sortPointList(rawTrajectory.getPointList());
       for (int j = 0; j < tmpPointList.size(); j++) {
         TrajPoint tmpP = tmpPointList.get(j);
-        tmpPointList.get(j).setTimestamp(tmpP.getTimestamp().plusWeeks(2));
+        tmpPointList.get(j).setTimestamp(tmpP.getTimestamp().plusWeeks(plusTimes));
       }
       Trajectory tmp = SegmentUtils.genNewTrajectory(
-          rawTrajectory.getTrajectoryID(),
+          simuTimes + "_" + rawTrajectory.getTrajectoryID(),
           rawTrajectory.getObjectID(),
           tmpPointList,
           rawTrajectory.getExtendedValues(),

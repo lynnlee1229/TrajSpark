@@ -33,4 +33,20 @@ public class JSONUtil {
     }
     return sb.toString();
   }
+
+  public static String readLocalTextFileLine(String path) {
+    File file = new File(path);
+    StringBuilder sb = new StringBuilder();
+    try {
+      Reader reader = new InputStreamReader(Files.newInputStream(file.toPath()));
+      BufferedReader bufferedReader = new BufferedReader(reader);
+      String line;
+      while ((line = bufferedReader.readLine()) != null) {
+        sb.append(line).append("\n");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return sb.toString();
+  }
 }

@@ -2,7 +2,7 @@ package cn.edu.whu.trajspark.example.preprocess;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.utils.JSONUtil;
-import cn.edu.whu.trajspark.core.conf.process.segmenter.SimuSegmenter;
+import cn.edu.whu.trajspark.core.operator.process.segmenter.SimuSegmenter;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
 import cn.edu.whu.trajspark.core.operator.store.IStore;
@@ -41,8 +41,9 @@ public class HBaseStoreExampleTest {
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig());
       int weeks = 3;
+      int plusWeek = 2;
       for (int i = 0; i < weeks; i++) {
-        ISegmenter simuSegmenter = new SimuSegmenter(i);
+        ISegmenter simuSegmenter = new SimuSegmenter(i, plusWeek);
         JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(trajRDD);
         JavaRDD<Trajectory> featuresJavaRDD = simuSegmentRDD.map(trajectory -> {
           trajectory.getTrajectoryFeatures();

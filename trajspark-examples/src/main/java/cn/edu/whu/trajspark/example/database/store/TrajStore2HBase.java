@@ -1,7 +1,7 @@
 package cn.edu.whu.trajspark.example.database.store;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.conf.process.segmenter.SimuSegmenter;
+import cn.edu.whu.trajspark.core.operator.process.segmenter.SimuSegmenter;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.CountSegmenter;
 import cn.edu.whu.trajspark.core.operator.process.segmenter.ISegmenter;
@@ -10,7 +10,6 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import java.io.IOException;
-import java.util.Objects;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
@@ -22,17 +21,17 @@ public class TrajStore2HBase {
 
   @SuppressWarnings("checkstyle:OperatorWrap")
   public static void main(String[] args) throws IOException {
-    String inPath = Objects.requireNonNull(
-        TrajStore2HBase.class.getResource("/ioconf/geofenceStoreConfig.json")).getPath();
+//    String inPath = Objects.requireNonNull(
+//        TrajStore2HBase.class.getResource("/ioconf/geofenceStoreConfig.json")).getPath();
 //    String fileStr = JSONUtil.readLocalTextFile(inPath);
     String fileStr = "{\n" +
         "  \"loadConfig\": {\n" +
         "    \"@type\": \"hdfs\",\n" +
         "    \"master\": \"local[*]\",\n" +
-        "    \"location\": \"hdfs://u0:9000/geofence/newcars/\",\n" +
-        "    \"fsDefaultName\": \"hdfs://u0:9000\",\n" +
+        "    \"location\": \"hdfs://master:9000/geofence/newcars/\",\n" +
+        "    \"fsDefaultName\": \"hdfs://master:9000\",\n" +
         "    \"fileMode\": \"multi_file\",\n" +
-        "    \"partNum\": 72,\n" +
+        "    \"partNum\": 192,\n" +
         "    \"splitter\": \",\"\n" +
         "  },\n" +
         "  \"dataConfig\": {\n" +
@@ -74,9 +73,9 @@ public class TrajStore2HBase {
         "  },\n" +
         "  \"storeConfig\": {\n" +
         "    \"@type\": \"hbase\",\n" +
-        "    \"location\": \"hdfs://u0:9000/geofence_traj/\",\n" +
+        "    \"location\": \"hdfs://master:9000/geofence_traj/\",\n" +
         "    \"schema\": \"POINT_BASED_TRAJECTORY\",\n" +
-        "    \"dataSetName\": \"DataStore_100millon\",\n" +
+        "    \"dataSetName\": \"DataStore_100millon_1\",\n" +
         "    \"mainIndex\": \"XZ2\"\n" +
         "  }\n" +
         "}";
@@ -91,14 +90,15 @@ public class TrajStore2HBase {
               exampleConfig.getDataConfig());
 //      trajRDD.collect().forEach(System.out::println);
       // TODO can shu pei zhi
-      ISegmenter mySegmenter = new CountSegmenter(10, 20, 3600);
+      ISegmenter mySegmenter = new CountSegmenter(5, 15, 3600);
       JavaRDD<Trajectory> segmentedRDD = mySegmenter.segment(trajRDD);
 
       IStore iStore =
           IStore.getStore(exampleConfig.getStoreConfig());
       int weeks = 2;
-      ISegmenter simuSegmenter = new SimuSegmenter(weeks);
-      JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(trajRDD);
+      int plusWeek = 2;
+      ISegmenter simuSegmenter = new SimuSegmenter(weeks, plusWeek);
+      JavaRDD<Trajectory> simuSegmentRDD = simuSegmenter.segment(segmentedRDD);
       JavaRDD<Trajectory> featuresJavaRDD = simuSegmentRDD.map(trajectory -> {
         trajectory.getTrajectoryFeatures();
         return trajectory;

@@ -58,6 +58,24 @@ public class SpatialQuery extends AbstractQuery {
         .addAllRange(ranges).build();
     return STCoprocessorQuery.executeQuery(targetIndexTable, spatialQueryRequest);
   }
+  public QueryCondition.QueryRequest getQuery(List<RowKeyRange> rowKeyRanges) throws IOException {
+    setupTargetIndexTable();
+    List<QueryCondition.Range> ranges = rowKeyRangeToProtoRange(rowKeyRanges);
+    QueryCondition.QueryRequest spatialQueryRequest = QueryCondition.QueryRequest.newBuilder()
+        .setSpatialQueryType(spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN ? QueryCondition.QueryType.CONTAIN : QueryCondition.QueryType.INTERSECT)
+        .setSpatialQueryWindow(QueryCondition.SpatialQueryWindow.newBuilder().setWkt(spatialQueryCondition.getQueryWindowWKT()))
+        .addAllRange(ranges).build();
+    return spatialQueryRequest;
+  }
+
+  public List<Trajectory> executeQueryScan(IndexTable targetIndexTable, QueryCondition.QueryRequest spatialQueryRequest, int time) throws IOException {
+    List<Trajectory> trajectories = null;
+    for (int i = 0; i < time; i++) {
+      trajectories = STCoprocessorQuery.executeQuery(targetIndexTable,
+          spatialQueryRequest);
+    }
+    return trajectories;
+  }
 
   @Override
   public IndexMeta findBestIndex() {
