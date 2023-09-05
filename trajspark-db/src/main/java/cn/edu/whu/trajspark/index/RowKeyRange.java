@@ -14,17 +14,17 @@ import cn.edu.whu.trajspark.datatypes.ByteArray;
 public class RowKeyRange {
   ByteArray startKey;
   ByteArray endKey;
-  boolean contained;
+  boolean validate;
 
   public RowKeyRange(ByteArray startKey, ByteArray endKey) {
     this.startKey = startKey;
     this.endKey = endKey;
   }
 
-  public RowKeyRange(ByteArray startKey, ByteArray endKey, boolean contained) {
+  public RowKeyRange(ByteArray startKey, ByteArray endKey, boolean validated) {
     this.startKey = startKey;
     this.endKey = endKey;
-    this.contained = contained;
+    this.validate = validated;
   }
 
   public ByteArray getStartKey() {
@@ -35,8 +35,8 @@ public class RowKeyRange {
     return endKey;
   }
 
-  public boolean isContained() {
-    return contained;
+  public boolean isValidate() {
+    return validate;
   }
 
   @Override

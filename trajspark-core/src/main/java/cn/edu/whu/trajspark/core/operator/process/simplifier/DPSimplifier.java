@@ -4,10 +4,11 @@ import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.common.constant.PreProcessDefaultConstant;
 import cn.edu.whu.trajspark.core.conf.process.simplifier.DPSimplifierConfig;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.apache.spark.api.java.JavaRDD;
 
 /**
  * @author Lynn Lee

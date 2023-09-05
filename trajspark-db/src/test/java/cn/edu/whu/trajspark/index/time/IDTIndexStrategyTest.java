@@ -51,8 +51,8 @@ class IDTIndexStrategyTest extends TestCase {
   void getSingleScanRanges() {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(TIME_ZONE);
-    ZonedDateTime start = ZonedDateTime.parse("2022-01-01 10:00:00", dateTimeFormatter);
-    ZonedDateTime end = ZonedDateTime.parse("2022-01-02 12:00:00", dateTimeFormatter);
+    ZonedDateTime start = ZonedDateTime.parse("2015-12-26 12:00:00", dateTimeFormatter);
+    ZonedDateTime end = ZonedDateTime.parse("2015-12-26 13:00:00", dateTimeFormatter);
     TimeLine timeLine = new TimeLine(start, end);
     String Oid = "001";
     TemporalQueryCondition temporalQueryCondition = new TemporalQueryCondition(timeLine,
@@ -64,7 +64,7 @@ class IDTIndexStrategyTest extends TestCase {
       System.out.println(
           "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
               + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + " isContained "
-              + scanRange.isContained());
+              + scanRange.isValidate());
     }
   }
 

@@ -95,6 +95,7 @@ public class XZ2PQueryTest {
   @Test
   public void testExecuteIntersectQuery() throws IOException {
     Database instance = Database.getInstance();
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialIntersectQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     for (Trajectory result : results) {
@@ -106,6 +107,7 @@ public class XZ2PQueryTest {
   @Test
   public void testExecuteContainQuery() throws IOException {
     Database instance = Database.getInstance();
+    indexTable = instance.getDataSet(DATASET_NAME).getCoreIndexTable();
     SpatialQuery spatialQuery = new SpatialQuery(indexTable, spatialContainedQueryCondition);
     List<Trajectory> results = spatialQuery.executeQuery();
     for (Trajectory result : results) {

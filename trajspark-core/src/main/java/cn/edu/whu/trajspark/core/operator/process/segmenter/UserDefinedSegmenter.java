@@ -2,13 +2,10 @@ package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.UserDefinedSegmenterConfig;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaRDD;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Lynn Lee

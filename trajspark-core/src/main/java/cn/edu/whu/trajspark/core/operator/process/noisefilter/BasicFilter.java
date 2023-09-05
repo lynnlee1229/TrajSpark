@@ -4,13 +4,9 @@ import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.base.util.GeoUtils;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.BasicFilterConfig;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 import org.apache.spark.api.java.JavaRDD;
+
+import java.util.*;
 
 /**
  * @author Lynn Lee

@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
+import static cn.edu.whu.trajspark.constant.DBConstants.ENABLE_SIMPLE_SECONDARY_INDEX;
 import static cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils.getIndexTable;
 
 /**
@@ -42,7 +43,7 @@ public class MainToSecondaryMapper extends TableMapper<ImmutableBytesWritable, P
   protected void map(ImmutableBytesWritable key, Result coreIndexRow, Context context) throws IOException, InterruptedException {
     byte[] coreIndexRowKey = key.get();
     Trajectory t = TrajectorySerdeUtils.getTrajectoryFromResult(coreIndexRow);
-    Put p = TrajectorySerdeUtils.getPutForSecondaryIndex(secondaryTable.getIndexMeta(), t, coreIndexRowKey);
+    Put p = TrajectorySerdeUtils.getPutForSecondaryIndex(secondaryTable.getIndexMeta(), t, coreIndexRowKey, context.getConfiguration().getBoolean(ENABLE_SIMPLE_SECONDARY_INDEX, false));
     context.write(new ImmutableBytesWritable(p.getRow()), p);
   }
 }

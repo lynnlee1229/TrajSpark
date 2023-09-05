@@ -15,8 +15,10 @@ import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
-import scala.Tuple2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -26,19 +28,21 @@ import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
 
 /**
- * row key: shard(short) + oid(string) + XZTCoding(short + long) + tid(string)
+ * row key: shard(short) + oid(string) + XZTCoding(long) + tid(string)
  *
  * @author Xu Qi
  * @since 2022/10/7
  */
 public class IDTIndexStrategy extends IndexStrategy {
 
+  private static Logger LOGGER = LoggerFactory.getLogger(IDTIndexStrategy.class);
+
   private final XZTCoding timeCoding;
 
   /**
    * 作为行键时的字节数
    */
-  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + MAX_OID_LENGTH + XZTCoding.BYTES + MAX_TID_LENGTH;
+  private static final int PHYSICAL_KEY_BYTE_LEN = Short.BYTES + MAX_OID_LENGTH + XZTCoding.BYTES_NUM + MAX_TID_LENGTH;
   private static final int LOGICAL_KEY_BYTE_LEN = PHYSICAL_KEY_BYTE_LEN - Short.BYTES;
   private static final int SCAN_RANGE_BYTE_LEN =  PHYSICAL_KEY_BYTE_LEN - MAX_TID_LENGTH;
 
@@ -56,12 +60,17 @@ public class IDTIndexStrategy extends IndexStrategy {
    * ID-T索引中，shard由object id的hashcode生成，在负载均衡的同时，同ID数据保持本地性
    */
   public ByteArray index(Trajectory trajectory) {
-    ByteArray logicalIndex = logicalIndex(trajectory);
-    short shard = getShard(trajectory.getObjectID());
-    ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
-    buffer.put(Bytes.toBytes(shard));
-    buffer.put(logicalIndex.getBytes());
-    return new ByteArray(buffer.array());
+    try {
+      ByteArray logicalIndex = logicalIndex(trajectory);
+      short shard = getShard(trajectory.getObjectID());
+      ByteBuffer buffer = ByteBuffer.allocate(logicalIndex.getBytes().length + Short.BYTES);
+      buffer.put(Bytes.toBytes(shard));
+      buffer.put(logicalIndex.getBytes());
+      return new ByteArray(buffer.array());
+    } catch (Exception e) {
+      LOGGER.error("Failed to get index of: " + trajectory.toString());
+      throw new IllegalArgumentException();
+    }
   }
 
   @Override
@@ -69,21 +78,19 @@ public class IDTIndexStrategy extends IndexStrategy {
     TimeLine timeLine = new TimeLine(trajectory.getTrajectoryFeatures().getStartTime(),
         trajectory.getTrajectoryFeatures().getEndTime());
     long timeIndex = timeCoding.getIndex(timeLine);
-    short binNum = timeCoding.dateToBinnedTime(timeLine.getTimeStart()).getBin();
     ByteBuffer byteBuffer = ByteBuffer.allocate(LOGICAL_KEY_BYTE_LEN);
     byteBuffer.put(getObjectIDBytes(trajectory));
-    byteBuffer.putShort(binNum);
     byteBuffer.putLong(timeIndex);
     byteBuffer.put(getTrajectoryIDBytes(trajectory));
     return new ByteArray(byteBuffer);
   }
 
+  /**
+   * 先去掉头部的shard和OID信息
+   */
   @Override
   public TimeLine getTimeLineRange(ByteArray byteArray) {
-    long timeCodingVal = getTimeCodingVal(byteArray);
-    short bin = getTimeBinVal(byteArray);
-    TimeBin timeBin = new TimeBin(bin, timeCoding.getTimePeriod());
-    return timeCoding.getTimeLine(timeCodingVal, timeBin);
+    return timeCoding.getXZTElementTimeLine(getTimeCode(byteArray));
   }
 
 
@@ -118,7 +125,7 @@ public class IDTIndexStrategy extends IndexStrategy {
       short shard = getShard(oId);
       ByteArray byteArray1 = toRowKeyRangeBoundary(shard, codingRange.getLower(), oId, false);
       ByteArray byteArray2 = toRowKeyRangeBoundary(shard, codingRange.getUpper(), oId, true);
-      result.add(new RowKeyRange(byteArray1, byteArray2, codingRange.isContained()));
+      result.add(new RowKeyRange(byteArray1, byteArray2, codingRange.isValidated()));
 
     }
     return result;
@@ -133,8 +140,7 @@ public class IDTIndexStrategy extends IndexStrategy {
   @Override
   public String parsePhysicalIndex2String(ByteArray byteArray) {
     return "Row key index: {" + "shardNum = " + getShardNum(byteArray) + ", OID = " + getObjectId(
-        byteArray) + ", Bin = " + getTimeBinVal(byteArray) + ", timeCoding = " + getTimeCodingVal(
-        byteArray) + '}';
+        byteArray) + ", XZT = " + timeCoding.getXZTElementTimeLine(getTimeCode(byteArray)) + '}';
   }
 
   @Override
@@ -154,38 +160,35 @@ public class IDTIndexStrategy extends IndexStrategy {
   }
 
   @Override
-  public long getTimeCodingVal(ByteArray byteArray) {
-    ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
-    buffer.getShort();
-    for (int i = 0; i < MAX_OID_LENGTH; i++) {
-      buffer.get();
-    }
-    buffer.getShort();
-    return buffer.getLong();
+  public long getTimeElementCode(ByteArray byteArray) {
+    return timeCoding.getElementCode(getTimeCode(byteArray));
   }
 
-  public short getTimeBinVal(ByteArray byteArray) {
+  public TimeBin getTimeBin(ByteArray byteArray) {
+    return timeCoding.getTimeBin(getTimeCode(byteArray));
+  }
+
+  public long getTimeCode(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     for (int i = 0; i < MAX_OID_LENGTH; i++) {
       buffer.get();
     }
-    return buffer.getShort();
+    return buffer.getLong();
   }
 
   @Override
   public short getShardNum(ByteArray physicalIndex) {
     ByteBuffer buffer = physicalIndex.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     return buffer.getShort();
   }
 
   @Override
   public String getObjectID(ByteArray physicalIndex) {
     ByteBuffer buffer = physicalIndex.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort(); // shard
     byte[] oidBytes = new byte[MAX_OID_LENGTH];
     buffer.get(oidBytes);
@@ -195,14 +198,12 @@ public class IDTIndexStrategy extends IndexStrategy {
   @Override
   public String getTrajectoryID(ByteArray byteArray) {
     ByteBuffer buffer = byteArray.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     // shard
     buffer.getShort();
     // OID
     byte[] oidBytes = new byte[MAX_OID_LENGTH];
     buffer.get(oidBytes);
-    // time bin
-    buffer.getShort();
     // time code
     buffer.getLong();
     // TID
@@ -214,7 +215,7 @@ public class IDTIndexStrategy extends IndexStrategy {
 
   public String getObjectId(ByteArray physicalIndex) {
     ByteBuffer buffer = physicalIndex.toByteBuffer();
-    buffer.flip();
+    ((Buffer) buffer).flip();
     buffer.getShort();
     byte[] stringBytes = new byte[MAX_OID_LENGTH];
     buffer.get(stringBytes);
@@ -227,9 +228,7 @@ public class IDTIndexStrategy extends IndexStrategy {
     byteBuffer.putShort(shard);
     byteBuffer.put(oidBytesPadding);
     if (end) {
-      Tuple2<Short, Long> extractTimeKeyBytes = XZTCoding.getExtractTimeKeyBytes(timeBytes);
-      byteBuffer.putShort(extractTimeKeyBytes._1);
-      byteBuffer.putLong(extractTimeKeyBytes._2);
+      byteBuffer.putLong(Bytes.toLong(timeBytes.getBytes()) + 1);
     } else {
       byteBuffer.put(timeBytes.getBytes());
     }

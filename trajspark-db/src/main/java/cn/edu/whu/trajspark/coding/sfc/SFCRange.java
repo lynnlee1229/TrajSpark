@@ -11,12 +11,12 @@ import java.util.Objects;
 public class SFCRange implements Comparable<SFCRange>{
   public long lower;
   public long upper;
-  public boolean contained;
+  public boolean validated;
 
-  public SFCRange(long lower, long upper, boolean contained) {
+  public SFCRange(long lower, long upper, boolean validated) {
     this.lower = lower;
     this.upper = upper;
-    this.contained = contained;
+    this.validated = validated;
   }
 
   public static SFCRange apply(long lower, long upper, boolean contained) {
@@ -42,12 +42,12 @@ public class SFCRange implements Comparable<SFCRange>{
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     SFCRange sfcRange = (SFCRange) o;
-    return lower == sfcRange.lower && upper == sfcRange.upper && contained == sfcRange.contained;
+    return lower == sfcRange.lower && upper == sfcRange.upper && validated == sfcRange.validated;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(lower, upper, contained);
+    return Objects.hash(lower, upper, validated);
   }
 
   @Override
@@ -55,7 +55,7 @@ public class SFCRange implements Comparable<SFCRange>{
     return "SFCRange{" +
         "lower=" + lower +
         ", upper=" + upper +
-        ", contained=" + contained +
+        ", contained=" + validated +
         '}';
   }
 }

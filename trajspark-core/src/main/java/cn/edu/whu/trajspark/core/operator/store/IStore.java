@@ -2,19 +2,17 @@ package cn.edu.whu.trajspark.core.operator.store;
 
 import cn.edu.whu.trajspark.base.point.StayPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.store.HBaseStoreConfig;
 import cn.edu.whu.trajspark.core.conf.store.HDFSStoreConfig;
 import cn.edu.whu.trajspark.core.conf.store.IStoreConfig;
 import cn.edu.whu.trajspark.core.conf.store.StandaloneStoreConfig;
-import java.io.IOException;
-import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Lynn Lee

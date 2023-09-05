@@ -7,7 +7,8 @@ package cn.edu.whu.trajspark.core.enums;
 public enum StoreSchemaEnum {
   POINT_BASED_TRAJECTORY("trajectory_point"),
   LIST_BASED_TRAJECTORY("trajectory_list"),
-  STAY_POINT("stay_point");
+  STAY_POINT("stay_point"),
+  POINT_BASED_TRAJECTORY_SLOWPUT("trajectory_point_slowput");
 
   private String storeSchema;
 

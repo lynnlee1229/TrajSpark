@@ -1,9 +1,8 @@
 package cn.edu.whu.trajspark.util;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
-
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -12,6 +11,8 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 /**
  * @author Haocheng Wang

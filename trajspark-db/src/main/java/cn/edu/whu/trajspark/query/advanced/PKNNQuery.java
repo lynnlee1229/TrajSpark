@@ -11,7 +11,6 @@ import cn.edu.whu.trajspark.query.basic.SpatialTemporalQuery;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ import java.util.PriorityQueue;
 public class PKNNQuery {
 
   private static Logger logger = LoggerFactory.getLogger(PKNNQuery.class);
-  public static final double BASIC_BUFFER_DISTANCE = 1.0;
+  public double BASIC_BUFFER_DISTANCE = 1.0;
 
   DataSet dataSet;
   IndexTable targetIndexTable;
@@ -88,21 +87,27 @@ public class PKNNQuery {
 
   public List<Trajectory> execute() {
     int stage = 1;
+    double curSearchDist = BASIC_BUFFER_DISTANCE;
     try {
       setupTargetIndexTable();
       List<Trajectory> result = new LinkedList<>();
-      while (result.size() < k && getSearchRadiusKM(stage) <= maxDistKM) {
-        logger.info("KNN query stage {}, current search radius is {}.", stage, getSearchRadiusKM(stage));
-        Geometry queryEnvelop = queryPoint.buffer(GeoUtils.getDegreeFromKm(getSearchRadiusKM(stage)));
-        SpatialQueryCondition sqc = new SpatialQueryCondition(queryEnvelop, SpatialQueryCondition.SpatialQueryType.INTERSECT);
+      while (result.size() < k) {
+        logger.info("KNN query stage {}, current search radius is {}.", stage, curSearchDist);
+        Geometry geom = queryPoint.buffer(GeoUtils.getDegreeFromKm(curSearchDist));
+        SpatialQueryCondition sqc = new SpatialQueryCondition(geom, SpatialQueryCondition.SpatialQueryType.INTERSECT);
         SpatialTemporalQueryCondition stqc = new SpatialTemporalQueryCondition(sqc, tqc);
-        result = new SpatialTemporalQuery(targetIndexTable, stqc).executeQuery();
-        logger.info("The count of trajectories get by [stage {}, search radius {}km] is {}", stage, getSearchRadiusKM(stage), result.size());
+        result = new SpatialTemporalQuery(targetIndexTable, stqc, false).executeQuery();
+        logger.info("The count of trajectories get by [stage {}, search radius {}km] is {}", stage, curSearchDist, result.size());
         stage++;
+        if (getSearchRadiusKM(result.size(), k, curSearchDist) >= maxDistKM) {
+          break;
+        } else {
+          curSearchDist = getSearchRadiusKM(result.size(), k, curSearchDist);
+        }
       }
       if (result.size() < k) {
         logger.info("Reach max search radius {} at stage {}, radius {}, and only got {} of {}.",
-            maxDistKM, stage, getSearchRadiusKM(stage), result.size(), k);
+            maxDistKM, stage, curSearchDist, result.size(), k);
       }
       PriorityQueue<KNNTrajectory> pq = new PriorityQueue<>(k, (o1, o2) -> {
         double dist1 = o1.getDistanceToPoint();
@@ -112,13 +117,17 @@ public class PKNNQuery {
       addToHeap(result, pq);
       return heapToResultList(pq);
     } catch (Exception e) {
-      logger.error("KNN query failed at stage {}, search radius {}", stage, getSearchRadiusKM(stage), e);
+      logger.error("KNN query failed at stage {}, search radius {}", stage, curSearchDist, e);
       return new LinkedList<>();
     }
   }
 
-  private double getSearchRadiusKM(int stage) {
-    return BASIC_BUFFER_DISTANCE * Math.pow(Math.sqrt(2), stage - 1);
+  private double getSearchRadiusKM(int lastGetRecords, int k, double curSearchDist) {
+    if (lastGetRecords == 0 || k / lastGetRecords >= 2) {
+      return curSearchDist * Math.sqrt(2);
+    } else {
+      return curSearchDist * Math.sqrt(k / (double) lastGetRecords);
+    }
   }
 
 

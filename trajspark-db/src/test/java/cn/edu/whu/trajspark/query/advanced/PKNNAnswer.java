@@ -7,7 +7,6 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.slf4j.Logger;
@@ -16,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-
-import static cn.edu.whu.trajspark.query.advanced.PKNNQuery.BASIC_BUFFER_DISTANCE;
 
 /**
  * @author Haocheng Wang
@@ -85,7 +82,7 @@ public class PKNNAnswer {
   }
 
   private double getSearchRadiusKM(int stage) {
-    return BASIC_BUFFER_DISTANCE * Math.pow(Math.sqrt(2), stage - 1);
+    return 1 * Math.pow(Math.sqrt(2), stage - 1);
   }
 
 

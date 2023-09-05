@@ -5,10 +5,13 @@ import cn.edu.whu.trajspark.coding.sfc.XZ2SFC;
 import cn.edu.whu.trajspark.constant.CodingConstants;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,7 +82,7 @@ public class XZ2Coding implements SpatialCoding {
   @Override
   public Polygon getCodingPolygon(ByteArray spatialCodingByteArray) {
     ByteBuffer br = spatialCodingByteArray.toByteBuffer();
-    br.flip();
+    ((Buffer) br).flip();
     long coding = br.getLong();
     return xz2Sfc.getEnlargedRegion(coding);
   }

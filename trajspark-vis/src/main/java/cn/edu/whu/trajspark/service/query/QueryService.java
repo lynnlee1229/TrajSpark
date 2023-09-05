@@ -2,7 +2,6 @@ package cn.edu.whu.trajspark.service.query;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.database.Database;
-import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.query.basic.IDTemporalQuery;
 import cn.edu.whu.trajspark.query.basic.SpatialQuery;
 import cn.edu.whu.trajspark.query.basic.SpatialTemporalQuery;
@@ -10,9 +9,9 @@ import cn.edu.whu.trajspark.query.condition.IDQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+
 import java.io.IOException;
 import java.util.List;
-import org.springframework.stereotype.Service;
 
 
 public class QueryService {

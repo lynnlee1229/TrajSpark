@@ -1,24 +1,21 @@
 package cn.edu.whu.trajspark.service.query;
 
-import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
-
 import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.query.condition.IDQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition.SpatialQueryType;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
-import org.springframework.stereotype.Service;
+
+import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
 
 
 public class QueryConditionService {

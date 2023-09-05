@@ -2,6 +2,7 @@ package cn.edu.whu.trajspark.core.operator.store.convertor.basic;
 
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
+
 import java.io.Serializable;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
