@@ -41,8 +41,8 @@ public class Parser extends TextTrajParser {
     WKTReader wktReader = new WKTReader();
     Coordinate[] coordinates = ((LineString) wktReader.read(lineWKT)).getCoordinates();
     for (int i = 0; i < coordinates.length; i++) {
-      Instant instant = Instant.ofEpochSecond(Long.parseLong(timestampStrs[i]) / 1000L);
-      ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of("Asia/Shanghai"));
+      Instant instant = Instant.ofEpochSecond(Long.parseLong(timestampStrs[i]));
+      ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
       double lng = coordinates[i].y;
       double lat = coordinates[i].x;
       TrajPoint trajPoint = new TrajPoint(zonedDateTime, lng, lat);

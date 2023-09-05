@@ -3,9 +3,10 @@ package cn.edu.whu.trajspark.core.operator.process.simplifier;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.simplifier.DPSimplifierConfig;
 import cn.edu.whu.trajspark.core.conf.process.simplifier.ISimplifierConfig;
-import java.io.Serializable;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
+
+import java.io.Serializable;
 
 /**
  * @author Lynn Lee

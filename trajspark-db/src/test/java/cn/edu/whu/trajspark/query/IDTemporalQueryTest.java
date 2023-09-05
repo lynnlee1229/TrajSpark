@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -47,12 +48,12 @@ public class IDTemporalQueryTest {
   static List<TimeLine> timeLineList = new ArrayList<>();
   static {
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(TIME_ZONE);
-    ZonedDateTime start = ZonedDateTime.parse("2015-12-25 06:00:00", dateTimeFormatter);
-    ZonedDateTime end = ZonedDateTime.parse("2015-12-25 07:00:00", dateTimeFormatter);
-    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 15:00:00", dateTimeFormatter);
-    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 16:00:00", dateTimeFormatter);
-    testTimeLine1 = new TimeLine(start, end);
-    testTimeLine2 = new TimeLine(start1, end1);
+    ZonedDateTime start1 = ZonedDateTime.parse("2015-12-25 06:00:00", dateTimeFormatter);
+    ZonedDateTime end1 = ZonedDateTime.parse("2015-12-25 07:00:00", dateTimeFormatter);
+    ZonedDateTime start2 = ZonedDateTime.parse("2015-12-25 15:00:00", dateTimeFormatter);
+    ZonedDateTime end2 = ZonedDateTime.parse("2015-12-25 16:00:00", dateTimeFormatter);
+    testTimeLine1 = new TimeLine(start1, end1);
+    testTimeLine2 = new TimeLine(start2, end2);
     timeLineList.add(testTimeLine1);
     timeLineList.add(testTimeLine2);
     temporalIntersectCondition = new TemporalQueryCondition(timeLineList, TemporalQueryType.INTERSECT);
@@ -87,7 +88,7 @@ public class IDTemporalQueryTest {
       System.out.println(
           "start : " + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getStartKey()) + " end : "
               + IDTIndexStrategy.parsePhysicalIndex2String(scanRange.getEndKey()) + "isContained "
-              + scanRange.isContained());
+              + scanRange.isValidate());
     }
   }
 
@@ -103,6 +104,12 @@ public class IDTemporalQueryTest {
       System.out.println(trajectory);
     }
     assertEquals(13, IDTemporalQuery.executeQuery().size());
+  }
+
+  @Test
+  void test2() throws IOException {
+    ByteBuffer byteBuffer1 = ByteBuffer.allocate(20);
+    byteBuffer1.flip();
   }
 
   @Test

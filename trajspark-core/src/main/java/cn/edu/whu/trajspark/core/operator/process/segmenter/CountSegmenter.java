@@ -5,12 +5,13 @@ import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.common.constant.PreProcessDefaultConstant;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.CountSegmenterConfig;
 import cn.edu.whu.trajspark.core.operator.process.noisefilter.FilterUtils;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import org.apache.spark.api.java.JavaRDD;
 
 /**
  * @author Lynn Lee

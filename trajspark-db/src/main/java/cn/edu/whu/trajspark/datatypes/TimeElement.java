@@ -56,7 +56,10 @@ public class TimeElement implements Serializable {
     return Objects.hash(timeStart, timeEnd, timeExtend);
   }
 
-  public Boolean isExContained(TimeLine timeLine) {
+  /**
+   * 扩展单元完全包含
+   */
+  public Boolean isExContainedBy(TimeLine timeLine) {
     return timeStart >= timeLine.getReTimeStart() && timeExtend <= timeLine.getReTimeEnd();
   }
 
@@ -64,7 +67,7 @@ public class TimeElement implements Serializable {
     return timeStart <= timeLine.getReTimeEnd() && timeExtend >= timeLine.getReTimeStart();
   }
 
-  public Boolean isContained(TimeLine timeLine) {
+  public Boolean isContainedBy(TimeLine timeLine) {
     return timeStart >= timeLine.getReTimeStart() && timeEnd <= timeLine.getReTimeEnd();
   }
 
@@ -88,14 +91,12 @@ public class TimeElement implements Serializable {
   /**
    * 获取扩展网格与查询Bound相交的Bound
    */
-  public TimeLine getExtOverlappedTimeLine(List<TimeLine> timeLineList) {
+  public TimeLine getExtOverlappedTimeLine(TimeLine timeQuery) {
     double timeStart = 0;
     double timeEnd = 0;
-    for (TimeLine timeLine : timeLineList) {
-      if (this.isExOverlaps(timeLine) || this.isExContained(timeLine)) {
-        timeStart = Math.max(timeLine.getReTimeStart(), this.timeStart);
-        timeEnd = Math.min(timeLine.getReTimeEnd(), this.timeExtend);
-      }
+    if (this.isExOverlaps(timeQuery) || this.isExContainedBy(timeQuery)) {
+      timeStart = Math.max(timeQuery.getReTimeStart(), this.timeStart);
+      timeEnd = Math.min(timeQuery.getReTimeEnd(), this.timeExtend);
     }
     return new TimeLine(timeStart, timeEnd);
   }

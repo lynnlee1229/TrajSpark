@@ -6,10 +6,11 @@ import cn.edu.whu.trajspark.core.conf.store.StandaloneStoreConfig;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.StayPointConvertor;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.TrajectoryConvertor;
 import cn.edu.whu.trajspark.core.util.IOUtils;
-import java.util.List;
-import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 import scala.NotImplementedError;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Lynn Lee

@@ -41,6 +41,10 @@ public abstract class AbstractQuery {
    */
   public abstract List<RowKeyRange> getIndexRanges() throws IOException;
 
+  public IndexTable getTargetIndexTable() {
+    return targetIndexTable;
+  }
+
   /**
    * Query <strong>all</strong> ranges that meets query request on target table.
    * @return
@@ -76,7 +80,7 @@ public abstract class AbstractQuery {
       QueryCondition.Range r = QueryCondition.Range.newBuilder()
           .setStart(ByteString.copyFrom(rowKeyRange.getStartKey().getBytes()))
           .setEnd(ByteString.copyFrom(rowKeyRange.getEndKey().getBytes()))
-          .setContained(rowKeyRange.isContained())
+          .setContained(rowKeyRange.isValidate())
           .build();
       ranges.add(r);
     }

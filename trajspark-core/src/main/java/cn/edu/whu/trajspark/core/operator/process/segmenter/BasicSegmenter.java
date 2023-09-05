@@ -2,13 +2,14 @@ package cn.edu.whu.trajspark.core.operator.process.segmenter;
 
 import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
-import cn.edu.whu.trajspark.core.conf.process.segmenter.BasicSegmenterConfig;
 import cn.edu.whu.trajspark.base.util.GeoUtils;
+import cn.edu.whu.trajspark.core.conf.process.segmenter.BasicSegmenterConfig;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.apache.spark.api.java.JavaRDD;
 
 /**
  * @author Lynn Lee

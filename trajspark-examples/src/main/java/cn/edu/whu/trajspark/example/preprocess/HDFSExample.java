@@ -7,9 +7,10 @@ import cn.edu.whu.trajspark.core.util.FSUtils;
 import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
-import java.io.InputStream;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
+
+import java.io.InputStream;
 
 /**
  * @author Lynn Lee

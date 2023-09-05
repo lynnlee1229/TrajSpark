@@ -5,9 +5,10 @@ import cn.edu.whu.trajspark.coding.utils.JSONUtil;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.GeoJsonConvertor;
 import cn.edu.whu.trajspark.database.util.TrajectoryJsonUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.junit.Test;
+
 import java.util.List;
 import java.util.Objects;
-import org.junit.Test;
 
 public class GeoJsonConvertTest {
   @Test

@@ -7,16 +7,17 @@ import cn.edu.whu.trajspark.service.query.QueryConditionService;
 import cn.edu.whu.trajspark.service.query.QueryService;
 import cn.edu.whu.trajspark.util.ExampleTrajectoryUtil;
 import com.alibaba.fastjson.JSONObject;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 class SpatialQueryControllerTest {

@@ -77,7 +77,7 @@ public class IndexTable {
   }
 
   public void putForSecondaryTable(Trajectory trajectory, byte[] ptr) throws IOException {
-    Put put = TrajectorySerdeUtils.getPutForSecondaryIndex(indexMeta, trajectory, ptr);
+    Put put = TrajectorySerdeUtils.getPutForSecondaryIndex(indexMeta, trajectory, ptr, false);
     table.put(put);
   }
 

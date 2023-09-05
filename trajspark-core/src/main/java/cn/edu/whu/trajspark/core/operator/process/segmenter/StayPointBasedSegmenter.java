@@ -4,11 +4,12 @@ import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.segmenter.StayPointBasedSegmenterConfig;
 import cn.edu.whu.trajspark.core.operator.process.staypointdetector.IDetector;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import org.apache.spark.api.java.JavaRDD;
 
 /**
  * @author Lynn Lee

@@ -1,6 +1,8 @@
 package cn.edu.whu.trajspark.index;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Haocheng Wang
@@ -18,6 +20,10 @@ public enum IndexType implements Serializable {
   OBJECT_ID_T(4);
 
   int id;
+
+  public static List<IndexType> spatialIndexTypes() {
+    return Arrays.asList(XZ2, XZ2T, TXZ2, XZ2Plus);
+  }
 
   IndexType(int id) {
     this.id = id;

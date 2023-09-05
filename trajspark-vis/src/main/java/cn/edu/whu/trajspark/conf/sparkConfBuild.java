@@ -1,6 +1,5 @@
 package cn.edu.whu.trajspark.conf;
 
-import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 

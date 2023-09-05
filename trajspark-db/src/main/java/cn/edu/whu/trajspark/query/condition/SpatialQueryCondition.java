@@ -1,6 +1,5 @@
 package cn.edu.whu.trajspark.query.condition;
 
-import cn.edu.whu.trajspark.base.mbr.MinimumBoundingBox;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;

@@ -5,6 +5,7 @@ import cn.edu.whu.trajspark.coding.SpatialCoding;
 import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.constant.IndexConstants;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
+import cn.edu.whu.trajspark.datatypes.TimeBin;
 import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
@@ -78,9 +79,10 @@ public abstract class IndexStrategy implements Serializable {
   public abstract ByteArray extractSpatialCode(ByteArray byteArray);
 
   public abstract TimeCoding getTimeCoding();
-  public abstract short getTimeBinVal(ByteArray byteArray);
 
-  public abstract long getTimeCodingVal(ByteArray byteArray);
+  public abstract TimeBin getTimeBin(ByteArray byteArray);
+
+  public abstract long getTimeElementCode(ByteArray byteArray);
 
   public abstract short getShardNum(ByteArray byteArray);
 
@@ -122,8 +124,12 @@ public abstract class IndexStrategy implements Serializable {
    */
   public byte[][] getSplits() {
     byte[][] splits = new byte[shardNum - 1][];
-    for (int i = 0; i < shardNum - 1; i++) {
-      splits[i] = Bytes.toBytes(i + 1);
+    for (short i = 0; i < shardNum - 1; i++) {
+      short split = (short) (i + 1);
+      byte[] bytes = new byte[2];
+      bytes[0] = (byte)((split >> 8) & 0xff);
+      bytes[1] = (byte)(split & 0xff);
+      splits[i] = bytes;
     }
     return splits;
   }

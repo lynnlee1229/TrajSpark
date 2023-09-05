@@ -4,7 +4,6 @@ import cn.edu.whu.trajspark.database.Database;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.query.basic.SpatialQuery;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;

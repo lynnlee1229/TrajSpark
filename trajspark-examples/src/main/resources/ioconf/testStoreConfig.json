@@ -58,7 +58,6 @@
     "location": "hdfs://localhost:9000/store/",
     "schema": "POINT_BASED_TRAJECTORY",
     "dataSetName": "TRAJECTORY_TEST",
-    "mainIndex": "XZ2",
-    "otherIndex": "OBJECT_ID_T,TXZ2"
+    "mainIndex": "XZ2"
   }
 }

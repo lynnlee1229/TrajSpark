@@ -2,8 +2,9 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.CompositiveFilterConfig;
-import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
+
+import java.util.Objects;
 
 /**
  * @author Lynn Lee

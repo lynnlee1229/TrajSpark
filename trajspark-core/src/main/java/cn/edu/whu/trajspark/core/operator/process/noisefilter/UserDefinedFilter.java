@@ -2,10 +2,11 @@ package cn.edu.whu.trajspark.core.operator.process.noisefilter;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.UserDefinedFilterConfig;
+import org.apache.spark.api.java.JavaRDD;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.spark.api.java.JavaRDD;
 
 /**
  * @author Lynn Lee

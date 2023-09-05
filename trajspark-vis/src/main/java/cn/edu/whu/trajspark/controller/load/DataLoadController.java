@@ -6,14 +6,14 @@ import cn.edu.whu.trajspark.core.operator.load.ILoader;
 import cn.edu.whu.trajspark.core.operator.store.convertor.basic.GeoJsonConvertor;
 import cn.edu.whu.trajspark.util.ExampleConfig;
 import com.alibaba.fastjson.JSONObject;
-import java.io.IOException;
-import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 @RestController
 public class DataLoadController {
