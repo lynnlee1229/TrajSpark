@@ -21,6 +21,9 @@ public class TrajectoryParser {
                                           String splitter) throws IOException {
     String[] points = rawString.split(System.lineSeparator());
     int n = points.length;
+    if (n <= 3) {
+      return null;
+    }
     List<TrajPoint> trajPoints = new ArrayList<>(n);
     String trajId = "";
     String objectId = "";
@@ -56,6 +59,9 @@ public class TrajectoryParser {
     int objectIdIndex = trajectoryConfig.getObjectId().getIndex();
     int trajIdIndex = trajectoryConfig.getTrajId().getIndex();
     String[] points = rawString.split(System.lineSeparator());
+    if (points.length <= 3) {
+      return null;
+    }
     // 按tid+oid分组
     Map<String, List<String>> groupList = Arrays.stream(points).collect(
         Collectors.groupingBy(item -> getGroupKey(item, splitter, trajIdIndex, objectIdIndex)));
@@ -80,6 +86,9 @@ public class TrajectoryParser {
   private static Trajectory mapToTraj(List<String> points, String splitter, int trajIdIndex,
                                       int objectIdIndex, TrajectoryConfig trajectoryConfig)
       throws IOException {
+    if (points == null || points.size() <= 3) {
+      return null;
+    }
     String trajId = "", objectId = "";
     List<TrajPoint> trajPoints = new ArrayList<>(points.size());
     for (String point : points) {
@@ -91,7 +100,7 @@ public class TrajectoryParser {
               splitter);
       trajPoints.add(trajPoint);
     }
-    return trajPoints.isEmpty() ? null : new Trajectory(trajId, objectId, trajPoints);
+    return new Trajectory(trajId, objectId, trajPoints);
 
   }
 }

@@ -1,0 +1,52 @@
+{
+  "loadConfig": {
+    "@type": "hdfs",
+    "master": "local[*]",
+    "location": "hdfs://localhost:9000/geofence/hw.txt",
+    "fileMode": "multi_single_file",
+    "partNum": 8,
+    "splitter": ","
+  },
+  "dataConfig": {
+    "@type": "trajectory",
+    "trajId": {
+      "sourceName": "traj_id",
+      "dataType": "String",
+      "index": 1
+    },
+    "objectId": {
+      "sourceName": "object_id",
+      "dataType": "String",
+      "index": 0
+    },
+    "trajPointConfig": {
+      "@type": "traj_point",
+      "pointId": {
+        "sourceName": "point_id",
+        "dataType": "String",
+        "index": 0
+      },
+      "lng": {
+        "sourceName": "lng",
+        "dataType": "Double",
+        "index": 3
+      },
+      "lat": {
+        "sourceName": "lat",
+        "dataType": "Double",
+        "index": 4
+      },
+      "time": {
+        "sourceName": "time",
+        "dataType": "Date",
+        "index": 2,
+        "format": "yyyy-MM-dd HH:mm:ss"
+      }
+    }
+  },
+  "geofenceConfig": {
+    "defaultFs":"hdfs://localhost:9000",
+    "geofencePath":"/geofence/fence_csv/landuseV2.csv",
+    "indexFence":false
+  }
+}

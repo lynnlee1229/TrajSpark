@@ -35,7 +35,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-      TrajFeatures trajectoryFeatures) {
+                    TrajFeatures trajectoryFeatures) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -44,7 +44,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-      TrajFeatures trajectoryFeatures, Map<String, Object> extendedValues) {
+                    TrajFeatures trajectoryFeatures, Map<String, Object> extendedValues) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -54,7 +54,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-      Map<String, Object> extendedValues) {
+                    Map<String, Object> extendedValues) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -68,7 +68,7 @@ public class Trajectory implements Serializable {
   }
 
   public Trajectory(String trajectoryID, String objectID, List<TrajPoint> pointList,
-      boolean genPid) {
+                    boolean genPid) {
     this.trajectoryID = trajectoryID;
     this.objectID = objectID;
     this.pointList = pointList;
@@ -121,7 +121,7 @@ public class Trajectory implements Serializable {
   }
 
   public LineString getLineString() {
-    if (this.updateLineString) {
+    if (this.updateLineString && this.pointList != null && this.pointList.size() > 3) {
       this.updateLineString();
     }
 
@@ -164,7 +164,7 @@ public class Trajectory implements Serializable {
   }
 
   public TrajFeatures getTrajectoryFeatures() {
-    if (this.updateFeatures && this.pointList != null && !this.pointList.isEmpty()) {
+    if (this.updateFeatures && this.pointList != null && this.pointList.size() > 3) {
       this.updateFeature();
       this.updateFeatures = false;
     }
@@ -188,7 +188,7 @@ public class Trajectory implements Serializable {
     TrajPoint prePoint = null;
     TrajPoint p;
     for (Iterator iter = this.pointList.iterator(); iter.hasNext();
-        maxLng = Math.max(maxLng, p.getLng())) {
+         maxLng = Math.max(maxLng, p.getLng())) {
       p = (TrajPoint) iter.next();
       minLat = Math.min(minLat, p.getLat());
       minLng = Math.min(minLng, p.getLng());
@@ -211,7 +211,7 @@ public class Trajectory implements Serializable {
   }
 
   private void updateLineString() {
-    if (this.pointList != null) {
+    if (this.pointList != null && this.pointList.size() > 3) {
       int srid = this.lineString == null ? 4326 : this.lineString.getSRID();
       this.lineString = new LineString(new CoordinateArraySequence(
           (Coordinate[]) ((List) this.pointList.stream().map((gpsPoint) -> {
