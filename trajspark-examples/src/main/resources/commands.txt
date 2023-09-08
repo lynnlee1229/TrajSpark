@@ -1,2 +1,3 @@
 spark-submit --class cn.edu.whu.trajspark.example.geofence.TrajStore2HBase  --master yarn --deploy-mode cluster trajspark-examples-1.0-SNAPSHOT.jar
 spark-submit --class cn.edu.whu.trajspark.example.geofence.GeofenceFromFS  --master yarn --deploy-mode cluster trajspark-examples-1.0-SNAPSHOT.jar
+spark-submit --master spark://localhost:7077 --deploy-mode cluster --class cn.edu.whu.trajspark.example.geofence.HwTest trajspark-examples-1.0-SNAPSHOT.jar

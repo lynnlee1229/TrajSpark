@@ -3,8 +3,8 @@
     "@type": "hdfs",
     "master": "local[*]",
     "location": "hdfs://localhost:9000/geofence/hw.txt",
-    "fileMode": "multi_single_file",
-    "partNum": 8,
+    "fileMode": "single_file",
+    "partNum": 16,
     "splitter": ","
   },
   "dataConfig": {

@@ -6,9 +6,11 @@ import cn.edu.whu.trajspark.core.common.index.TreeIndex;
 import cn.edu.whu.trajspark.core.conf.analysis.geofence.GeofenceConfig;
 import cn.edu.whu.trajspark.core.operator.analysis.geofence.Geofence;
 import cn.edu.whu.trajspark.core.operator.load.ILoader;
+import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.FileSystemUtils;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
@@ -28,19 +30,19 @@ public class HwTest implements Serializable {
   public static void main(String[] args) throws Exception {
     // TODO 服务器测试：更改json中的路径内容，将json、fence.csv传至hdfs
     String fileStr;
-    fileStr = FileSystemUtils.readFully("hdfs://localhost:9000", "/geofence/hw.json");
-//    if (args.length > 1) {
-//      String fs = args[0];
-//      String filePath = args[1];
-//      fileStr = FileSystemUtils.readFully(fs, filePath);
-//    } else if (args.length == 1) {
-//      String confPath = args[0];
-//      fileStr = IOUtils.readFileToString(confPath);
-//    } else {
-//      InputStream resourceAsStream = GeofenceFromFS.class.getClassLoader()
-//          .getResourceAsStream("ioconf/hw.json");
-//      fileStr = IOUtils.readFileToString(resourceAsStream);
-//    }
+//    fileStr = FileSystemUtils.readFully("hdfs://localhost:9000", "/geofence/hw.json");
+    if (args.length > 1) {
+      String fs = args[0];
+      String filePath = args[1];
+      fileStr = FileSystemUtils.readFully(fs, filePath);
+    } else if (args.length == 1) {
+      String confPath = args[0];
+      fileStr = IOUtils.readFileToString(confPath);
+    } else {
+      InputStream resourceAsStream = GeofenceFromFS.class.getClassLoader()
+          .getResourceAsStream("ioconf/hw.json");
+      fileStr = IOUtils.readFileToString(resourceAsStream);
+    }
     ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
 //    boolean isLocal = false;
     boolean isLocal = true;
@@ -66,6 +68,8 @@ public class HwTest implements Serializable {
           trajRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue()))
               .filter(Objects::nonNull);
       System.out.println(res.count());
+//      res.count();
+
 
 //      // 从配置文件初始化预处理算子
 //      IFilter myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
