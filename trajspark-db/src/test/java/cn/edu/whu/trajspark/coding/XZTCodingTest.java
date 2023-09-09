@@ -9,7 +9,7 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.datatypes.TimePeriod;
 import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import junit.framework.TestCase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;

@@ -8,7 +8,7 @@ import cn.edu.whu.trajspark.database.meta.IndexMeta;
 import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.index.spatial.XZ2IndexStrategy;
 import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

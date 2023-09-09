@@ -15,7 +15,8 @@ import cn.edu.whu.trajspark.index.time.IDTIndexStrategy;
 import cn.edu.whu.trajspark.query.basic.IDTemporalQuery;
 import cn.edu.whu.trajspark.query.condition.IDQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static cn.edu.whu.trajspark.constant.DBConstants.TIME_ZONE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -103,7 +103,7 @@ public class IDTemporalQueryTest {
     for (Trajectory trajectory : trajectories) {
       System.out.println(trajectory);
     }
-    assertEquals(13, IDTemporalQuery.executeQuery().size());
+    Assert.assertEquals(13, IDTemporalQuery.executeQuery().size());
   }
 
   @Test
@@ -122,7 +122,7 @@ public class IDTemporalQueryTest {
     for (Trajectory trajectory : trajectories) {
       System.out.println(trajectory);
     }
-    assertEquals(10, IDTemporalQuery.executeQuery().size());
+    Assert.assertEquals(10, IDTemporalQuery.executeQuery().size());
   }
 
   @Test

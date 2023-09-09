@@ -18,7 +18,7 @@ import cn.edu.whu.trajspark.query.condition.IDQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

@@ -2,7 +2,7 @@ package cn.edu.whu.trajspark.database.util;
 
 import cn.edu.whu.trajspark.database.load.driver.JsonWriteFormat;
 import junit.framework.TestCase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Objects;

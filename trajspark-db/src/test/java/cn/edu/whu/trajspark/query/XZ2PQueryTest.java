@@ -17,7 +17,7 @@ import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
@@ -138,7 +138,6 @@ public class XZ2PQueryTest {
     instance.deleteDataSet(DATASET_NAME);
   }
 
-  @org.junit.jupiter.api.Test
   public void testSingleGetTrajectory() throws IOException {
     Database instance = Database.getInstance();
     byte[] target = Bytes.fromHex("000100000001000000012156ad340a4342514244533431");

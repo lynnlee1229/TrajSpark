@@ -44,9 +44,11 @@
       }
     }
   },
-  "geofenceConfig": {
-    "defaultFs":"hdfs://u0:9000",
-    "geofencePath":"/geofence/GeoFenceOneKilo.csv",
-    "indexFence":false
+  "storeConfig": {
+    "@type": "hbase",
+    "location": "hdfs://u0:9000/geofence_traj/",
+    "schema": "POINT_BASED_TRAJECTORY",
+    "dataSetName": "GEOFENCE_TRAJECTORY_HW",
+    "mainIndex": "XZ2"
   }
 }

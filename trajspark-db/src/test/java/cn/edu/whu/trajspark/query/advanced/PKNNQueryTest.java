@@ -11,7 +11,7 @@ import cn.edu.whu.trajspark.datatypes.TemporalQueryType;
 import cn.edu.whu.trajspark.index.spatialtemporal.TXZ2IndexStrategy;
 import cn.edu.whu.trajspark.query.IDTemporalQueryTest;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

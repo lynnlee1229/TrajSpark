@@ -19,7 +19,7 @@ import cn.edu.whu.trajspark.query.coprocessor.STQueryEndPoint;
 import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;

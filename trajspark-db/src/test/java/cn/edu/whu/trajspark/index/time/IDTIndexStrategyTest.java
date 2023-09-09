@@ -8,7 +8,7 @@ import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.RowKeyRange;
 import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import junit.framework.TestCase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
