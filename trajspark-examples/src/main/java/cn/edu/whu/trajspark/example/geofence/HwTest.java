@@ -68,7 +68,7 @@ public class HwTest implements Serializable {
       JavaRDD<Tuple2<String, String>> res =
           trajRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue()))
               .filter(Objects::nonNull);
-      System.out.println(res.count());
+      res.count();
 //      res.count();
 
 

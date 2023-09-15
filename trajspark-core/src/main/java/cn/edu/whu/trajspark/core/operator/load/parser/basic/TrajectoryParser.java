@@ -60,7 +60,7 @@ public class TrajectoryParser {
     int trajIdIndex = trajectoryConfig.getTrajId().getIndex();
     String[] points = rawString.split(System.lineSeparator());
     if (points.length <= 3) {
-      return null;
+      return new ArrayList<Trajectory>();
     }
     // 按tid+oid分组
     Map<String, List<String>> groupList = Arrays.stream(points).collect(
