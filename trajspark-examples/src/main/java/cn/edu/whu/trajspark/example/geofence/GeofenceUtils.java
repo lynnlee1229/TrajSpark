@@ -4,12 +4,6 @@ import cn.edu.whu.trajspark.core.common.index.STRTreeIndex;
 import cn.edu.whu.trajspark.core.common.indexedgeom.MultiPolygonWithIndex;
 import cn.edu.whu.trajspark.core.common.indexedgeom.PolygonWithIndex;
 import cn.edu.whu.trajspark.example.util.FileSystemUtils;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -18,6 +12,13 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Lynn Lee
@@ -138,8 +139,10 @@ public class GeofenceUtils {
 //        getIndexedGeoFence("hdfs://localhost:9000", "/geofence/shenzhen_landuse.csv", true);
 //    System.out.println(indexedGeoFence.size());
 //    List<Geometry> geometries = readGeoFence("/Users/lynnlee/Data/land.csv");
-    System.out.println(
-        getIndexedGeoFence("hdfs://localhost:9000", "/geofence/fence_csv/landuseV2.csv", false).size());
-//    System.out.println(geometries.size());
+//    System.out.println(
+//        getIndexedGeoFence("hdfs://localhost:9000", "/geofence/fence_csv/landuseV2.csv", false).size());
+//    System.out.println(geometries.size())
+    STRTreeIndex<Geometry> indexedGeoFence = getIndexedGeoFence("hdfs://u0:9000",
+            "/geofence/GeoFenceOneKilo.csv", false);
   }
 }

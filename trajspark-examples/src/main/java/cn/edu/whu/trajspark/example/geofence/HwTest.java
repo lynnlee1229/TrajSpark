@@ -10,15 +10,16 @@ import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.FileSystemUtils;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.SparkSession;
 import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author Lynn Lee
@@ -44,8 +45,8 @@ public class HwTest implements Serializable {
       fileStr = IOUtils.readFileToString(resourceAsStream);
     }
     ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
-//    boolean isLocal = false;
-    boolean isLocal = true;
+    boolean isLocal = false;
+//    boolean isLocal = true;
     int localIndex = 2;
     try {
       isLocal = Boolean.parseBoolean(args[localIndex]);

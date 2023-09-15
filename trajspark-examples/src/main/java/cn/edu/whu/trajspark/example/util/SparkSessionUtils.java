@@ -29,6 +29,8 @@ public class SparkSessionUtils {
     if (loadConfig.getFsDefaultName() != null) {
       sparkConf.set("fs.defaultFS", loadConfig.getFsDefaultName());
     }
+    sparkConf.set("spark.hadoop.fs.hdfs.impl.disable.cache","true");
+
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
     sparkConf.set("spark.kryoserializer.buffer.max", "512m");
     sparkConf.set("spark.kryoserializer.buffer", "64m");
