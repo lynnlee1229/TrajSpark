@@ -10,16 +10,15 @@ import cn.edu.whu.trajspark.core.util.IOUtils;
 import cn.edu.whu.trajspark.example.conf.ExampleConfig;
 import cn.edu.whu.trajspark.example.util.FileSystemUtils;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.SparkSession;
 import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
-
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * @author Lynn Lee
@@ -54,10 +53,14 @@ public class HwTest implements Serializable {
     }
     try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
         HwTest.class.getName(), isLocal)) {
+      long loadStart = System.currentTimeMillis();
       ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
+      long loadEnd = System.currentTimeMillis();
+
+      long fenceStart = System.currentTimeMillis();
       GeofenceConfig geofenceConfig = exampleConfig.getGeofenceConfig();
       STRTreeIndex<Geometry> treeIndex = GeofenceUtils.getIndexedGeoFence(geofenceConfig.getDefaultFs(),
           geofenceConfig.getGeofencePath(), geofenceConfig.isIndexFence());
@@ -68,7 +71,11 @@ public class HwTest implements Serializable {
       JavaRDD<Tuple2<String, String>> res =
           trajRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue()))
               .filter(Objects::nonNull);
-      res.count();
+//      List<Tuple2<String, String>> collect = res.collect();
+      res.collect();
+      long fenceEnd = System.currentTimeMillis();
+      System.out.println("Load cost " + (loadEnd - loadStart) + "ms");
+      System.out.println("GeoFence cost " + (fenceEnd - fenceStart) + "ms");
 //      res.count();
 
 

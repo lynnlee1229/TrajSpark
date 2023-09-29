@@ -1,5 +1,6 @@
 package cn.edu.whu.trajspark.base.point;
 
+import cn.edu.whu.trajspark.base.util.BasicDateUtils;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
  **/
 public class TrajPoint extends BasePoint implements Serializable {
   private String pid;
+  private String timeString;
   private ZonedDateTime timestamp;
   private Map<String, Object> extendedValues;
 
@@ -21,11 +23,22 @@ public class TrajPoint extends BasePoint implements Serializable {
     this.extendedValues = null;
   }
 
+  public TrajPoint(String timeString, double lng, double lat) {
+    super(lng, lat);
+    this.timeString = timeString;
+  }
+
   public TrajPoint(String id, ZonedDateTime timestamp, double lng, double lat) {
     super(lng, lat);
     this.pid = id;
     this.timestamp = timestamp;
     this.extendedValues = null;
+  }
+
+  public TrajPoint(String id, String timeString, double lng, double lat) {
+    super(lng, lat);
+    this.pid = id;
+    this.timeString = timeString;
   }
 
   public TrajPoint(String id, ZonedDateTime timestamp, double lng, double lat,
@@ -36,9 +49,22 @@ public class TrajPoint extends BasePoint implements Serializable {
     this.extendedValues = extendedValues;
   }
 
+  public TrajPoint(String id, String timeString, double lng, double lat,
+                   Map<String, Object> extendedValues) {
+    super(lng, lat);
+    this.pid = id;
+    this.timeString = timeString;
+    this.extendedValues = extendedValues;
+  }
+
+  public void setTimeString(String timeString) {
+    this.timeString = timeString;
+  }
+
   public void setTimestamp(ZonedDateTime timestamp) {
     this.timestamp = timestamp;
   }
+
   public void setPid(String pid) {
     this.pid = pid;
   }
@@ -48,11 +74,14 @@ public class TrajPoint extends BasePoint implements Serializable {
   }
 
   public ZonedDateTime getTimestamp() {
+    if (timestamp == null) {
+      timestamp = BasicDateUtils.parseDate(timeString);
+    }
     return timestamp;
   }
 
   public String getTimestampString() {
-    return timestamp.toLocalDateTime().toString();
+    return timeString;
   }
 
   public Map<String, Object> getExtendedValues() {

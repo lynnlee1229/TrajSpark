@@ -25,7 +25,8 @@ public class DateUtils {
   }
 
   public static ZonedDateTime parse(String time, DateTimeFormatter dateTimeFormatter) {
-    return StringUtils.isEmpty(time.trim()) ? null : ZonedDateTime.parse(time.trim(), dateTimeFormatter);
+    return StringUtils.isEmpty(time.trim()) ? null :
+        ZonedDateTime.parse(time.trim(), dateTimeFormatter);
   }
 
   public static String format(ZonedDateTime time, String pattern) {
@@ -78,7 +79,27 @@ public class DateUtils {
       zoneId = "UTC+8";
     }
 
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(format).withZone(ZoneId.of(zoneId));
+    DateTimeFormatter timeFormatter =
+        DateTimeFormatter.ofPattern(format).withZone(ZoneId.of(zoneId));
     return ZonedDateTime.parse(timeFormat, timeFormatter);
   }
+
+  private static ZonedDateTime parseDate(String timeFormat) {
+    return parseDate(timeFormat, null, null);
+  }
+
+  private static ZonedDateTime parseDate(String timeFormat, String format, String zoneId) {
+    if (StringUtils.isEmpty(format)) {
+      format = "yyyy-MM-dd HH:mm:ss";
+    }
+
+    if (StringUtils.isEmpty(zoneId)) {
+      zoneId = "UTC+8";
+    }
+
+    DateTimeFormatter timeFormatter =
+        DateTimeFormatter.ofPattern(format).withZone(ZoneId.of(zoneId));
+    return ZonedDateTime.parse(timeFormat, timeFormatter);
+  }
+
 }

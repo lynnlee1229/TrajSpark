@@ -4,9 +4,7 @@ import cn.edu.whu.trajspark.base.point.TrajPoint;
 import cn.edu.whu.trajspark.core.conf.data.Mapping;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
 import cn.edu.whu.trajspark.core.util.DataTypeUtils;
-import cn.edu.whu.trajspark.core.util.DateUtils;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +26,10 @@ public class TrajPointParser {
       } else {
         id = record[config.getPointId().getIndex()];
       }
-      ZonedDateTime
-          time = DateUtils.parse(config.getTime().getBasicDataTypeEnum(),
-          record[config.getTime().getIndex()], config.getTime());
+//      ZonedDateTime
+//          time = DateUtils.parse(config.getTime().getBasicDataTypeEnum(),
+//          record[config.getTime().getIndex()], config.getTime());
+      String time = record[config.getTime().getIndex()];
       double lat = Double.parseDouble(record[config.getLat().getIndex()]);
       double lng = Double.parseDouble(record[config.getLng().getIndex()]);
       int n = record.length;
