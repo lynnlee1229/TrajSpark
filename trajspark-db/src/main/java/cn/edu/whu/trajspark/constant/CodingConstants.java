@@ -1,7 +1,5 @@
 package cn.edu.whu.trajspark.constant;
 
-import cn.edu.whu.trajspark.datatypes.TimePeriod;
-
 /**
  * @author Haocheng Wang
  * Created on 2022/9/27
@@ -19,7 +17,6 @@ public class CodingConstants {
 
   public static final short MAX_TIME_BIN_PRECISION = 7;
 
-  public static final TimePeriod DEFAULT_TIME_PERIOD = TimePeriod.DAY;
   public static final double LOG_FIVE = Math.log(0.5);
   public static final int MAX_OID_LENGTH = 60;
   public static final int MAX_TID_LENGTH = 60;

@@ -2,20 +2,13 @@ package cn.edu.whu.trajspark.index;
 
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
-import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.constant.IndexConstants;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
-import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
-import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Objects;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
@@ -53,34 +46,11 @@ public abstract class IndexStrategy implements Serializable {
     return indexType;
   }
 
-  public abstract TimeLine getTimeLineRange(ByteArray byteArray);
-
-  /**
-   * Get RowKey pairs for scan operation, based on spatial and temporal range.
-   * A pair of RowKey is the startKey and endKey of a single scan.
-   * @param spatialQueryCondition 查询框
-   * @param maxRangeNum 最大范围数量
-   * @return RowKey pairs
-   */
-  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition, int maxRangeNum);
-
-  public abstract List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition);
-
-  public abstract List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition, int maxRangeNum);
-
-  public abstract List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition, String oID);
-
-  public abstract List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition);
-
   public abstract String parsePhysicalIndex2String(ByteArray byteArray);
 
   public abstract SpatialCoding getSpatialCoding();
 
   public abstract ByteArray extractSpatialCode(ByteArray byteArray);
-
-  public abstract TimeCoding getTimeCoding();
-
-  public abstract TimeBin getTimeBin(ByteArray byteArray);
 
   public abstract long getTimeElementCode(ByteArray byteArray);
 

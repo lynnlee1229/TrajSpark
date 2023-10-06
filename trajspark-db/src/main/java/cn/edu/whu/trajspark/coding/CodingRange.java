@@ -1,9 +1,6 @@
 package cn.edu.whu.trajspark.coding;
 
-import cn.edu.whu.trajspark.coding.poscode.PosCode;
-import cn.edu.whu.trajspark.coding.poscode.PosCodeRange;
 import cn.edu.whu.trajspark.coding.sfc.SFCRange;
-import cn.edu.whu.trajspark.coding.sfc.TimeIndexRange;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
 
 import java.nio.ByteBuffer;
@@ -55,37 +52,6 @@ public class CodingRange {
       validated = sfcRange.validated;
     }
   }
-
-  public void concatTimeIndexRange(TimeIndexRange timeIndexRange) {
-    if (lower == null || upper == null) {
-      lower = new ByteArray(
-          ByteBuffer.allocate(XZTCoding.BYTES_NUM).putLong(timeIndexRange.getLowerXZTCode()));
-      upper = new ByteArray(
-          ByteBuffer.allocate(XZTCoding.BYTES_NUM).putLong(timeIndexRange.getUpperXZTCode()));
-    } else {
-      lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + XZTCoding.BYTES_NUM)
-          .put(lower.getBytes())
-          .putLong(timeIndexRange.getLowerXZTCode()));
-      upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + XZTCoding.BYTES_NUM)
-          .put(upper.getBytes())
-          .putLong(timeIndexRange.getUpperXZTCode()));
-    }
-    validated = timeIndexRange.isContained();
-  }
-
- public void concatPosCodeRange(PosCodeRange posCodeRange) {
-   if (lower == null || upper == null) {
-     lower = new ByteArray(ByteBuffer.allocate(PosCode.SIZE / Byte.SIZE).put(posCodeRange.lower.getPoscodeByte()));
-     upper = new ByteArray(ByteBuffer.allocate(PosCode.SIZE / Byte.SIZE).put(posCodeRange.upper.getPoscodeByte()));
-   } else {
-     lower = new ByteArray(ByteBuffer.allocate(lower.getBytes().length + PosCode.SIZE / Byte.SIZE)
-         .put(lower.getBytes())
-         .put(posCodeRange.lower.getPoscodeByte()));
-     upper = new ByteArray(ByteBuffer.allocate(upper.getBytes().length + PosCode.SIZE / Byte.SIZE)
-         .put(upper.getBytes())
-         .put(posCodeRange.upper.getPoscodeByte()));
-   }
- }
 
   @Override
   public String toString() {

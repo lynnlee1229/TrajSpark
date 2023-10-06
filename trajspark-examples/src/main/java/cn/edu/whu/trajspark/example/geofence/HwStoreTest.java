@@ -36,13 +36,11 @@ public class HwStoreTest {
         LOGGER.info("Init sparkSession...");
         boolean isLocal = false;
         try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
-                TrajStore2HBase.class.getName(), isLocal)) {
+                HwStoreTest.class.getName(), isLocal)) {
             ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
             JavaRDD<Trajectory> trajRDD =
                     iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
                             exampleConfig.getDataConfig());
-//            System.out.println(trajRDD.count());
-//            trajRDD.collect().forEach(System.out::println);
             long start = System.currentTimeMillis();
             IStore iStore = IStore.getStore(exampleConfig.getStoreConfig());
             iStore.storeTrajectory(trajRDD);

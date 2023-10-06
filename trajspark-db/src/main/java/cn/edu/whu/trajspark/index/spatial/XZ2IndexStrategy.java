@@ -3,24 +3,15 @@ package cn.edu.whu.trajspark.index.spatial;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.coding.CodingRange;
 import cn.edu.whu.trajspark.coding.SpatialCoding;
-import cn.edu.whu.trajspark.coding.TimeCoding;
 import cn.edu.whu.trajspark.coding.XZ2Coding;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.datatypes.TimeBin;
-import cn.edu.whu.trajspark.datatypes.TimeLine;
 import cn.edu.whu.trajspark.index.IndexStrategy;
 import cn.edu.whu.trajspark.index.IndexType;
-import cn.edu.whu.trajspark.index.RowKeyRange;
-import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
-import cn.edu.whu.trajspark.query.condition.SpatialTemporalQueryCondition;
-import cn.edu.whu.trajspark.query.condition.TemporalQueryCondition;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_OID_LENGTH;
 import static cn.edu.whu.trajspark.constant.CodingConstants.MAX_TID_LENGTH;
@@ -58,47 +49,6 @@ public class XZ2IndexStrategy extends IndexStrategy {
     return IndexType.XZ2;
   }
 
-  @Override
-  public TimeLine getTimeLineRange(ByteArray byteArray) {
-    return null;
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition,
-      int maxRangeNum) {
-    List<RowKeyRange> result = new ArrayList<>();
-    // 1. xz2 coding
-    List<CodingRange> codingRanges = xz2Coding.ranges(spatialQueryCondition);
-    // 2. concat shard index
-    for (CodingRange xz2Coding : codingRanges) {
-      for (short shard = 0; shard < shardNum; shard++) {
-        result.add(new RowKeyRange(toRowKeyRangeBoundary(shard, xz2Coding.getLower(), false),
-            toRowKeyRangeBoundary(shard, xz2Coding.getUpper(), true), xz2Coding.isValidated()));
-      }
-    }
-    return result;
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(SpatialQueryCondition spatialQueryCondition) {
-    return getScanRanges(spatialQueryCondition, 500);
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition, int maxRangeNum) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(TemporalQueryCondition temporalQueryCondition,
-      String oID) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<RowKeyRange> getScanRanges(SpatialTemporalQueryCondition spatialTemporalQueryCondition) {
-    throw new UnsupportedOperationException();
-  }
 
   @Override
   public String parsePhysicalIndex2String(ByteArray byteArray) {
@@ -119,16 +69,6 @@ public class XZ2IndexStrategy extends IndexStrategy {
     byte[] bytes = new byte[XZ2Coding.BYTES];
     buffer.get(bytes);
     return new ByteArray(bytes);
-  }
-
-  @Override
-  public TimeCoding getTimeCoding() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public TimeBin getTimeBin(ByteArray byteArray) {
-    throw new UnsupportedOperationException();
   }
 
   @Override

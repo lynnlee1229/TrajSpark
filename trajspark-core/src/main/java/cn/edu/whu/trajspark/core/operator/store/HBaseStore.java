@@ -1,20 +1,17 @@
 package cn.edu.whu.trajspark.core.operator.store;
 
-import avro.shaded.com.google.common.collect.Iterators;
 import cn.edu.whu.trajspark.base.point.StayPoint;
 import cn.edu.whu.trajspark.base.trajectory.Trajectory;
 import cn.edu.whu.trajspark.constant.DBConstants;
 import cn.edu.whu.trajspark.core.conf.store.HBaseStoreConfig;
 import cn.edu.whu.trajspark.database.Database;
-import cn.edu.whu.trajspark.database.load.BulkLoadDriverUtils;
 import cn.edu.whu.trajspark.database.load.mapper.TrajectoryDataMapper;
 import cn.edu.whu.trajspark.database.load.mapper.datatypes.KeyFamilyQualifier;
 import cn.edu.whu.trajspark.database.meta.DataSetMeta;
 import cn.edu.whu.trajspark.database.meta.IndexMeta;
-import cn.edu.whu.trajspark.database.table.IndexTable;
 import cn.edu.whu.trajspark.database.util.TrajectorySerdeUtils;
 import java.util.ArrayList;
-import org.apache.commons.collections.IteratorUtils;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,7 +28,6 @@ import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.StorageLevels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.NotImplementedError;
@@ -94,13 +90,6 @@ public class HBaseStore extends Configured implements IStore {
             puts.clear();
         });
         LOGGER.info("Successfully store to main index, meta: {}", coreIndexMeta);
-        try {
-            bulkLoadToSecondaryIndexTable(dataSetMeta);
-        } catch (Exception e) {
-            LOGGER.error("Failed to finish bulk load second index {}", dataSetMeta.getIndexMetaList(), e);
-            throw e;
-        }
-        LOGGER.info("Successfully bulkLoad to second index, meta: {}", dataSetMeta.getIndexMetaList());
         long endLoadTime = System.currentTimeMillis();
         LOGGER.info("DataSet {} load finished, cost time: {}ms.", dataSetMeta.getDataSetName(), (endLoadTime - startLoadTime));
         instance.closeConnection();
@@ -122,13 +111,6 @@ public class HBaseStore extends Configured implements IStore {
             throw e;
         }
         LOGGER.info("Successfully bulkLoad to main index, meta: {}", coreIndexMeta);
-        try {
-            bulkLoadToSecondaryIndexTable(dataSetMeta);
-        } catch (Exception e) {
-            LOGGER.error("Failed to finish bulk load second index {}", dataSetMeta.getIndexMetaList(), e);
-            throw e;
-        }
-        LOGGER.info("Successfully bulkLoad to second index, meta: {}", dataSetMeta.getIndexMetaList());
         long endLoadTime = System.currentTimeMillis();
         LOGGER.info("DataSet {} store finished, cost time: {}ms.", dataSetMeta.getDataSetName(), (endLoadTime - startLoadTime));
         deleteHFile(storeConfig.getLocation(), getConf());
@@ -174,17 +156,6 @@ public class HBaseStore extends Configured implements IStore {
         loader.doBulkLoad(new Path(storeConfig.getLocation()), instance.getAdmin(), table, locator);
     }
 
-    public void bulkLoadToSecondaryIndexTable(DataSetMeta dataSetMeta) throws IOException {
-        Configuration conf = getConf();
-        String location = storeConfig.getLocation();
-        conf.set(DBConstants.BULK_LOAD_TEMP_FILE_PATH_KEY, location);
-        for (IndexMeta im : dataSetMeta.getIndexMetaList()) {
-            if(im == dataSetMeta.getCoreIndexMeta()) continue;
-            String indexTableName = im.getIndexTableName();
-            conf.set(DBConstants.BULKLOAD_TARGET_INDEX_NAME, indexTableName);
-            BulkLoadDriverUtils.createIndexFromTable(conf, im, dataSetMeta);
-        }
-    }
 
     public void deleteHFile(String path, Configuration conf) throws IOException {
         Path outPath = new Path(path);

@@ -1,7 +1,6 @@
 package cn.edu.whu.trajspark.coding;
 
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
 
@@ -24,13 +23,6 @@ public interface SpatialCoding extends Serializable {
    */
   public ByteArray code(LineString lineString);
 
-  /**
-   * Get all necessary coding ranges according to the provided query condition. <br>
-   * A coarse filtration strategy of the specific coding should be implemented in this function.
-   *
-   * @return A list of necessary coding ranges satisfying the provided query condition.
-   */
-  public List<CodingRange> ranges(SpatialQueryCondition spatialQueryCondition);
 
   /**
    * Get spatial polygon which is represented by the input spatial coding byte array.

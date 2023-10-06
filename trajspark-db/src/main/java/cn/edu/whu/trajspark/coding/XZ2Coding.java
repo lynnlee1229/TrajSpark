@@ -4,7 +4,6 @@ import cn.edu.whu.trajspark.coding.sfc.SFCRange;
 import cn.edu.whu.trajspark.coding.sfc.XZ2SFC;
 import cn.edu.whu.trajspark.constant.CodingConstants;
 import cn.edu.whu.trajspark.datatypes.ByteArray;
-import cn.edu.whu.trajspark.query.condition.SpatialQueryCondition;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
@@ -60,23 +59,6 @@ public class XZ2Coding implements SpatialCoding {
     ByteBuffer br = ByteBuffer.allocate(Long.BYTES);
     br.putLong(xz2Sfc.index(minLng, maxLng, minLat, maxLat, false));
     return new ByteArray(br);
-  }
-
-  /**
-   * Get index ranges of the query range, support two spatial query types
-   * @param spatialQueryCondition Spatial query on the index.
-   * @return List of xz2 index ranges corresponding to the query range.
-   */
-  public List<CodingRange> ranges(SpatialQueryCondition spatialQueryCondition) {
-    Envelope envelope = spatialQueryCondition.getQueryWindow();
-    List<CodingRange> codingRangeList = new LinkedList<>();
-    List<SFCRange> sfcRangeList = xz2Sfc.ranges(envelope, spatialQueryCondition.getQueryType() == SpatialQueryCondition.SpatialQueryType.CONTAIN);
-    for (SFCRange sfcRange : sfcRangeList) {
-      CodingRange codingRange = new CodingRange();
-      codingRange.concatSfcRange(sfcRange);
-      codingRangeList.add(codingRange);
-    }
-    return codingRangeList;
   }
 
   @Override
