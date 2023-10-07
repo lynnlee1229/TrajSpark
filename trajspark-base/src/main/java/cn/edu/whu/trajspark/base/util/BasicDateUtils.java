@@ -20,12 +20,35 @@ public class BasicDateUtils {
   static DateTimeFormatter defaultFormatter =
       DateTimeFormatter.ofPattern(deaultFormat).withZone(ZoneId.of(defaultZoneId));
 
+  public static void updateStaticProperties(String newFormat, String newZoneId) {
+    if (newFormat != null && !newFormat.isEmpty()) {
+      deaultFormat = newFormat;
+    }
+    if (newZoneId != null && !newZoneId.isEmpty()) {
+      defaultZoneId = newZoneId;
+    }
+    defaultFormatter = DateTimeFormatter.ofPattern(deaultFormat).withZone(ZoneId.of(defaultZoneId));
+  }
+
+  public static String getDeaultFormat() {
+    return deaultFormat;
+  }
+
+  public static String getDefaultZoneId() {
+    return defaultZoneId;
+  }
+
+  public static DateTimeFormatter getDefaultFormatter() {
+    return defaultFormatter;
+  }
+
   public static ZonedDateTime timeToUTC(ZonedDateTime time) {
     return time.withZoneSameInstant(ZoneOffset.UTC);
   }
 
   public static ZonedDateTime parse(String time, DateTimeFormatter dateTimeFormatter) {
-    return StringUtils.isEmpty(time.trim()) ? null : ZonedDateTime.parse(time.trim(), dateTimeFormatter);
+    return StringUtils.isEmpty(time.trim()) ? null :
+        ZonedDateTime.parse(time.trim(), dateTimeFormatter);
   }
 
   public static String format(ZonedDateTime time, String pattern) {

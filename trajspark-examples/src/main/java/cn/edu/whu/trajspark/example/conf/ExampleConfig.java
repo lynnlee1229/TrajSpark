@@ -1,7 +1,10 @@
 package cn.edu.whu.trajspark.example.conf;
 
+import cn.edu.whu.trajspark.base.util.BasicDateUtils;
 import cn.edu.whu.trajspark.core.conf.analysis.geofence.GeofenceConfig;
 import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
+import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
+import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
 import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
 import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
@@ -62,6 +65,8 @@ public class ExampleConfig {
   @JsonProperty
   private GeofenceConfig geofenceConfig;
 
+  private static Boolean dateUtilInited = false;
+
   public GeofenceConfig getGeofenceConfig() {
     return geofenceConfig;
   }
@@ -75,6 +80,10 @@ public class ExampleConfig {
   }
 
   public IDataConfig getDataConfig() {
+    if (!dateUtilInited) {
+      initDateUtil(dataConfig);
+      dateUtilInited = true;
+    }
     return dataConfig;
   }
 
@@ -121,4 +130,15 @@ public class ExampleConfig {
   public static ExampleConfig parse(URL url) throws IOException {
     return MAPPER.readValue(url, ExampleConfig.class);
   }
+
+  static void initDateUtil(IDataConfig dataConfig) {
+    if (dataConfig instanceof TrajectoryConfig) {
+      TrajectoryConfig trajConfig = (TrajectoryConfig) dataConfig;
+      TrajPointConfig trajPointConfig = trajConfig.getTrajPointConfig();
+      String zoneId = trajPointConfig.getTime().getZoneId();
+      String format = trajPointConfig.getTime().getFormat();
+      BasicDateUtils.updateStaticProperties(format, zoneId);
+    }
+  }
+
 }
