@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @date 2022/11/4
  **/
 public enum FileMode {
-  MULTI_FILE("multi_file"),
-  SINGLE_FILE("single_file"),
-  MULTI_SINGLE_FILE("multi_single_file");
+  MULTI_FILE("multi_file"), // 用于读取多个文件，且每个文件内只有一条轨迹
+  SINGLE_FILE("single_file"), // 用于读取单个大文件，文件内包含多条轨迹
+  MULTI_SINGLE_FILE("multi_single_file"); // 用于读取多个小文件，每个文件内包含多条轨迹
 
   private final String mode;
 

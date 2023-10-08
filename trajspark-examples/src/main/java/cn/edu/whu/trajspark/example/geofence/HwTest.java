@@ -32,9 +32,9 @@ public class HwTest implements Serializable {
     /**
      * 1.读取配置文件
      * 提供三种方式：
-     * - HDFS，需要指定fs和路径
-     * - 本地文件系统，需要指定路径
-     * - 资源文件，不需传参，会从项目资源文件中读取，仅本地测试使用
+     * HDFS，需要指定fs和路径（例：传入2参数localhost:9000 path）
+     * 本地文件系统，需要指定路径（例：传入1参数 path）
+     * 资源文件，不需传参，会从项目资源文件中读取，仅本地测试使用
      */
     String fileStr;
     if (args.length > 1) {
@@ -77,7 +77,7 @@ public class HwTest implements Serializable {
       JavaSparkContext javaSparkContext =
           JavaSparkContext.fromSparkContext(sparkSession.sparkContext());
       Broadcast<TreeIndex<Geometry>> treeIndexBroadcast = javaSparkContext.broadcast(treeIndex);
-      // 6.执行地理围栏操作
+      // 6.空间交互关系计算
       Geofence<Geometry> geofenceFunc = new Geofence<>();
       JavaRDD<Tuple2<String, String>> res =
           trajRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue()))

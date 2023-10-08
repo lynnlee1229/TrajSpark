@@ -19,6 +19,13 @@ import java.io.InputStream;
 public class HwStoreTest {
     private static final Logger LOGGER = Logger.getLogger(HwStoreTest.class);
     public static void main(String[] args) throws IOException {
+        /**
+         * 1.读取配置文件
+         * 提供三种方式：
+         * HDFS，需要指定fs和路径（例：传入2参数localhost:9000 path）
+         * 本地文件系统，需要指定路径（例：传入1参数 path）
+         * 资源文件，不需传参，会从项目资源文件中读取，仅本地测试使用
+         */
         String fileStr;
         if (args.length > 1) {
             String fs = args[0];
@@ -32,16 +39,26 @@ public class HwStoreTest {
                     .getResourceAsStream("ioconf/hw_store.json");
             fileStr = IOUtils.readFileToString(resourceAsStream);
         }
-        ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
-        LOGGER.info("Init sparkSession...");
+        // 本地测试时可以传入第三个参数，指定是否本地master运行
         boolean isLocal = false;
+        int localIndex = 2;
+        try {
+            isLocal = Boolean.parseBoolean(args[localIndex]);
+        } catch (Exception ignored) {
+        }
+        // 2.解析配置文件
+        ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
+        // 3.初始化sparkSession
+        LOGGER.info("Init sparkSession...");
         try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
                 HwStoreTest.class.getName(), isLocal)) {
+            // 4.加载轨迹数据
             ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
             JavaRDD<Trajectory> trajRDD =
                     iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
                             exampleConfig.getDataConfig());
             long start = System.currentTimeMillis();
+            // 5.存储轨迹数据
             IStore iStore = IStore.getStore(exampleConfig.getStoreConfig());
             iStore.storeTrajectory(trajRDD);
             long end = System.currentTimeMillis();
