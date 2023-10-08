@@ -1,3 +1,1 @@
-spark-submit --class cn.edu.whu.trajspark.example.geofence.TrajStore2HBase  --master yarn --deploy-mode cluster trajspark-examples-1.0-SNAPSHOT.jar
-spark-submit --class cn.edu.whu.trajspark.example.geofence.GeofenceFromFS  --master yarn --deploy-mode cluster trajspark-examples-1.0-SNAPSHOT.jar
-spark-submit --master spark://localhost:7077 --deploy-mode cluster --class cn.edu.whu.trajspark.example.geofence.HwTest trajspark-examples-1.0-SNAPSHOT.jar
+spark-submit --master spark://7.185.21.81:7077 --num-executors 3 --executor-memory 36G --executor-cores 12 --class cn.edu.whu.trajspark.example.geofence.HwTest trajspark.jar hdfs://7.185.21.81:9000 /fence/hw/hw_res_1.json

@@ -1,6 +1,0 @@
-{
-  "loadConfig": {
-    "@type": "hbase",
-    "dataSetName": "TRAJECTORY_GEOFENCE"
-  }
-}

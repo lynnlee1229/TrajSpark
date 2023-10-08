@@ -12,6 +12,7 @@ import cn.edu.whu.trajspark.example.util.FileSystemUtils;
 import cn.edu.whu.trajspark.example.util.SparkSessionUtils;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -28,9 +29,14 @@ import scala.Tuple2;
 public class HwTest implements Serializable {
 
   public static void main(String[] args) throws Exception {
-    // TODO 服务器测试：更改json中的路径内容，将json、fence.csv传至hdfs
+    /**
+     * 1.读取配置文件
+     * 提供三种方式：
+     * - HDFS，需要指定fs和路径
+     * - 本地文件系统，需要指定路径
+     * - 资源文件，不需传参，会从项目资源文件中读取，仅本地测试使用
+     */
     String fileStr;
-//    fileStr = FileSystemUtils.readFully("hdfs://localhost:9000", "/geofence/hw.json");
     if (args.length > 1) {
       String fs = args[0];
       String filePath = args[1];
@@ -39,56 +45,48 @@ public class HwTest implements Serializable {
       String confPath = args[0];
       fileStr = IOUtils.readFileToString(confPath);
     } else {
-      InputStream resourceAsStream = GeofenceFromFS.class.getClassLoader()
+      InputStream resourceAsStream = HwTest.class.getClassLoader()
           .getResourceAsStream("ioconf/hw.json");
       fileStr = IOUtils.readFileToString(resourceAsStream);
     }
-    ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
+    // 本地测试时可以传入第三个参数，指定是否本地master运行
     boolean isLocal = false;
-//    boolean isLocal = true;
     int localIndex = 2;
     try {
       isLocal = Boolean.parseBoolean(args[localIndex]);
     } catch (Exception ignored) {
     }
+    // 2.解析配置文件
+    ExampleConfig exampleConfig = ExampleConfig.parse(fileStr);
+    // 3.初始化sparkSession
     try (SparkSession sparkSession = SparkSessionUtils.createSession(exampleConfig.getLoadConfig(),
         HwTest.class.getName(), isLocal)) {
+      // 4.加载轨迹数据
       long loadStart = System.currentTimeMillis();
       ILoader iLoader = ILoader.getLoader(exampleConfig.getLoadConfig());
       JavaRDD<Trajectory> trajRDD =
           iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig(),
               exampleConfig.getDataConfig());
       long loadEnd = System.currentTimeMillis();
-
+    // 5.加载地理围栏数据并建立、广播索引
       long fenceStart = System.currentTimeMillis();
       GeofenceConfig geofenceConfig = exampleConfig.getGeofenceConfig();
-      STRTreeIndex<Geometry> treeIndex = GeofenceUtils.getIndexedGeoFence(geofenceConfig.getDefaultFs(),
-          geofenceConfig.getGeofencePath(), geofenceConfig.isIndexFence());
+      STRTreeIndex<Geometry> treeIndex =
+          GeofenceUtils.getIndexedGeoFence(geofenceConfig.getDefaultFs(),
+              geofenceConfig.getGeofencePath(), geofenceConfig.isIndexFence());
       JavaSparkContext javaSparkContext =
           JavaSparkContext.fromSparkContext(sparkSession.sparkContext());
       Broadcast<TreeIndex<Geometry>> treeIndexBroadcast = javaSparkContext.broadcast(treeIndex);
+      // 6.执行地理围栏操作
       Geofence<Geometry> geofenceFunc = new Geofence<>();
       JavaRDD<Tuple2<String, String>> res =
           trajRDD.map(traj -> geofenceFunc.geofence(traj, treeIndexBroadcast.getValue()))
               .filter(Objects::nonNull);
-//      List<Tuple2<String, String>> collect = res.collect();
-      res.collect();
+      // 7.收集结果
+      List<Tuple2<String, String>> fencedTrajs = res.collect();
       long fenceEnd = System.currentTimeMillis();
       System.out.println("Load cost " + (loadEnd - loadStart) + "ms");
       System.out.println("GeoFence cost " + (fenceEnd - fenceStart) + "ms");
-//      res.count();
-
-
-//      // 从配置文件初始化预处理算子
-//      IFilter myFilter = IFilter.getFilter(exampleConfig.getFilterConfig());
-//
-//      // 执行预处理
-//      JavaRDD<Trajectory> filteredRDD = myFilter.filter(trajRDD);
-//
-//      // 存储
-//      IStore iStore =
-//          IStore.getStore(exampleConfig.getStoreConfig(), exampleConfig.getDataConfig());
-//      iStore.storeTrajectory(filteredRDD);
     }
   }
 }

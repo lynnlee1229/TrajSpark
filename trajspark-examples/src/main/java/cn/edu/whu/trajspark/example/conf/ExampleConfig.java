@@ -6,16 +6,11 @@ import cn.edu.whu.trajspark.core.conf.data.IDataConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajPointConfig;
 import cn.edu.whu.trajspark.core.conf.data.TrajectoryConfig;
 import cn.edu.whu.trajspark.core.conf.load.ILoadConfig;
-import cn.edu.whu.trajspark.core.conf.process.detector.IDetectorConfig;
-import cn.edu.whu.trajspark.core.conf.process.noisefilter.IFilterConfig;
-import cn.edu.whu.trajspark.core.conf.process.segmenter.ISegmenterConfig;
-import cn.edu.whu.trajspark.core.conf.process.simplifier.ISimplifierConfig;
 import cn.edu.whu.trajspark.core.conf.store.IStoreConfig;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.net.URL;
 
@@ -43,25 +38,6 @@ public class ExampleConfig {
    */
   @JsonProperty
   private IStoreConfig storeConfig;
-  /**
-   * 去噪参数
-   */
-  @JsonProperty
-  private IFilterConfig filterConfig;
-  /**
-   * 分段参数
-   */
-  @JsonProperty
-  private ISegmenterConfig segmenterConfig;
-
-  /**
-   * 停留识别参数
-   */
-  @JsonProperty
-  private IDetectorConfig detectorConfig;
-  @JsonProperty
-  private ISimplifierConfig simplifierConfig;
-
   @JsonProperty
   private GeofenceConfig geofenceConfig;
 
@@ -69,10 +45,6 @@ public class ExampleConfig {
 
   public GeofenceConfig getGeofenceConfig() {
     return geofenceConfig;
-  }
-
-  public ISimplifierConfig getSimplifierConfig() {
-    return simplifierConfig;
   }
 
   public ILoadConfig getLoadConfig() {
@@ -89,18 +61,6 @@ public class ExampleConfig {
 
   public IStoreConfig getStoreConfig() {
     return storeConfig;
-  }
-
-  public IFilterConfig getFilterConfig() {
-    return filterConfig;
-  }
-
-  public ISegmenterConfig getSegmenterConfig() {
-    return segmenterConfig;
-  }
-
-  public IDetectorConfig getDetectorConfig() {
-    return detectorConfig;
   }
 
   /**

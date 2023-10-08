@@ -28,7 +28,7 @@ public class HwStoreTest {
             String confPath = args[0];
             fileStr = IOUtils.readFileToString(confPath);
         } else {
-            InputStream resourceAsStream = GeofenceFromFS.class.getClassLoader()
+            InputStream resourceAsStream = HwStoreTest.class.getClassLoader()
                     .getResourceAsStream("ioconf/hw_store.json");
             fileStr = IOUtils.readFileToString(resourceAsStream);
         }
