@@ -43,7 +43,9 @@ public class HwHBaseLoad {
             JavaRDD<Trajectory> trajRDD =
                     iLoader.loadTrajectory(sparkSession, exampleConfig.getLoadConfig());
             LOGGER.info("Successfully load data from HBase");
-            trajRDD.collect().forEach(System.out::println);
+            long count = trajRDD.count();
+            LOGGER.info("Load data from HBase count :" + count + " trajectories");
+            System.out.println(count);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
