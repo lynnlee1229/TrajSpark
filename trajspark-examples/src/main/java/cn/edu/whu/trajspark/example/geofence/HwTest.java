@@ -46,7 +46,7 @@ public class HwTest implements Serializable {
       fileStr = IOUtils.readFileToString(confPath);
     } else {
       InputStream resourceAsStream = HwTest.class.getClassLoader()
-          .getResourceAsStream("ioconf/hw.json");
+          .getResourceAsStream("ioconf/hw_res.json");
       fileStr = IOUtils.readFileToString(resourceAsStream);
     }
     // 本地测试时可以传入第三个参数，指定是否本地master运行

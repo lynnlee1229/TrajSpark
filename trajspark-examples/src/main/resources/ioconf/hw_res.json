@@ -4,7 +4,7 @@
     "master": "local[*]",
     "location": "hdfs://7.185.21.81:9000/fence/081600to081605",
     "fileMode": "multi_single_file",
-    "partNum": 48,
+    "partNum": 72,
     "splitter": ","
   },
   "dataConfig": {
@@ -44,11 +44,9 @@
       }
     }
   },
-  "storeConfig": {
-    "@type": "hbase",
-    "location": "hdfs://7.185.21.81:9000/geofence_traj/",
-    "schema": "POINT_BASED_TRAJECTORY",
-    "dataSetName": "GEOFENCE_TRAJECTORY_HW_1605",
-    "mainIndex": "XZ2"
+  "geofenceConfig": {
+    "defaultFs":"hdfs://7.185.21.81:9000",
+    "geofencePath":"/fence/residential1000.csv",
+    "indexFence":false
   }
 }

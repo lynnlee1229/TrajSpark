@@ -10,19 +10,12 @@ import java.util.List;
  */
 public enum IndexType implements Serializable {
   // spatial only
-  XZ2(0),
-  XZ2Plus(1),
-  // Concatenate temporal index before spatial index
-  TXZ2(2),
-  // Concatenate spatial index before temporal index
-  XZ2T(3),
-  // Index value will be car ids
-  OBJECT_ID_T(4);
+  XZ2(0);
 
   int id;
 
   public static List<IndexType> spatialIndexTypes() {
-    return Arrays.asList(XZ2, XZ2T, TXZ2, XZ2Plus);
+    return Arrays.asList(XZ2);
   }
 
   IndexType(int id) {

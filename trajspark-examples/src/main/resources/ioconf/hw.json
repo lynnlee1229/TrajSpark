@@ -2,9 +2,9 @@
   "loadConfig": {
     "@type": "hdfs",
     "master": "local[*]",
-    "location": "hdfs://u0:9000/geofence/hw_test/C1A4Q2.txt",
-    "fileMode": "single_file",
-    "partNum": 16,
+    "location": "hdfs://7.185.21.81:9000/fence/081600to081605",
+    "fileMode": "multi_single_file",
+    "partNum": 72,
     "splitter": ","
   },
   "dataConfig": {
@@ -45,8 +45,15 @@
     }
   },
   "geofenceConfig": {
-    "defaultFs":"hdfs://u0:9000",
-    "geofencePath":"/geofence/GeoFenceOneKilo.csv",
+    "defaultFs":"hdfs://7.185.21.81:9000",
+    "geofencePath":"/fence/residential1000.csv",
     "indexFence":false
+  },
+  "storeConfig": {
+    "@type": "hbase",
+    "location": "hdfs://7.185.21.81:9000/geofence_traj/",
+    "schema": "POINT_BASED_TRAJECTORY",
+    "dataSetName": "GEOFENCE_TRAJECTORY_HW_1605",
+    "mainIndex": "XZ2"
   }
 }
