@@ -60,13 +60,14 @@ public class HBaseStore extends Configured implements IStore {
     switch (this.storeConfig.getSchema()) {
       case POINT_BASED_TRAJECTORY:
         this.storePointBasedTrajectory(trajectoryJavaRDD);
-        return;
+        break;
       case POINT_BASED_TRAJECTORY_SLOWPUT:
         this.storePutPointBasedTrajectory(trajectoryJavaRDD);
-        return;
+        break;
       default:
         throw new NotImplementedError();
     }
+    deleteHFile(storeConfig.getLocation(), getConf());
   }
 
   public void storePutPointBasedTrajectory(JavaRDD<Trajectory> trajectoryJavaRDD) throws Exception {
@@ -112,7 +113,6 @@ public class HBaseStore extends Configured implements IStore {
     long endLoadTime = System.currentTimeMillis();
     LOGGER.info("DataSet {} store finished, cost time: {}ms.", dataSetMeta.getDataSetName(),
         (endLoadTime - startLoadTime));
-    deleteHFile(storeConfig.getLocation(), getConf());
     instance.closeConnection();
   }
 
